@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using Broilerplate.Gameplay;
+using Broilerplate.Gameplay.Input;
 using Broilerplate.Ticking;
 using UnityEngine;
-using UnityEngine.XR;
 
 namespace Broilerplate.Core {
     /// <summary>
@@ -18,9 +19,11 @@ namespace Broilerplate.Core {
         public WorldTime timeData;
 
         private TickManager tickManager;
-        private readonly List<Actor> liveActors = new List<Actor>();
-        private readonly List<Actor> dirtyActors = new List<Actor>();
-        private readonly List<Actor> actorsScheduledForDestroy = new List<Actor>();
+        private GameMode gameMode;
+        private readonly List<Actor> liveActors = new();
+        private readonly List<Actor> dirtyActors = new();
+        private readonly List<Actor> actorsScheduledForDestroy = new();
+        
         public TickManager TickManager => tickManager;
 
         /// <summary>
@@ -46,7 +49,7 @@ namespace Broilerplate.Core {
             HandleActorDestruction();
         }
 
-        public void BootWorld() {
+        public void BootWorld(GameMode gameModePrefab) {
             Debug.Log("Booting ze world");
             timeData.timeDilation = 1;
             timeData.lastTick = timeData.thisTick = default;
@@ -58,9 +61,11 @@ namespace Broilerplate.Core {
             var ticker = unityTicker.AddComponent<UnityTicker>();
             ticker.SetTickManager(tickManager);
             
-            
             liveActors.Clear();
             liveActors.AddRange(FindObjectsOfType<Actor>());
+            gameMode = gameModePrefab ? SpawnActor(gameModePrefab, Vector3.zero,Quaternion.identity) : SpawnActorOn<GameMode>(new GameObject("Default Game Mode"));
+            
+            BeginPlay();
         }
 
         public void RegisterActor(Actor actor) {
@@ -83,6 +88,10 @@ namespace Broilerplate.Core {
 
         public void BeginPlay() {
             for (int i = 0; i < liveActors.Count; i++) {
+                if (liveActors[i].GetWorld() == this) {
+                    // this was already registered, like a game mode for instance.
+                    continue;
+                }
                 liveActors[i].SetWorld(this);
                 liveActors[i].BeginPlay();
             }
@@ -124,6 +133,11 @@ namespace Broilerplate.Core {
                 UnregisterTickFunc(actor.ActorTick);
                 Destroy(actor.gameObject);
             }
+        }
+
+        public void SpawnPlayer(PlayerInfo playerInfo) {
+            // todo: find spawn point type and spawn there!
+            gameMode.SpawnPlayer(playerInfo, Vector3.zero, Quaternion.identity);
         }
     }
 }

@@ -15,7 +15,6 @@ namespace Broilerplate.Gameplay {
                 inputs = p.GetInputHandler();
                 SetupInputs(GetInputHandler());
             }
-            
         }
         
         public virtual void OnEjectPawn() {}

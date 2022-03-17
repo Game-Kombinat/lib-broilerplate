@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Broilerplate.Core;
+using UnityEngine;
 using UnityEngine.InputSystem;
 
 namespace Broilerplate.Gameplay.Input {
@@ -17,11 +18,14 @@ namespace Broilerplate.Gameplay.Input {
         private PlayerInput playerInput;
 
         private InputHandler inputHandler;
+        private PlayerInfo playerInfo;
 
         public override void Possess(Pawn pawn) {
             EjectPawn();
-            
-            inputHandler.ClearInputs();
+            if (!playerInput) {
+                // Since it's not a broilerplate type we get it via vanilla unity api
+                playerInput = gameObject.GetComponent<PlayerInput>();
+            }
             inputHandler = new InputHandler(playerInput);
 
             possessedPawn = pawn;
@@ -33,11 +37,16 @@ namespace Broilerplate.Gameplay.Input {
             if (possessedPawn) {
                 possessedPawn.OnEjectPawn();
             }
-            inputHandler.ClearInputs();
+
+            inputHandler?.ClearInputs();
         }
 
         public InputHandler GetInputHandler() {
             return inputHandler;
+        }
+
+        public void SetPlayerInfo(PlayerInfo inPlayerInfo) {
+            playerInfo = inPlayerInfo;
         }
     }
 }
