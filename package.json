@@ -1,15 +1,19 @@
 {
-    "description": "Contains a bunch of Boilerplate code and opinions on how to make a game to allow you to make games faster that's akin to Unreals game framework",
-    "displayName": "Broilerplate",
     "name": "com.gamekombinat.lib-broilerplate",
+    "version": "1.0.0",
+    "displayName": "Broilerplate",
+    "description": "Contains a bunch of Boilerplate code and opinions on how to make a game to allow you to make games faster that's akin to Unreals game framework",
+    "unity": "2021.2",
+    "dependencies": {
+        "com.unity.inputsystem": "1.3.0",
+        "com.dbrizov.naughtyattributes": "2.0.4"
+    },
     "keywords": [
         "game framework",
         "boilerplate"
     ],
-    "unity": "2021.2",
-    "version": "1.0.0",
-    "dependencies": {
-        "com.unity.inputsystem": "1.3.0",
-        "com.dbrizov.naughtyattributes": "2.0.4"
+    "author": {
+        "name": "Game Kombinat",
+        "url": "https://gamekombinat.com"
     }
 }

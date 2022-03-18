@@ -1,10 +1,10 @@
 {
-    "name": "BroilerplateTests",
+    "name": "GameKombinat.Broilerplate.Tests",
     "rootNamespace": "",
     "references": [
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
-        "Broilerplate"
+        "GameKombinat.Broilerplate"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
