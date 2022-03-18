@@ -45,6 +45,17 @@ namespace Broilerplate.Core {
             return defaultGameModePrefab;
         }
 
+        public void RegisterSceneOverride(Scene scene, GameMode gameModeOverride) {
+            for (int i = 0; i < gameModeOverrides.Count; i++) {
+                if (gameModeOverrides[i].scene == scene) {
+                    gameModeOverrides[i].gameModeOverridePrefab = gameModeOverride;
+                    return;
+                }
+            }
+            // new
+            gameModeOverrides.Add(new MapGameModeOverrides() {scene = scene, gameModeOverridePrefab = gameModeOverride});
+        }
+
         public static BroilerConfiguration GetConfiguration() {
             var config = Resources.Load<BroilerConfiguration>("BroilerGameConfiguration");
             #if UNITY_EDITOR

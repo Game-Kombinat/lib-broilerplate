@@ -20,22 +20,24 @@ namespace Broilerplate.Gameplay.Input {
         private InputHandler inputHandler;
         private PlayerInfo playerInfo;
 
-        public override void Possess(Pawn pawn) {
-            EjectPawn();
+        public PlayerInfo PlayerInfo => playerInfo;
+
+        public override void TakeControl(Pawn pawn) {
+            LeaveControlledPawn();
             if (!playerInput) {
                 // Since it's not a broilerplate type we get it via vanilla unity api
                 playerInput = gameObject.GetComponent<PlayerInput>();
             }
             inputHandler = new InputHandler(playerInput);
 
-            possessedPawn = pawn;
-            pawn.OnPossess(this);
+            controlledPawn = pawn;
+            pawn.OnControlTaken(this);
 
         }
 
-        public override void EjectPawn() {
-            if (possessedPawn) {
-                possessedPawn.OnEjectPawn();
+        public override void LeaveControlledPawn() {
+            if (controlledPawn) {
+                controlledPawn.OnControlLeft();
             }
 
             inputHandler?.ClearInputs();

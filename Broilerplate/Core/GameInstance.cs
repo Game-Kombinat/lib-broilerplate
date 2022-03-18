@@ -13,6 +13,7 @@ namespace Broilerplate.Core {
         // todo: multi world setup: make dictionary scene => world hand handle that.
         private World world;
         private BroilerConfiguration configuration;
+        public BroilerConfiguration Configuration => configuration;
 
         private List<PlayerInfo> localPlayers = new();
         

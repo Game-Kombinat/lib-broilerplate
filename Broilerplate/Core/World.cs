@@ -139,5 +139,9 @@ namespace Broilerplate.Core {
             // todo: find spawn point type and spawn there!
             gameMode.SpawnPlayer(playerInfo, Vector3.zero, Quaternion.identity);
         }
+
+        public GameMode GetGameMode() {
+            return gameMode;
+        }
     }
 }

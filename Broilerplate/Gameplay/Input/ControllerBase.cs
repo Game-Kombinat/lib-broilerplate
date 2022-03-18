@@ -2,10 +2,12 @@ using Broilerplate.Core;
 
 namespace Broilerplate.Gameplay.Input {
     public abstract class ControllerBase : Actor {
-        protected Pawn possessedPawn;
+        protected Pawn controlledPawn;
+        
+        public Pawn ControlledPawn => controlledPawn;
 
-        public abstract void Possess(Pawn pawn);
+        public abstract void TakeControl(Pawn pawn);
 
-        public abstract void EjectPawn();
+        public abstract void LeaveControlledPawn();
     }
 }

@@ -15,7 +15,7 @@ namespace Broilerplate.Core {
         private PlayerController defaultPlayerControllerType;
         
         [SerializeField]
-        private Pawn defaultPawnType;
+        private Pawn defaultPlayerPawnType;
 
         private List<PlayerController> playerControllers = new();
         
@@ -25,8 +25,8 @@ namespace Broilerplate.Core {
             return defaultPlayerControllerType;
         }
 
-        public virtual Pawn GetPawnType() {
-            return defaultPawnType;
+        public virtual Pawn GetPlayerPawnType() {
+            return defaultPlayerPawnType;
         }
 
         public PlayerController SpawnPlayer(PlayerInfo playerInfo, Vector3 spawnPosition, Quaternion spawnRotation) {
@@ -35,7 +35,8 @@ namespace Broilerplate.Core {
             Pawn p = SpawnPlayPawn();
             pc.transform.SetPositionAndRotation(spawnPosition, spawnRotation);
             p.transform.SetPositionAndRotation(spawnPosition, spawnRotation);
-            pc.Possess(p);
+            pc.TakeControl(p);
+            playerControllers.Add(pc);
             return pc;
         }
 
@@ -55,7 +56,7 @@ namespace Broilerplate.Core {
 
         private Pawn SpawnPlayPawn() {
             Pawn p;
-            Pawn pawnType = GetPawnType();
+            Pawn pawnType = GetPlayerPawnType();
             
             if (pawnType != null) {
                 p = GetWorld().SpawnActor(pawnType, Vector3.zero, Quaternion.identity);
@@ -66,6 +67,20 @@ namespace Broilerplate.Core {
             }
 
             return p;
+        }
+
+        public PlayerController GetMainPlayerController() {
+            return GetPlayerController(0);
+        }
+
+        public PlayerController GetPlayerController(int controllerIndex) {
+            for (int i = 0; i < playerControllers.Count; i++) {
+                if (playerControllers[i].PlayerInfo.PlayerId == controllerIndex) {
+                    return playerControllers[i];
+                }
+            }
+
+            return null;
         }
     }
 }

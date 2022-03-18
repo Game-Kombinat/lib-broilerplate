@@ -9,7 +9,7 @@ namespace Broilerplate.Gameplay {
 
         private ControllerBase controller;
         private InputHandler inputs;
-        public virtual void OnPossess(ControllerBase inController) {
+        public virtual void OnControlTaken(ControllerBase inController) {
             controller = inController;
             if (inController is PlayerController p) {
                 inputs = p.GetInputHandler();
@@ -17,7 +17,7 @@ namespace Broilerplate.Gameplay {
             }
         }
         
-        public virtual void OnEjectPawn() {}
+        public virtual void OnControlLeft() {}
 
         public virtual InputHandler GetInputHandler() {
             return inputs;
