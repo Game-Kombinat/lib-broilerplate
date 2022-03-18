@@ -5,7 +5,7 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace Broilerplate.Tests.PlaymodeTests {
+namespace Tests.Runtime.Broilerplate {
     public class GameInstanceTests {
 
         private GameInstance instance;

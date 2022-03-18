@@ -1,13 +1,11 @@
-﻿using System.Collections;
-using Broilerplate.Core;
+﻿using Broilerplate.Core;
 using Broilerplate.Gameplay;
 using Broilerplate.Gameplay.Input;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.TestTools;
 
-namespace Broilerplate.Tests.PlaymodeTests {
+namespace Tests.Runtime.Broilerplate {
     /// <summary>
     /// This tests that everything pertaining to creating a playable state in the
     /// game is bootstrapping correctly and behaves as expected.

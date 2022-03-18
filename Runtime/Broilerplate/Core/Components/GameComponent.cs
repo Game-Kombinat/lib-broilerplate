@@ -49,7 +49,7 @@ namespace Broilerplate.Core.Components {
         }
 
         public World GetWorld() {
-            return owner.GetWorld();
+            return owner == null ? null : owner.GetWorld();
         }
 
         public void UnregisterTickFunc() {
@@ -70,16 +70,21 @@ namespace Broilerplate.Core.Components {
         private void Decommission() {
             UnregisterTickFunc();
             PendingDestruction = true;
+            // when called from OnDestroy this will become a null pointer before the deletion can be processed.
+            // But it's okay, we don't dereference it. And all it does is destroying them anyway.
+            // Would be a double-destroy
             owner.UnregisterComponent(this);
         }
 
-        // todo: this happens ofc when components are destroyed on play end.
-        // and then these messages are not appropriate. This needs to be circumvented somehow.
+
         protected virtual void OnDestroy() {
             // when the world is already destroyed there is no use in trying to do anything here.
             if (!PendingDestruction && GetWorld() != null) {
-                // someone called Destroy() directly. But it also happens when playmode stops
-                // so we have to deal with this gracefully rather than chopping it all down.
+                // This happens when
+                // a) game ends
+                // b) someone calls Destroy() directly
+                // c) There were other actor components on the same GO that was bound to a scene component which is destroyed
+                // And in either case we need to make sure that they all don't produce any null pointers
                 Decommission();
             }
         }

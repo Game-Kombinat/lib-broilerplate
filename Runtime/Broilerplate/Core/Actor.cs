@@ -102,6 +102,15 @@ namespace Broilerplate.Core {
                 }
             }
         }
+        
+        public void RemoveGameComponent(GameComponent comp) {
+            for (int i = 0; i < registeredComponents.Count; ++i) {
+                if (registeredComponents[i] == comp) {
+                    registeredComponents[i].DestroyComponent();
+                    break;
+                }
+            }
+        }
 
         public T AddGameComponent<T>() where T : GameComponent {
             if (typeof(T) == typeof(SceneComponent)) {
@@ -142,11 +151,6 @@ namespace Broilerplate.Core {
             }
         }
         
-
-        // todo: problem here: this needs to be called at some point to actually remove components
-        // and it would have to happen as soon as there is a component scheduled for removal.
-        // we do this in the first place to not remove a component mid-frame. Ideally it happens after
-        // the frame is over to avoid any issues when someone is looping the component list.
         public void ProcessComponentRemoval() {
             for (int i = 0; i < componentRemovalSchedule.Count; ++i) {
                 if (registeredComponents.Remove(componentRemovalSchedule[i])) {

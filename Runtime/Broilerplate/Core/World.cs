@@ -84,6 +84,7 @@ namespace Broilerplate.Core {
                 // add more if actors get more stuff that needs this sort of handling.
                 // or think of a more dynamic way to do this.
             }
+            dirtyActors.Clear();
         }
 
         public void BeginPlay() {

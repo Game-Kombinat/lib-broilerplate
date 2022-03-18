@@ -3,10 +3,9 @@ using Broilerplate.Core;
 using Broilerplate.Core.Components;
 using NUnit.Framework;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 
-namespace Broilerplate.Tests.PlaymodeTests {
+namespace Tests.Runtime.Broilerplate {
     public class ComponentBehaviorTests
     {
         private GameInstance instance;
@@ -61,13 +60,15 @@ namespace Broilerplate.Tests.PlaymodeTests {
             Assert.True(actor.NumComponents == 2, "actor.NumComponents == 2");
             
             actor.RemoveGameComponent<SceneComponent>();
-            actor.ProcessComponentRemoval();
+            yield return null;
+            Assert.DoesNotThrow(() => { actor.ProcessComponentRemoval(); });
             
             Assert.True(actor.NumComponents == 1, "actor.NumComponents == 1");
             
             actor.AddGameComponent<SceneComponent>();
             actor.RemoveGameComponent<SceneComponent>(true);
-            actor.ProcessComponentRemoval();
+            yield return null;
+            Assert.DoesNotThrow(() => { actor.ProcessComponentRemoval(); }); 
             
             Assert.True(actor.NumComponents == 0, "actor.NumComponents == 0");
 
@@ -75,10 +76,23 @@ namespace Broilerplate.Tests.PlaymodeTests {
             actor.AddGameComponent<SceneComponent>();
             
             actor.RemoveGameComponent<SceneComponent>();
-            actor.ProcessComponentRemoval();
+            yield return null;
+            Assert.DoesNotThrow(() => { actor.ProcessComponentRemoval(); }); 
             Assert.True(actor.NumComponents == 1, "actor.NumComponents == 1 (actor component left)");
             
             yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator TestSceneComponentRemovalWithOtherComponentsOn() {
+            var go = new GameObject("Test Actor");
+            var actor = instance.GetWorld().SpawnActorOn<Actor>(go);
+            var sc = actor.AddGameComponent<SceneComponent>();
+            // This is ofc illegal but this must not blow regardless
+            sc.gameObject.AddComponent<ActorComponent>();
+            actor.RemoveGameComponent(sc);
+            yield return null;
+            Assert.DoesNotThrow(() => { actor.ProcessComponentRemoval(); });
         }
         
         [UnityTest]
