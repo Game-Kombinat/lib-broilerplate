@@ -1,4 +1,5 @@
-﻿using Broilerplate.Ticking;
+﻿using System;
+using Broilerplate.Ticking;
 using UnityEngine;
 
 namespace Broilerplate.Core.Components {
@@ -20,6 +21,10 @@ namespace Broilerplate.Core.Components {
             componentTick.SetCanEverTick(true);
         }
 
+        private void Awake() {
+            EnsureIntegrity();
+        }
+
         public virtual void BeginPlay() {
             componentTick.SetTickTarget(this);
             GetWorld().RegisterTickFunc(componentTick);
@@ -34,12 +39,12 @@ namespace Broilerplate.Core.Components {
             componentTick.SetEnableTick(shouldTick);
         }
 
-        public void Reset() {
+        public virtual void EnsureIntegrity() {
+            Debug.Log($"{name} Reset!");
             var actor = transform.root.gameObject.GetComponent<Actor>();
             if (!actor) {
-                Debug.LogError($"Component {GetType().Name} requires an Actor component on the root object!");
                 DestroyImmediate(this);
-                return;
+                throw new InvalidOperationException($"Component {GetType().Name} requires an Actor component on the root object!");
             }
 
             owner = actor;
@@ -87,6 +92,10 @@ namespace Broilerplate.Core.Components {
                 // And in either case we need to make sure that they all don't produce any null pointers
                 Decommission();
             }
+        }
+
+        private void Reset() {
+            EnsureIntegrity();
         }
     }
 }

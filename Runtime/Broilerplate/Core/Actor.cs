@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Broilerplate.Core.Components;
 using Broilerplate.Ticking;
+using UnityEditor;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 
@@ -70,7 +71,6 @@ namespace Broilerplate.Core {
                 return;
             }
 
-            
             actorTick.SetEnableTick(shouldTick);
         }
 
@@ -117,12 +117,21 @@ namespace Broilerplate.Core {
                 var go = new GameObject($"{typeof(T).Name} Container");
                 go.transform.SetParent(transform);
                 var c = go.AddComponent<T>();
-                c.Reset();
+                // this is a case when creating actor prefabs with scripts.
+                // Then neither Reset nor Awake are called to ensure integrity.
+                // So we do it manually.
+                if (!Application.isPlaying) {
+                    // otherwise Awake() is called and that calls EnsureIntegrity
+                    c.EnsureIntegrity();
+                }
                 return c;
             }
 
             var comp = gameObject.AddComponent<T>();
-            comp.Reset();
+            if (!Application.isPlaying) {
+                // otherwise Awake() is called and that calls EnsureIntegrity
+                comp.EnsureIntegrity();
+            }
             return comp;
         }
 
@@ -147,7 +156,7 @@ namespace Broilerplate.Core {
             // get all components that may already exist because an actor was deleted and make them register themselves here.
             var childs = GetComponentsInChildren<GameComponent>();
             for (int i = 0; i < childs.Length; ++i) {
-                childs[i].Reset();
+                childs[i].EnsureIntegrity();
             }
         }
         
@@ -162,6 +171,10 @@ namespace Broilerplate.Core {
         }
 
         public void RegisterComponent(GameComponent component) {
+            if (registeredComponents.Contains(component)) {
+                // That can happen for instance when someone calls Reset from the inspector
+                return;
+            }
             registeredComponents.Add(component);
         }
 
