@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using Broilerplate.Core;
 using Broilerplate.Core.Components;
@@ -93,6 +94,18 @@ namespace Tests.Runtime.Broilerplate {
             actor.RemoveGameComponent(sc);
             yield return null;
             Assert.DoesNotThrow(() => { actor.ProcessComponentRemoval(); });
+        }
+        
+        [UnityTest]
+        public IEnumerator TestAddActorComponentOnChildObjectThrows() {
+            var go = new GameObject("Test Actor");
+            var actor = instance.GetWorld().SpawnActorOn<Actor>(go);
+            var sc = actor.AddGameComponent<SceneComponent>();
+            
+            // be nice if this could throw generally
+            var ac = sc.gameObject.AddComponent<ActorComponent>();
+            Assert.Throws<InvalidOperationException>(() => { ac.EnsureIntegrity(); });
+            yield break;
         }
         
         [UnityTest]
