@@ -12,28 +12,26 @@ namespace Broilerplate.Core {
     /// </summary>
     [DisallowMultipleComponent]
     public class Actor : MonoBehaviour, ITickable {
-
         protected World world;
 
-        
-        [SerializeField]
-        protected TickFunc actorTick = new TickFunc();
+
+        [SerializeField] protected TickFunc actorTick = new TickFunc();
 
         public int NumComponents => registeredComponents.Count;
 
         public bool HasTickFunc => actorTick != null;
 
-        [SerializeField]
-        private List<GameComponent> registeredComponents = new List<GameComponent>();
-        private readonly List<GameComponent> componentRemovalSchedule = new List<GameComponent>();
-        
+        public bool HasBegunPlaying { get; private set; } = false;
+
+        private readonly List<GameComponent> registeredComponents = new();
+
 
         public TickFunc ActorTick => actorTick;
 
         public Actor() {
             actorTick.SetCanEverTick(true);
         }
-        
+
 
         /// <summary>
         /// Called when this actor is spawned.
@@ -42,23 +40,27 @@ namespace Broilerplate.Core {
         /// Be sure to call the super function to ensure everything is working!
         /// </summary>
         public virtual void BeginPlay() {
-            
             // register tick function to world.
             if (!HasTickFunc || !actorTick.CanEverTick) {
                 return;
             }
+
             actorTick.SetTickTarget(this);
 
             world.RegisterTickFunc(actorTick);
 
             var attachedComps = GetComponentsInChildren<GameComponent>();
-            
+
             // why do this? So we know the owner actor has been initialised with BeginPlay before its components.
             // Now we get a known execution order.
             for (int i = 0; i < attachedComps.Length; ++i) {
                 var comp = attachedComps[i];
                 comp.BeginPlay();
             }
+
+            // mark as ready so when components get added now, during runtime,
+            // they get BeginPlay called right away.
+            HasBegunPlaying = true;
         }
 
         /// <summary>
@@ -106,6 +108,7 @@ namespace Broilerplate.Core {
                     // otherwise Awake() is called and that calls EnsureIntegrity
                     c.EnsureIntegrity();
                 }
+
                 return c;
             }
 
@@ -114,6 +117,7 @@ namespace Broilerplate.Core {
                 // otherwise Awake() is called and that calls EnsureIntegrity
                 comp.EnsureIntegrity();
             }
+
             return comp;
         }
 
@@ -132,11 +136,12 @@ namespace Broilerplate.Core {
                         Destroy(comp);
                     }
                 }
+
                 world.UnregisterTickFunc(actorTick);
-            
+
                 world.UnregisterActor(this);
             }
-            
+
             Destroy(gameObject);
         }
 
@@ -146,10 +151,11 @@ namespace Broilerplate.Core {
 
         private void Reset() {
             if (transform.root != transform) {
-                Debug.LogError($"Actor components must be added on the root component {transform.root.name} but this is {name}");
+                Debug.LogError(
+                    $"Actor components must be added on the root component {transform.root.name} but this is {name}");
                 DestroyImmediate(this);
             }
-            
+
             // get all components that may already exist because an actor was deleted and make them register themselves here.
             var childs = GetComponentsInChildren<GameComponent>();
             for (int i = 0; i < childs.Length; ++i) {
@@ -162,8 +168,11 @@ namespace Broilerplate.Core {
                 Debug.LogWarning($"Attempted to register component {component.GetType().Name} twice on actor {name}");
                 return;
             }
+
             registeredComponents.Add(component);
-            component.BeginPlay();
+            if (HasBegunPlaying) {
+                component.BeginPlay();
+            }
         }
 
         public void UnregisterComponent(GameComponent component) {
