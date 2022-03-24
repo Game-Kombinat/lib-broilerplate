@@ -7,13 +7,18 @@ namespace Broilerplate.Core.Components {
     /// That is because they do not require a transform to operate.
     /// </summary>
     public class ActorComponent : GameComponent {
-        public override void EnsureIntegrity() {
+        public override void EnsureIntegrity(bool autoRegister = false) {
             if (transform != transform.root) {
-                DestroyImmediate(this);
+                if (Application.isPlaying) {
+                    Destroy(this);
+                }
+                else {
+                    DestroyImmediate(this);
+                }
+                
                 throw new InvalidOperationException("Actor Component must be added to the root, where the actor is located!");
             }
-            base.EnsureIntegrity();
-            
+            base.EnsureIntegrity(autoRegister);
         }
     }
 }

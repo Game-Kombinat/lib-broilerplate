@@ -16,7 +16,6 @@ namespace Broilerplate.Ticking {
         }
 
         public virtual void Tick() {
-            world.ProcessDirtyActors();
             world.OnNewTick();
             ticks.Tick(world.timeData.deltaTime, world.timeData.timeSinceWorldBooted);
         }

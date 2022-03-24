@@ -20,13 +20,22 @@ namespace Broilerplate.Core.Components {
         public override void BeginPlay() {
             base.BeginPlay();
             if (detachAtRuntime) {
-                transform.parent = null;
+                DetachFromActor();
             }
+        }
+
+        /// <summary>
+        /// This will break this scene component out of its actors game object hierarchy
+        /// but will retain the connection to its actor. And the actor will keep this component
+        /// in its component list regardless.
+        /// </summary>
+        public void DetachFromActor() {
+            transform.parent = null;
         }
 
         protected override void OnDestroy() {
             base.OnDestroy();
-            if (transform == transform.root) {
+            if (owner && transform == owner.transform) {
                 // This is a scene component on the root of a prefab which has also the actor on it.
                 // we don't need to deal with this. This is the only case where scene components are
                 // not in charge of their own gameobject

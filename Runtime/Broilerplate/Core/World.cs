@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Broilerplate.Gameplay;
-using Broilerplate.Gameplay.Input;
 using Broilerplate.Ticking;
 using UnityEngine;
 
@@ -18,13 +16,14 @@ namespace Broilerplate.Core {
     public class World : ScriptableObject {
         public WorldTime timeData;
 
+        private UnityTicker unityTickerInstance;
         private TickManager tickManager;
         private GameMode gameMode;
         private readonly List<Actor> liveActors = new();
-        private readonly List<Actor> dirtyActors = new();
-        private readonly List<Actor> actorsScheduledForDestroy = new();
         
         public TickManager TickManager => tickManager;
+        public bool HasActors => liveActors.Count > 0;
+        public int NumActors => liveActors.Count;
 
         /// <summary>
         /// Called first thing on a new tick.
@@ -41,25 +40,23 @@ namespace Broilerplate.Core {
         }
 
         public void ShutdownWorld() {
-            // Generate a list of scheduled removals
             for (int i = 0; i < liveActors.Count; i++) {
-                liveActors[i].DestroyActor();
+                UnregisterActor(liveActors[i--]);
             }
-            // Force this list to be processed now
-            HandleActorDestruction();
+            Destroy(unityTickerInstance.gameObject);
         }
 
         public void BootWorld(GameMode gameModePrefab) {
-            Debug.Log("Booting ze world");
             timeData.timeDilation = 1;
             timeData.lastTick = timeData.thisTick = default;
             timeData.timeSinceWorldBooted = 0;
             timeData.deltaTime = 0;
             tickManager = new TickManager(this);
 
+            
             var unityTicker = new GameObject("Unity Ticker");
-            var ticker = unityTicker.AddComponent<UnityTicker>();
-            ticker.SetTickManager(tickManager);
+            unityTickerInstance = unityTicker.AddComponent<UnityTicker>();
+            unityTickerInstance.SetTickManager(tickManager);
             
             liveActors.Clear();
             liveActors.AddRange(FindObjectsOfType<Actor>());
@@ -72,19 +69,6 @@ namespace Broilerplate.Core {
             liveActors.Add(actor);
             actor.SetWorld(this);
             actor.BeginPlay();
-        }
-
-        public void MarkDirty(Actor actor) {
-            dirtyActors.Add(actor);
-        }
-
-        public void ProcessDirtyActors() {
-            for (int i = 0; i < dirtyActors.Count; ++i) {
-                dirtyActors[i].ProcessComponentRemoval();
-                // add more if actors get more stuff that needs this sort of handling.
-                // or think of a more dynamic way to do this.
-            }
-            dirtyActors.Clear();
         }
 
         public void BeginPlay() {
@@ -114,9 +98,10 @@ namespace Broilerplate.Core {
             return (T)a;
         }
 
-        public void DestroyActor(Actor actor) {
-            actorsScheduledForDestroy.Add(actor);
-            
+        public void UnregisterActor(Actor actor) {
+            UnregisterTickFunc(actor.ActorTick);
+            liveActors.Remove(actor);
+
         }
 
         public void UnregisterTickFunc(TickFunc tickFunc) {
@@ -125,15 +110,6 @@ namespace Broilerplate.Core {
 
         public void RegisterTickFunc(TickFunc tickFunc) {
             tickManager.RegisterTickFunc(tickFunc);
-        }
-
-        private void HandleActorDestruction() {
-            for (int i = 0; i < actorsScheduledForDestroy.Count; i++) {
-                var actor = actorsScheduledForDestroy[i];
-                liveActors.Remove(actor);
-                UnregisterTickFunc(actor.ActorTick);
-                Destroy(actor.gameObject);
-            }
         }
 
         public void SpawnPlayer(PlayerInfo playerInfo) {

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Broilerplate.Core.Components;
 using Broilerplate.Ticking;
-using UnityEditor;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 
@@ -52,10 +51,13 @@ namespace Broilerplate.Core {
 
             world.RegisterTickFunc(actorTick);
 
+            var attachedComps = GetComponentsInChildren<GameComponent>();
+            
             // why do this? So we know the owner actor has been initialised with BeginPlay before its components.
             // Now we get a known execution order.
-            for (int i = 0; i < registeredComponents.Count; ++i) {
-                registeredComponents[i].BeginPlay();
+            for (int i = 0; i < attachedComps.Length; ++i) {
+                var comp = attachedComps[i];
+                comp.BeginPlay();
             }
         }
 
@@ -92,26 +94,6 @@ namespace Broilerplate.Core {
             return null;
         }
 
-        public void RemoveGameComponent<T>(bool all = false) where T : GameComponent {
-            for (int i = 0; i < registeredComponents.Count; ++i) {
-                if (registeredComponents[i] is T) {
-                    registeredComponents[i].DestroyComponent();
-                    if (!all) {
-                        break;
-                    }
-                }
-            }
-        }
-        
-        public void RemoveGameComponent(GameComponent comp) {
-            for (int i = 0; i < registeredComponents.Count; ++i) {
-                if (registeredComponents[i] == comp) {
-                    registeredComponents[i].DestroyComponent();
-                    break;
-                }
-            }
-        }
-
         public T AddGameComponent<T>() where T : GameComponent {
             if (typeof(T) == typeof(SceneComponent)) {
                 var go = new GameObject($"{typeof(T).Name} Container");
@@ -139,12 +121,27 @@ namespace Broilerplate.Core {
             return world;
         }
 
-        public virtual void DestroyActor() {
-            for (int i = 0; i < registeredComponents.Count; ++i) {
-                registeredComponents[i].DestroyComponent();
+        protected virtual void DestroyActor() {
+            if (world) {
+                for (int i = 0; i < registeredComponents.Count; ++i) {
+                    // Destroy components that are part of the actor but not part of the game object hierarchy.
+                    // These are detached scene components. And they would not be caught when destroying the game object
+                    // of this actor
+                    var comp = registeredComponents[i];
+                    if (comp.transform.root != transform) {
+                        Destroy(comp);
+                    }
+                }
+                world.UnregisterTickFunc(actorTick);
+            
+                world.UnregisterActor(this);
             }
-            ProcessComponentRemoval();
-            world.DestroyActor(this);
+            
+            Destroy(gameObject);
+        }
+
+        private void OnDestroy() {
+            DestroyActor();
         }
 
         private void Reset() {
@@ -159,29 +156,21 @@ namespace Broilerplate.Core {
                 childs[i].EnsureIntegrity();
             }
         }
-        
-        public void ProcessComponentRemoval() {
-            for (int i = 0; i < componentRemovalSchedule.Count; ++i) {
-                if (registeredComponents.Remove(componentRemovalSchedule[i])) {
-                    Destroy(componentRemovalSchedule[i]);
-                }
-                
-            }
-            componentRemovalSchedule.Clear();
-        }
 
         public void RegisterComponent(GameComponent component) {
             if (registeredComponents.Contains(component)) {
-                // That can happen for instance when someone calls Reset from the inspector
+                Debug.LogWarning($"Attempted to register component {component.GetType().Name} twice on actor {name}");
                 return;
             }
             registeredComponents.Add(component);
+            component.BeginPlay();
         }
 
         public void UnregisterComponent(GameComponent component) {
-            if (world) {
-                componentRemovalSchedule.Add(component);
-                world.MarkDirty(this);
+            registeredComponents.Remove(component);
+            if (!component.IsBeingDestroyed) {
+                Debug.LogWarning("Unregistered a component that wasn't being destroyed. Will destroy it now.");
+                Destroy(component);
             }
         }
 

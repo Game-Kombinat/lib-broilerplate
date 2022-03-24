@@ -15,14 +15,14 @@ namespace Broilerplate.Core.Components {
 
         public TickFunc ComponentTick => componentTick;
 
-        public bool PendingDestruction { get; private set; }
+        public bool IsBeingDestroyed { get; private set; }
 
         public GameComponent() {
             componentTick.SetCanEverTick(true);
         }
 
         private void Awake() {
-            EnsureIntegrity();
+            EnsureIntegrity(true);
         }
 
         public virtual void BeginPlay() {
@@ -39,18 +39,22 @@ namespace Broilerplate.Core.Components {
             componentTick.SetEnableTick(shouldTick);
         }
 
-        public virtual void EnsureIntegrity() {
-            Debug.Log($"{name} Reset!");
+        public virtual void EnsureIntegrity(bool autoRegister = false) {
             var actor = transform.root.gameObject.GetComponent<Actor>();
             if (!actor) {
-                DestroyImmediate(this);
+                if (!Application.isPlaying) {
+                    DestroyImmediate(this);
+                }
+                else {
+                    Destroy(this);
+                }
                 throw new InvalidOperationException($"Component {GetType().Name} requires an Actor component on the root object!");
             }
 
             owner = actor;
-            // unity GetComponent causes a native call, we want to avoid them where possible.
-            // so we keep a managed-land component list.
-            owner.RegisterComponent(this);
+            if (autoRegister) {
+                owner.RegisterComponent(this);
+            }
         }
 
         public World GetWorld() {
@@ -64,17 +68,12 @@ namespace Broilerplate.Core.Components {
             }
         }
 
-        public virtual void DestroyComponent() {
-            Decommission();
-        }
-
         public void ProcessTick(float deltaTime) {
             // there is no default behaviour
         }
 
-        private void Decommission() {
+        protected virtual void Decommission() {
             UnregisterTickFunc();
-            PendingDestruction = true;
             // when called from OnDestroy this will become a null pointer before the deletion can be processed.
             // But it's okay, we don't dereference it. And all it does is destroying them anyway.
             // Would be a double-destroy
@@ -83,13 +82,9 @@ namespace Broilerplate.Core.Components {
 
 
         protected virtual void OnDestroy() {
+            IsBeingDestroyed = true;
             // when the world is already destroyed there is no use in trying to do anything here.
-            if (!PendingDestruction && GetWorld() != null) {
-                // This happens when
-                // a) game ends
-                // b) someone calls Destroy() directly
-                // c) There were other actor components on the same GO that was bound to a scene component which is destroyed
-                // And in either case we need to make sure that they all don't produce any null pointers
+            if (GetWorld() != null) {
                 Decommission();
             }
         }

@@ -1,10 +1,13 @@
 using System;
 using System.Collections;
+using System.Text.RegularExpressions;
 using Broilerplate.Core;
 using Broilerplate.Core.Components;
 using NUnit.Framework;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.TestTools;
+using Object = UnityEngine.Object;
 
 namespace Tests.Runtime.Broilerplate {
     public class ComponentBehaviorTests
@@ -51,49 +54,50 @@ namespace Tests.Runtime.Broilerplate {
         }
         
         [UnityTest]
-        public IEnumerator TestRemoveComponents() {
+        public IEnumerator TestDestroyComponents() {
             var go = new GameObject("Test Actor");
             var actor = instance.GetWorld().SpawnActorOn<Actor>(go);
             // we assert in another test that the adding works
-            actor.AddGameComponent<SceneComponent>();
-            actor.AddGameComponent<SceneComponent>();
+            var cp1 = actor.AddGameComponent<SceneComponent>();
+            var cp2 = actor.AddGameComponent<SceneComponent>();
             // ssert that we have 2 components now
             Assert.True(actor.NumComponents == 2, "actor.NumComponents == 2");
             
-            actor.RemoveGameComponent<SceneComponent>();
+            Object.Destroy(cp1);
             yield return null;
-            Assert.DoesNotThrow(() => { actor.ProcessComponentRemoval(); });
             
             Assert.True(actor.NumComponents == 1, "actor.NumComponents == 1");
             
-            actor.AddGameComponent<SceneComponent>();
-            actor.RemoveGameComponent<SceneComponent>(true);
+            cp1 = actor.AddGameComponent<SceneComponent>();
+            Object.Destroy(cp1);
+            Object.Destroy(cp2);
             yield return null;
-            Assert.DoesNotThrow(() => { actor.ProcessComponentRemoval(); }); 
-            
             Assert.True(actor.NumComponents == 0, "actor.NumComponents == 0");
 
-            actor.AddGameComponent<ActorComponent>();
-            actor.AddGameComponent<SceneComponent>();
-            
-            actor.RemoveGameComponent<SceneComponent>();
+            var ac = actor.AddGameComponent<ActorComponent>();
+            cp1 = actor.AddGameComponent<SceneComponent>();
+            Assert.True(actor.NumComponents == 2, "actor.NumComponents == 2");
+            Object.Destroy(cp1);
+            Object.Destroy(ac);
+            Assert.True(actor.NumComponents == 2, "actor.NumComponents == 2 (after destroy, same frame)");
             yield return null;
-            Assert.DoesNotThrow(() => { actor.ProcessComponentRemoval(); }); 
-            Assert.True(actor.NumComponents == 1, "actor.NumComponents == 1 (actor component left)");
+            Assert.True(actor.NumComponents == 0, "actor.NumComponents == 0 (after destroy, next frame)");
             
             yield return null;
         }
 
         [UnityTest]
-        public IEnumerator TestSceneComponentRemovalWithOtherComponentsOn() {
+        public IEnumerator TestDetachedActorIsDestroyed() {
             var go = new GameObject("Test Actor");
             var actor = instance.GetWorld().SpawnActorOn<Actor>(go);
             var sc = actor.AddGameComponent<SceneComponent>();
-            // This is ofc illegal but this must not blow regardless
-            sc.gameObject.AddComponent<ActorComponent>();
-            actor.RemoveGameComponent(sc);
+            sc.DetachFromActor();
+            Assert.True(actor.NumComponents == 1, "actor.NumComponents == 1 (after scene component detached)");
+            Object.Destroy(actor);
             yield return null;
-            Assert.DoesNotThrow(() => { actor.ProcessComponentRemoval(); });
+            // we cannot assert.null here because, apparently, the "unity null" is not the null that the
+            // assert is expecting (it failed, literally because of "expected null but got <null>" ...
+            Assert.True(sc == null, "sc == null after actor destruction");
         }
         
         [UnityTest]
@@ -101,11 +105,58 @@ namespace Tests.Runtime.Broilerplate {
             var go = new GameObject("Test Actor");
             var actor = instance.GetWorld().SpawnActorOn<Actor>(go);
             var sc = actor.AddGameComponent<SceneComponent>();
-            
-            // be nice if this could throw generally
+
+            // this actually throws in ActorComponent.Awake() but unity catches that and
+            // turns it into a log message therefore we have to do a LogAssert.
             var ac = sc.gameObject.AddComponent<ActorComponent>();
-            Assert.Throws<InvalidOperationException>(() => { ac.EnsureIntegrity(); });
-            yield break;
+            LogAssert.Expect(LogType.Exception, new Regex("Actor Component must be added to the root"));
+            yield return null;
+            // again: can't assert.null because unitys null override isn't the exact same as the null expected from the assert.
+            Assert.True(ac == null, "ac == null after invalid component adding");
+        }
+        
+        [UnityTest]
+        public IEnumerator TestAddComponentOnEmptyObject() {
+            var go = new GameObject("None Actor");
+            var sc = go.AddComponent<SceneComponent>();
+            LogAssert.Expect(LogType.Exception, new Regex("requires an Actor component on the root object"));
+            yield return null;
+            Assert.True(sc == null, "sc == null after invalid component adding");
+            // because scene components delete their game object along with them
+            Assert.True(go == null, "go == null after invalid component adding");
+
+            go = new GameObject("None Actor");
+            var ac = go.AddComponent<ActorComponent>();
+            LogAssert.Expect(LogType.Exception, new Regex("requires an Actor component on the root object"));
+            yield return null;
+            Assert.True(ac == null, "ac == null after invalid component adding");
+            // actor components don't delete their game object
+            Assert.True(go != null, "go != null after invalid component adding");
+        }
+        
+        [UnityTest]
+        public IEnumerator TestSceneCompDeletesOwnGameObject() {
+            var go = new GameObject("Test Actor");
+            var actor = instance.GetWorld().SpawnActorOn<Actor>(go);
+            var sc = actor.AddGameComponent<SceneComponent>();
+            var scGo = sc.gameObject;
+            Assert.True(go != scGo, "go != scGo");
+            Object.Destroy(sc);
+            yield return null;
+            Assert.True(sc == null, "sc == null");
+            Assert.True(scGo == null, "scGo == null");
+            Assert.True(go != null, "go != null");
+        }
+        
+        [UnityTest]
+        public IEnumerator TestActorLiveListIntegrity() {
+            var go = new GameObject("Test Actor");
+            var actor = instance.GetWorld().SpawnActorOn<Actor>(go);
+            Assert.True(instance.GetWorld().HasActors, "instance.GetWorld().HasActors");
+            int numActors = instance.GetWorld().NumActors;
+            Object.Destroy(actor);
+            yield return null;
+            Assert.True(instance.GetWorld().NumActors < numActors, "instance.GetWorld().NumActors < numActors");
         }
         
         [UnityTest]
