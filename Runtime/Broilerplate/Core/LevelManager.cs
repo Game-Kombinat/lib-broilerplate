@@ -12,11 +12,11 @@ namespace Broilerplate.Core {
         /// Bunch of actions that expose hooks in the scene loading process.
         /// These are not called for the loading scene.
         /// Loading scene is not invoked for additive level load requests.
-        public static event Action<Scene> BeforeLevelLoad;
+        public static event Action<string> BeforeLevelLoad;
         public static event Action<Scene> OnLevelLoaded;
         public static event Action<Scene> OnLevelLoadedAdditively;
-        public static event Action<Scene> BeforeLevelLoadAdditively;
-        public static event Action<Scene> OnLevelUnloaded;
+        public static event Action<string> BeforeLevelLoadAdditively;
+        public static event Action<string> OnLevelUnloaded;
         public static event Action<Scene> BeforeLevelUnload;
 
         private static Scene loadingScene;
@@ -28,20 +28,17 @@ namespace Broilerplate.Core {
         /// <param name="levelName"></param>
         public static void LoadLevel(string levelName) {
             // if we need to load levels from asset bundles, this is the place to check for them
-            Scene targetScene = SceneManager.GetSceneByName(levelName);
-            Scene currentScene = SceneManager.GetActiveScene();
+            string currentScene = SceneManager.GetActiveScene().name;
             if (!string.IsNullOrEmpty(loadingScene.name)) {
                 var loadTask = SceneManager.LoadSceneAsync(loadingScene.name, LoadSceneMode.Additive);
                 loadTask.completed += _ => {
                     Resources.UnloadUnusedAssets();
                     GC.Collect();
-                    HandleLoadLevel(targetScene, currentScene);
+                    HandleLoadLevel(levelName, currentScene);
                 };
             }
-
-            Resources.UnloadUnusedAssets();
-            GC.Collect();
-            HandleLoadLevel(targetScene, currentScene, false);
+            
+            HandleLoadLevel(levelName, currentScene, false);
         }
 
         /// <summary>
@@ -50,36 +47,37 @@ namespace Broilerplate.Core {
         /// <param name="levelName"></param>
         public static void LoadLevelAdditive(string levelName) {
             // if we need to load levels from asset bundles, this is the place to check for them
-            Scene targetScene = SceneManager.GetSceneByName(levelName);
-            BeforeLevelLoadAdditively?.Invoke(targetScene);
-            var task = SceneManager.LoadSceneAsync(targetScene.name, LoadSceneMode.Additive);
+            BeforeLevelLoadAdditively?.Invoke(levelName);
+            var task = SceneManager.LoadSceneAsync(levelName, LoadSceneMode.Additive);
             task.completed += _ => {
-                OnLevelLoadedAdditively?.Invoke(targetScene);
+                OnLevelLoadedAdditively?.Invoke(SceneManager.GetSceneByName(levelName));
             };
         }
 
-        private static void HandleLoadLevel(Scene targetScene, Scene unloadScene, bool unloadLoadingScene = true) {
-            var activeScene = SceneManager.GetActiveScene();
-            BeforeLevelUnload?.Invoke(activeScene);
-            // unload current scene and register a complete callback
-            var task = SceneManager.UnloadSceneAsync(unloadScene);
-            task.completed += a => {
-                // invoke some events accordingly
-                OnLevelUnloaded?.Invoke(activeScene);
-                BeforeLevelLoad?.Invoke(targetScene);
-                
-                // load target scene and register complete callback
-                var loadTask = SceneManager.LoadSceneAsync(targetScene.name, unloadLoadingScene ? LoadSceneMode.Additive : LoadSceneMode.Single);
-                loadTask.completed += b => {
-                    // call final level loaded event.
-                    OnLevelLoaded?.Invoke(targetScene);
-                    
-                    // unload loading scene if it was requested.
-                    if (unloadLoadingScene) {
+        private static void HandleLoadLevel(string targetScene, string unloadScene, bool unloadLoadingScene = true) {
+            BeforeLevelLoad?.Invoke(targetScene);
+            var task = SceneManager.LoadSceneAsync(targetScene,
+                unloadLoadingScene ? LoadSceneMode.Additive : LoadSceneMode.Single);
+            task.completed += _ => {
+                OnLevelLoaded?.Invoke(SceneManager.GetSceneByName(targetScene));
+
+                if (unloadLoadingScene) {
+                    BeforeLevelUnload?.Invoke(SceneManager.GetSceneByName(unloadScene));
+                    var unloadOldSceneTask = SceneManager.UnloadSceneAsync(unloadScene);
+                    unloadOldSceneTask.completed += _ => {
+                        OnLevelUnloaded?.Invoke(unloadScene);
                         SceneManager.UnloadSceneAsync(loadingScene);
-                    }
-                };
+                        Resources.UnloadUnusedAssets();
+                        GC.Collect();
+                    };
+                }
+                else {
+                    OnLevelUnloaded?.Invoke(unloadScene);
+                    Resources.UnloadUnusedAssets();
+                    GC.Collect();
+                }
             };
+
         }
     }
 }
