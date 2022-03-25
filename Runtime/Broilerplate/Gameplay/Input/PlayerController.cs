@@ -16,10 +16,14 @@ namespace Broilerplate.Gameplay.Input {
         [SerializeField]
         private CameraManager cameraManagerType;
 
+        [SerializeField]
+        private bool startWithMouseCursor;
+
         private CameraManager cameraManagerInstance;
         
         [SerializeField]
         private PlayerInput playerInput;
+        
 
         private InputHandler inputHandler;
         private PlayerInfo playerInfo;
@@ -37,6 +41,23 @@ namespace Broilerplate.Gameplay.Input {
                 var go = new GameObject("Default Camera Manager");
                 cameraManagerInstance = GetWorld().SpawnActorOn<CameraManager>(go);
             }
+
+            if (startWithMouseCursor) {
+                ShowMouseCursor();
+            }
+            else {
+                HideMouseCursor();
+            }
+        }
+
+        public void ShowMouseCursor() {
+            Cursor.visible = true;
+            Cursor.lockState = CursorLockMode.None;
+        }
+        
+        public void HideMouseCursor() {
+            Cursor.visible = false;
+            Cursor.lockState = CursorLockMode.Confined;
         }
 
         public override void ControlPawn(Pawn pawn) {

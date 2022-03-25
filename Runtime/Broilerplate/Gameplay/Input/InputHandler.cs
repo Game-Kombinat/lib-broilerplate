@@ -27,6 +27,7 @@ namespace Broilerplate.Gameplay.Input {
         public InputHandler(PlayerInput playerInput) {
             inputs = playerInput;
             inputs.onActionTriggered += InputActionReceived;
+            inputs.currentActionMap.actionTriggered += InputActionReceived;
         }
 
         /// <summary>
@@ -34,6 +35,8 @@ namespace Broilerplate.Gameplay.Input {
         /// </summary>
         public void ClearInputs() {
             inputs.onActionTriggered -= InputActionReceived;
+            inputs.currentActionMap.actionTriggered -= InputActionReceived;
+            
             pressEvents.Clear();
             holdEvents.Clear();
             releaseEvents.Clear();
@@ -44,13 +47,29 @@ namespace Broilerplate.Gameplay.Input {
         public void BindAction(ButtonActivatorType type, string action, ButtonPress callback) {
             switch (type) {
                 case ButtonActivatorType.Press:
-                    pressEvents[action] += callback;
+                    if (pressEvents.ContainsKey(action)) {
+                        pressEvents[action] += callback;
+                    }
+                    else {
+                        pressEvents[action] = callback;
+                    }
+                    
                     break;
                 case ButtonActivatorType.Hold:
-                    holdEvents[action] += callback;
+                    if (holdEvents.ContainsKey(action)) {
+                        holdEvents[action] += callback;
+                    }
+                    else {
+                        holdEvents[action] = callback;
+                    }
                     break;
                 case ButtonActivatorType.Release:
-                    releaseEvents[action] += callback;
+                    if (releaseEvents.ContainsKey(action)) {
+                        releaseEvents[action] += callback;
+                    }
+                    else {
+                        releaseEvents[action] = callback;
+                    }
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
@@ -58,14 +77,27 @@ namespace Broilerplate.Gameplay.Input {
         }
 
         public void BindAxis(string action, SingleAxisInput callback) {
-            singleAxisEvents[action] = callback;
+            // inputs.currentActionMap[action].performed += ;
+            if (singleAxisEvents.ContainsKey(action)) {
+                singleAxisEvents[action] += callback;
+            }
+            else {
+                singleAxisEvents[action] = callback;
+            }
+            
         }
         
         public void BindAxis(string action, DoubleAxisInput callback) {
-            doubleAxisEvents[action] = callback;
+            if (doubleAxisEvents.ContainsKey(action)) {
+                doubleAxisEvents[action] += callback;
+            }
+            else {
+                doubleAxisEvents[action] = callback;
+            }
         }
 
         private void InputActionReceived(InputAction.CallbackContext ctx) {
+            Debug.Log(ctx.action + " " + ctx.phase);
             if (ctx.action.type == InputActionType.Button) {
                 switch (ctx.phase) {
                     case InputActionPhase.Started:
