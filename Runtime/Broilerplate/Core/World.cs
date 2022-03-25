@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Broilerplate.Gameplay;
 using Broilerplate.Ticking;
 using UnityEngine;
 
@@ -113,8 +114,25 @@ namespace Broilerplate.Core {
         }
 
         public void SpawnPlayer(PlayerInfo playerInfo) {
-            // todo: find spawn point type and spawn there!
-            gameMode.SpawnPlayer(playerInfo, Vector3.zero, Quaternion.identity);
+            var ps = FindActorOfType<PlayerStart>();
+            if (ps) {
+                gameMode.SpawnPlayer(playerInfo, ps.transform.position, ps.transform.rotation);
+            }
+            else {
+                gameMode.SpawnPlayer(playerInfo, Vector3.zero, Quaternion.identity);
+            }
+            
+        }
+
+        private T FindActorOfType<T>() where T : Actor {
+            for (int i = 0; i < liveActors.Count; i++) {
+                var a = liveActors[i];
+                if (a is T t) {
+                    return t;
+                }
+            }
+
+            return null;
         }
 
         public GameMode GetGameMode() {
