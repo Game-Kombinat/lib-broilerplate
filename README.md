@@ -28,6 +28,13 @@ a player pawn which the player controller will take control of.
 
 The types of `PlayerController` and `Pawn` that are spawned depend on your configuration.
 
+I am not done with this library yet in any way. It might change around very drastically
+when I'm taking it for some spins in a couple games. Expect change.
 
-TBC when I have time. But at that point, surely you get the picture.
+I'm also planning on adding more test coverage and making more test cases
+to cover as much ground as possible.
+
+TBC when I have time. 
+
+But at that point, surely you get the picture.
 But if you're in doubt about the usefulness of this: Trust me. You will love it.
