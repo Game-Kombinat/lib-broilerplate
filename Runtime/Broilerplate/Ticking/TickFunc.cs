@@ -136,5 +136,9 @@ namespace Broilerplate.Ticking {
             }
             tickTarget = tickable;
         }
+
+        public void SetTickGroup(TickGroup inTickGroup) {
+            tickGroup = inTickGroup;
+        }
     }
 }

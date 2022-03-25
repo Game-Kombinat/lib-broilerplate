@@ -66,7 +66,7 @@ namespace Broilerplate.Gameplay.Input {
                 // Since it's not a broilerplate type we get it via vanilla unity api
                 playerInput = gameObject.GetComponent<PlayerInput>();
             }
-            inputHandler = new InputHandler(playerInput);
+            inputHandler = new InputHandler(playerInput, this);
 
             controlledPawn = pawn;
             if (cameraManagerInstance.AutoViewTargeting) {

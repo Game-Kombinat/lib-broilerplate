@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Broilerplate.Ticking;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -10,24 +11,62 @@ namespace Broilerplate.Gameplay.Input {
         Release
     }
 
-    public delegate void ButtonPress();
-    public delegate void SingleAxisInput(float value);
-    public delegate void DoubleAxisInput(Vector2 value);
+    public class SingleAxisInputData {
+        public delegate void SingleAxisInput(float value);
+        public event SingleAxisInput Inputs;
+        public float lastInput;
+
+        public void Invoke() {
+            Inputs?.Invoke(lastInput);
+        }
+
+        public void UpdateInput(float newInput) {
+            lastInput = newInput;
+        }
+
+    }
     
-    public class InputHandler {
+    public class DoubleAxisInputData {
+        public delegate void DoubleAxisInput(Vector2 value);
+        public event DoubleAxisInput Inputs;
+        public Vector2 lastInput;
+        
+        
+        public void Invoke() {
+            Inputs?.Invoke(lastInput);
+        }
+
+        public void UpdateInput(Vector2 newInput) {
+            lastInput = newInput;
+        }
+
+    }
+
+    public delegate void ButtonPress();
+    
+    public class InputHandler : ITickable {
 
         protected PlayerInput inputs;
+        protected PlayerController playerController;
 
         private readonly Dictionary<string, ButtonPress> pressEvents = new();
         private readonly Dictionary<string, ButtonPress> holdEvents = new();
         private readonly Dictionary<string, ButtonPress> releaseEvents = new();
-        private readonly Dictionary<string, SingleAxisInput> singleAxisEvents = new();
-        private readonly Dictionary<string, DoubleAxisInput> doubleAxisEvents = new();
+        private readonly Dictionary<string, SingleAxisInputData> singleAxisEvents = new();
+        private readonly Dictionary<string, DoubleAxisInputData> doubleAxisEvents = new();
         
-        public InputHandler(PlayerInput playerInput) {
+        private readonly TickFunc inputTick;
+        
+        public InputHandler(PlayerInput playerInput, PlayerController controller) {
             inputs = playerInput;
             inputs.onActionTriggered += InputActionReceived;
-            inputs.currentActionMap.actionTriggered += InputActionReceived;
+            playerController = controller;
+            
+            inputTick = new TickFunc();
+            inputTick.SetTickGroup(TickGroup.LateTick);
+            inputTick.SetTickTarget(this);
+            inputTick.SetEnableTick(false);
+            controller.GetWorld().RegisterTickFunc(inputTick);
         }
 
         /// <summary>
@@ -35,13 +74,14 @@ namespace Broilerplate.Gameplay.Input {
         /// </summary>
         public void ClearInputs() {
             inputs.onActionTriggered -= InputActionReceived;
-            inputs.currentActionMap.actionTriggered -= InputActionReceived;
             
             pressEvents.Clear();
             holdEvents.Clear();
             releaseEvents.Clear();
             singleAxisEvents.Clear();
             doubleAxisEvents.Clear();
+            
+            playerController.GetWorld().UnregisterTickFunc(inputTick);
         }
         
         public void BindAction(ButtonActivatorType type, string action, ButtonPress callback) {
@@ -76,28 +116,52 @@ namespace Broilerplate.Gameplay.Input {
             }
         }
 
-        public void BindAxis(string action, SingleAxisInput callback) {
-            // inputs.currentActionMap[action].performed += ;
-            if (singleAxisEvents.ContainsKey(action)) {
-                singleAxisEvents[action] += callback;
+        public void BindAxis(string action, SingleAxisInputData.SingleAxisInput callback) {
+            if (!singleAxisEvents.ContainsKey(action)) {
+                singleAxisEvents.Add(action, new SingleAxisInputData());
             }
-            else {
-                singleAxisEvents[action] = callback;
-            }
+            singleAxisEvents[action].Inputs += callback;
             
         }
         
-        public void BindAxis(string action, DoubleAxisInput callback) {
-            if (doubleAxisEvents.ContainsKey(action)) {
-                doubleAxisEvents[action] += callback;
+        public void BindAxis(string action, DoubleAxisInputData.DoubleAxisInput callback) {
+            if (!doubleAxisEvents.ContainsKey(action)) {
+                doubleAxisEvents.Add(action, new DoubleAxisInputData());
             }
-            else {
-                doubleAxisEvents[action] = callback;
+            doubleAxisEvents[action].Inputs += callback;
+        }
+
+        public bool ProcessAxisInput() {
+            // just calls the registered callbacks with the currently known axis values.
+            // Because Unitys input system doesn't actually do repeated invocations
+            // on axis that have non-0 values (because that is obviously way too difficult and nobody ever could possibly want that)
+            // we have to repeat the axis inputs manually for all inputs until they are all 0.
+            bool repeatNextFrame = false;
+            foreach (var kvp in singleAxisEvents) {
+                kvp.Value.Invoke();
+                if (kvp.Value.lastInput != 0) {
+                    repeatNextFrame = true;
+                }
             }
+            
+            foreach (var kvp in doubleAxisEvents) {
+                kvp.Value.Invoke();
+                if (kvp.Value.lastInput != Vector2.zero) {
+                    repeatNextFrame = true;
+                }
+            }
+
+            return repeatNextFrame;
+        }
+        
+        public void SetEnableTick(bool shouldTick) {
+            // we ignore the "can ever tick" flag here because
+            // we know that we must tick this
+            inputTick.SetEnableTick(shouldTick);
         }
 
         private void InputActionReceived(InputAction.CallbackContext ctx) {
-            Debug.Log(ctx.action + " " + ctx.phase);
+            // Debug.Log(ctx.action + " " + ctx.phase);
             if (ctx.action.type == InputActionType.Button) {
                 switch (ctx.phase) {
                     case InputActionPhase.Started:
@@ -125,13 +189,17 @@ namespace Broilerplate.Gameplay.Input {
                     if (!singleAxisEvents.ContainsKey(ctx.action.name)) {
                         return;
                     }
-                    singleAxisEvents[ctx.action.name]?.Invoke(ctx.ReadValue<float>());
+
+                    singleAxisEvents[ctx.action.name].UpdateInput(ctx.ReadValue<float>());
+                    SetEnableTick(true);
                 }
                 else if (ctx.valueType == typeof(Vector2)) {
                     if (!doubleAxisEvents.ContainsKey(ctx.action.name)) {
                         return;
                     }
-                    doubleAxisEvents[ctx.action.name]?.Invoke(ctx.ReadValue<Vector2>());
+                    
+                    doubleAxisEvents[ctx.action.name].UpdateInput(ctx.ReadValue<Vector2>());
+                    SetEnableTick(true);
                 }
             }
         }
@@ -141,7 +209,12 @@ namespace Broilerplate.Gameplay.Input {
                 return;
             }
             callbacks[bindingName]?.Invoke();
-            
+        }
+
+        public void ProcessTick(float deltaTime) {
+            if (!ProcessAxisInput()) {
+                SetEnableTick(false);
+            }
         }
     }
 }
