@@ -14,7 +14,7 @@ namespace Broilerplate.Gameplay.View {
         /// by the player controller, if they have a camera component attached to them.
         /// </summary>
         [SerializeField]
-        private bool autoHandleViewTargets = true;
+        private bool autoViewTargeting = true;
 
         [SerializeField]
         private Camera mainCameraType;
@@ -24,7 +24,7 @@ namespace Broilerplate.Gameplay.View {
 
         private Camera mainCamera;
 
-        public bool AutoHandleViewTargets => autoHandleViewTargets;
+        public bool AutoViewTargeting => autoViewTargeting;
 
         public Actor ViewTarget => viewTargetActor;
 
@@ -80,7 +80,7 @@ namespace Broilerplate.Gameplay.View {
         }
 
         public void SetAutoViewTargeting(bool enable) {
-            autoHandleViewTargets = enable;
+            autoViewTargeting = enable;
         }
     }
 }

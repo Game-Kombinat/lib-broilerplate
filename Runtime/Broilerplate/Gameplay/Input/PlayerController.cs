@@ -48,7 +48,7 @@ namespace Broilerplate.Gameplay.Input {
             inputHandler = new InputHandler(playerInput);
 
             controlledPawn = pawn;
-            if (cameraManagerInstance.AutoHandleViewTargets) {
+            if (cameraManagerInstance.AutoViewTargeting) {
                 cameraManagerInstance.SetViewTarget(pawn);
             }
             
