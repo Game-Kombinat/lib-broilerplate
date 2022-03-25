@@ -1,4 +1,5 @@
 ﻿using Broilerplate.Core;
+using Broilerplate.Gameplay.View;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -12,8 +13,11 @@ namespace Broilerplate.Gameplay.Input {
     /// </summary>
     [RequireComponent(typeof(PlayerInput))]
     public class PlayerController : ControllerBase {
-        // todo: get the camera manager in here.
-        // probably going to go with Cinemachine for camera handling.
+        [SerializeField]
+        private CameraManager cameraManagerType;
+
+        private CameraManager cameraManagerInstance;
+        
         [SerializeField]
         private PlayerInput playerInput;
 
@@ -22,7 +26,20 @@ namespace Broilerplate.Gameplay.Input {
 
         public PlayerInfo PlayerInfo => playerInfo;
 
-        public override void TakeControl(Pawn pawn) {
+        public CameraManager CameraManager => cameraManagerInstance;
+
+        public override void BeginPlay() {
+            base.BeginPlay();
+            if (cameraManagerType) {
+                cameraManagerInstance = GetWorld().SpawnActor(cameraManagerType, Vector3.zero, Quaternion.identity);
+            }
+            else {
+                var go = new GameObject("Default Camera Manager");
+                cameraManagerInstance = GetWorld().SpawnActorOn<CameraManager>(go);
+            }
+        }
+
+        public override void ControlPawn(Pawn pawn) {
             LeaveControlledPawn();
             if (!playerInput) {
                 // Since it's not a broilerplate type we get it via vanilla unity api
@@ -31,8 +48,11 @@ namespace Broilerplate.Gameplay.Input {
             inputHandler = new InputHandler(playerInput);
 
             controlledPawn = pawn;
+            if (cameraManagerInstance.AutoHandleViewTargets) {
+                cameraManagerInstance.SetViewTarget(pawn);
+            }
+            
             pawn.OnControlTaken(this);
-
         }
 
         public override void LeaveControlledPawn() {

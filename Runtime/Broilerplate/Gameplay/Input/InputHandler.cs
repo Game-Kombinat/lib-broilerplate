@@ -18,11 +18,11 @@ namespace Broilerplate.Gameplay.Input {
 
         protected PlayerInput inputs;
 
-        private Dictionary<string, ButtonPress> pressEvents;
-        private Dictionary<string, ButtonPress> holdEvents;
-        private Dictionary<string, ButtonPress> releaseEvents;
-        private Dictionary<string, SingleAxisInput> singleAxisEvents;
-        private Dictionary<string, DoubleAxisInput> doubleAxisEvents;
+        private readonly Dictionary<string, ButtonPress> pressEvents = new();
+        private readonly Dictionary<string, ButtonPress> holdEvents = new();
+        private readonly Dictionary<string, ButtonPress> releaseEvents = new();
+        private readonly Dictionary<string, SingleAxisInput> singleAxisEvents = new();
+        private readonly Dictionary<string, DoubleAxisInput> doubleAxisEvents = new();
         
         public InputHandler(PlayerInput playerInput) {
             inputs = playerInput;

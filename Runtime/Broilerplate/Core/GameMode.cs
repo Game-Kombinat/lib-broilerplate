@@ -35,7 +35,7 @@ namespace Broilerplate.Core {
             Pawn p = SpawnPlayPawn();
             pc.transform.SetPositionAndRotation(spawnPosition, spawnRotation);
             p.transform.SetPositionAndRotation(spawnPosition, spawnRotation);
-            pc.TakeControl(p);
+            pc.ControlPawn(p);
             playerControllers.Add(pc);
             return pc;
         }

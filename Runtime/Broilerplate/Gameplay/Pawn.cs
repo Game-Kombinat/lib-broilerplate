@@ -1,5 +1,6 @@
 ﻿using Broilerplate.Core;
 using Broilerplate.Gameplay.Input;
+using NaughtyAttributes;
 
 namespace Broilerplate.Gameplay {
     /// <summary>
@@ -34,5 +35,11 @@ namespace Broilerplate.Gameplay {
         protected virtual void ClearInputs() {
             GetInputHandler().ClearInputs();
         }
+#if UNITY_EDITOR
+        [Button("Control This")]
+        private void ControlThis() {
+            GetWorld().GetGameMode().GetMainPlayerController().ControlPawn(this);
+        }
+#endif
     }
 }

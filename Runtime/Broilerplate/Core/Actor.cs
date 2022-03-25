@@ -189,6 +189,7 @@ namespace Broilerplate.Core {
     }
 
     public static class ActorHelperExtensions {
+        // todo: this is not test covered, test cover it. Doesn't look like this would work atm
         public static T SpawnActor<T>(this GameObject go, World world) where T : Actor {
             var actor = go.AddComponent<Actor>();
             actor.SetWorld(world);

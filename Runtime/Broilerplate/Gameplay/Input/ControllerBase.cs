@@ -6,7 +6,7 @@ namespace Broilerplate.Gameplay.Input {
         
         public Pawn ControlledPawn => controlledPawn;
 
-        public abstract void TakeControl(Pawn pawn);
+        public abstract void ControlPawn(Pawn pawn);
 
         public abstract void LeaveControlledPawn();
     }

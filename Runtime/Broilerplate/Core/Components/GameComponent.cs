@@ -15,6 +15,8 @@ namespace Broilerplate.Core.Components {
 
         public TickFunc ComponentTick => componentTick;
 
+        public Actor Owner => owner;
+
         public bool IsBeingDestroyed { get; private set; }
 
         public GameComponent() {
