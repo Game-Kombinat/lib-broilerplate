@@ -5,6 +5,10 @@ using UnityEngine;
 
 namespace Broilerplate.Gameplay {
     public class PlayerStart : Actor {
+        public PlayerStart() {
+            actorTick.SetCanEverTick(false);
+        }
+        
 #if UNITY_EDITOR
         private void OnDrawGizmos() {
             Handles.color = Color.green;
