@@ -11,35 +11,18 @@ namespace Broilerplate.Gameplay.Input {
         Release
     }
 
-    public class SingleAxisInputData {
-        public delegate void SingleAxisInput(float value);
-        public event SingleAxisInput Inputs;
-        public float lastInput;
-
-        public void Invoke() {
-            Inputs?.Invoke(lastInput);
-        }
-
-        public void UpdateInput(float newInput) {
-            lastInput = newInput;
-        }
-
-    }
-    
-    public class DoubleAxisInputData {
-        public delegate void DoubleAxisInput(Vector2 value);
-        public event DoubleAxisInput Inputs;
-        public Vector2 lastInput;
-        
+    public class AxisInputData<T> {
+        public delegate void AxisInput(T value);
+        public event AxisInput Inputs;
+        public T lastInput;
         
         public void Invoke() {
             Inputs?.Invoke(lastInput);
         }
 
-        public void UpdateInput(Vector2 newInput) {
+        public void UpdateInput(T newInput) {
             lastInput = newInput;
         }
-
     }
 
     public delegate void ButtonPress();
@@ -52,8 +35,8 @@ namespace Broilerplate.Gameplay.Input {
         private readonly Dictionary<string, ButtonPress> pressEvents = new();
         private readonly Dictionary<string, ButtonPress> holdEvents = new();
         private readonly Dictionary<string, ButtonPress> releaseEvents = new();
-        private readonly Dictionary<string, SingleAxisInputData> singleAxisEvents = new();
-        private readonly Dictionary<string, DoubleAxisInputData> doubleAxisEvents = new();
+        private readonly Dictionary<string, AxisInputData<float>> singleAxisEvents = new();
+        private readonly Dictionary<string, AxisInputData<Vector2>> doubleAxisEvents = new();
         
         private readonly TickFunc inputTick;
         
@@ -116,17 +99,17 @@ namespace Broilerplate.Gameplay.Input {
             }
         }
 
-        public void BindAxis(string action, SingleAxisInputData.SingleAxisInput callback) {
+        public void BindAxis(string action, AxisInputData<float>.AxisInput callback) {
             if (!singleAxisEvents.ContainsKey(action)) {
-                singleAxisEvents.Add(action, new SingleAxisInputData());
+                singleAxisEvents.Add(action, new AxisInputData<float>());
             }
             singleAxisEvents[action].Inputs += callback;
             
         }
         
-        public void BindAxis(string action, DoubleAxisInputData.DoubleAxisInput callback) {
+        public void BindAxis(string action, AxisInputData<Vector2>.AxisInput callback) {
             if (!doubleAxisEvents.ContainsKey(action)) {
-                doubleAxisEvents.Add(action, new DoubleAxisInputData());
+                doubleAxisEvents.Add(action, new AxisInputData<Vector2>());
             }
             doubleAxisEvents[action].Inputs += callback;
         }
