@@ -36,7 +36,7 @@ namespace Tests.Runtime.Broilerplate {
             // And we don't want that. Hence we test that this behaviour is working as expected.
             // There is, of course, a way with the prefab utils but it's inherently editor bound and this
             // oughta work at runtime so this must be the way to go.
-            var cfg = instance.Configuration;
+            var cfg = ScriptableObject.CreateInstance<BroilerConfiguration>();
             
             Scene nullOverrideScene = SceneManager.CreateScene("TemporaryScene", new CreateSceneParameters { localPhysicsMode = LocalPhysicsMode.Physics3D });
             Scene notNullOverrideScene = SceneManager.GetActiveScene();
@@ -63,9 +63,10 @@ namespace Tests.Runtime.Broilerplate {
             var gmType = cfg.GetGameModeFor(SceneManager.GetActiveScene());
             
             if (gmType == null) {
-                Assert.True(mode.GetType() == typeof(GameMode), "mode.GetType() == gmType.GetType()");
+                Assert.True(mode.GetType() == typeof(GameMode), "mode.GetType() == typeof(GameMode)");
             }
             else {
+                
                 Assert.True(mode.GetType() == gmType.GetType(), "mode.GetType() == gmType.GetType()");
             }
             

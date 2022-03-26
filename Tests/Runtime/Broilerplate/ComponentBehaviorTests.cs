@@ -160,6 +160,20 @@ namespace Tests.Runtime.Broilerplate {
         }
         
         [UnityTest]
+        public IEnumerator TestGetComponentFromDetachedObject() {
+            var go = new GameObject("Test Actor");
+            var actor = instance.GetWorld().SpawnActorOn<Actor>(go);
+            var sc = actor.AddGameComponent<SceneComponent>();
+            sc.DetachFromActor();
+            actor.GetGameComponent<SceneComponent>();
+
+            var fetchedSc = actor.GetGameComponent<SceneComponent>();
+            
+            Assert.True(sc == fetchedSc, "sc == fetchedSc");
+            yield break;
+        }
+        
+        [UnityTest]
         public IEnumerator TestTicking() {
             var go = new GameObject("Test Actor");
             var actor = instance.GetWorld().SpawnActorOn<Actor>(go);
