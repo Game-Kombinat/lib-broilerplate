@@ -1,5 +1,6 @@
 ﻿using Broilerplate.Core;
 using Broilerplate.Gameplay.View;
+using Broilerplate.Ticking;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -13,17 +14,19 @@ namespace Broilerplate.Gameplay.Input {
     /// </summary>
     [RequireComponent(typeof(PlayerInput))]
     public class PlayerController : ControllerBase {
-        [SerializeField]
-        private CameraManager cameraManagerType;
-
+        
+        [Header("Control Behaviour")]
         [SerializeField]
         private bool startWithMouseCursor;
-
-        private CameraManager cameraManagerInstance;
+        
+        [Header("References")]
+        [SerializeField]
+        private CameraManager cameraManagerType;
         
         [SerializeField]
         private PlayerInput playerInput;
-        
+
+        private CameraManager cameraManagerInstance;
 
         private InputHandler inputHandler;
         private PlayerInfo playerInfo;
@@ -48,6 +51,11 @@ namespace Broilerplate.Gameplay.Input {
             else {
                 HideMouseCursor();
             }
+        }
+
+        protected override void Reset() {
+            base.Reset();
+            actorTick.SetTickGroup(TickGroup.LateTick);
         }
 
         public void ShowMouseCursor() {
@@ -90,6 +98,15 @@ namespace Broilerplate.Gameplay.Input {
 
         public void SetPlayerInfo(PlayerInfo inPlayerInfo) {
             playerInfo = inPlayerInfo;
+        }
+
+        
+        public void AddRotationInput(float x, float y, float z) {
+            ControlledPawn.GetMovementComponent().AddRotationInput(x, y, z);
+        }
+
+        public void AddMovementInput(float x, float y, float z) {
+            ControlledPawn.GetMovementComponent().AddMovementInput(x, y, z);
         }
     }
 }

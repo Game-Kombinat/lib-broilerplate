@@ -67,7 +67,7 @@ namespace Broilerplate.Gameplay.Input {
             playerController.GetWorld().UnregisterTickFunc(inputTick);
         }
         
-        public void BindAction(ButtonActivatorType type, string action, ButtonPress callback) {
+        public void BindAction(string action, ButtonActivatorType type, ButtonPress callback) {
             switch (type) {
                 case ButtonActivatorType.Press:
                     if (pressEvents.ContainsKey(action)) {
