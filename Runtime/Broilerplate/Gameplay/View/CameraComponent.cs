@@ -9,15 +9,18 @@ namespace Broilerplate.Gameplay.View {
     /// It adds an extra layer of control that is exposed for the CameraManager
     /// to make use of controlling view targets and so forth.
     /// </summary>
-    [RequireComponent(typeof(CinemachineVirtualCamera))]
     public class CameraComponent : SceneComponent {
-        private CinemachineVirtualCamera cameraHandle;
+        private CinemachineVirtualCameraBase cameraHandle;
 
-        public CinemachineVirtualCamera CameraHandle => cameraHandle;
+        public CinemachineVirtualCameraBase CameraHandle => cameraHandle;
 
         public override void BeginPlay() {
             base.BeginPlay();
-            cameraHandle = GetComponent<CinemachineVirtualCamera>();
+            cameraHandle = GetComponent<CinemachineVirtualCameraBase>();
+            if (!cameraHandle) {
+                Debug.LogWarning("No Virtual Camera found on CameraComponents GameObject. Creating default one!");
+                cameraHandle = gameObject.AddComponent<CinemachineVirtualCamera>();
+            }
             DisableCamera();
         }
 
