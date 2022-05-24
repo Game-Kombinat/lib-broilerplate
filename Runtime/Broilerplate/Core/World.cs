@@ -31,6 +31,7 @@ namespace Broilerplate.Core {
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
         public void OnNewTick() {
+            timeData.lastTick = timeData.thisTick;
             timeData.thisTick = DateTime.Now;
             timeData.deltaTime = (float)(timeData.thisTick - timeData.lastTick).TotalSeconds * timeData.timeDilation;
             timeData.timeSinceWorldBooted += timeData.deltaTime;
@@ -49,7 +50,7 @@ namespace Broilerplate.Core {
 
         public void BootWorld(GameMode gameModePrefab) {
             timeData.timeDilation = 1;
-            timeData.lastTick = timeData.thisTick = default;
+            timeData.lastTick = timeData.thisTick = DateTime.Now;
             timeData.timeSinceWorldBooted = 0;
             timeData.deltaTime = 0;
             tickManager = new TickManager(this);

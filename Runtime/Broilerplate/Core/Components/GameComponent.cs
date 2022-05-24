@@ -70,7 +70,7 @@ namespace Broilerplate.Core.Components {
             }
         }
 
-        public void ProcessTick(float deltaTime) {
+        public virtual void ProcessTick(float deltaTime) {
             // there is no default behaviour
         }
 
@@ -91,7 +91,7 @@ namespace Broilerplate.Core.Components {
             }
         }
 
-        private void Reset() {
+        protected virtual void Reset() {
             EnsureIntegrity();
         }
     }

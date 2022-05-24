@@ -149,7 +149,7 @@ namespace Broilerplate.Core {
             DestroyActor();
         }
 
-        private void Reset() {
+        protected virtual void Reset() {
             if (transform.root != transform) {
                 Debug.LogError(
                     $"Actor components must be added on the root component {transform.root.name} but this is {name}");
