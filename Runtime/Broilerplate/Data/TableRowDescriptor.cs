@@ -18,22 +18,35 @@ namespace Broilerplate.Data {
     /// </summary>
     public class TableRowDescriptor {
 #if UNITY_EDITOR
-        public List<FieldInfo> Columns { get; }
         public List<ColumnDescriptor> ColumnInfo { get; }
 
-        public Type RowType { get; }
-
         public TableRowDescriptor(Type typeInfo) {
-            var fields = typeInfo.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.CreateInstance)
-                                 .Where(x => x.GetCustomAttribute<HideInInspector>() == null);
-            Columns = new List<FieldInfo>(fields);
-            Columns.Sort(SortByAttribute);
+            var columns = new List<FieldInfo>();
+            var fields = typeInfo.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+                                 .Where(FieldIsSerializable);
+            
+            columns.AddRange(fields);
+            // By a (questionable) design decision, GetFields will not return private fields from parent classes.
+            // So we iterate through the hierarchy and return the private fields for all the parent classes.
+            Type current = typeInfo.BaseType;
+            while (current != null) {
+                // only private fields here, we already got the public and protected ones.
+                fields = current.GetFields(BindingFlags.Instance | BindingFlags.NonPublic)
+                                    .Where(FieldIsSerializable);
+            
+                columns.AddRange(fields);
+                current = current.BaseType;
+            }
+            
+            columns.Sort(SortByAttribute);
 
             // need reversal because it will fetch the objects in the order of appearance
             // going down in the inheritance (so id and machine name last, where they should be first)
-            ColumnInfo = Columns.Select(ExtractColumnInfo).ToList();
+            ColumnInfo = columns.Select(ExtractColumnInfo).ToList();
+        }
 
-            RowType = typeInfo;
+        private static bool FieldIsSerializable(FieldInfo x) {
+            return x.GetCustomAttribute<HideInInspector>() == null && (!x.IsPrivate || x.GetCustomAttribute<SerializeField>() != null);
         }
 
         private static int SortByAttribute(FieldInfo a, FieldInfo b) {
