@@ -28,8 +28,12 @@ namespace Broilerplate.Gameplay {
                 SetupInputs(GetInputHandler());
             }
         }
-        
-        public virtual void OnControlLeft() {}
+
+        public virtual void OnControlLeft() {
+            controller = null;
+        }
+
+        public bool IsPlayerControlled() => controller is PlayerController;
 
         public virtual InputHandler GetInputHandler() {
             return inputs;
