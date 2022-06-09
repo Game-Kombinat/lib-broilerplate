@@ -17,14 +17,14 @@ namespace Editor.Broilerplate.Data {
 
         [OnOpenAsset]
         public static bool OpenEditor(int instanceId) {
-            var window = GetWindow<DataTableEditor>();
-            if (!window) {
-                window = CreateWindow<DataTableEditor>("Data Table Editor");
-            }
-
             var obj = EditorUtility.InstanceIDToObject(instanceId);
             if (obj is not IDataTable) {
                 return false;
+            }
+            
+            var window = GetWindow<DataTableEditor>();
+            if (!window) {
+                window = CreateWindow<DataTableEditor>("Data Table Editor");
             }
 
             window.Prepare(obj as ScriptableObject);
