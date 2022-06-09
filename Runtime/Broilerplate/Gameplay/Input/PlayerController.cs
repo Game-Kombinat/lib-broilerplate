@@ -102,11 +102,11 @@ namespace Broilerplate.Gameplay.Input {
 
         
         public void AddRotationInput(float x, float y, float z) {
-            ControlledPawn.GetMovementComponent().AddRotationInput(x, y, z);
+            ControlledPawn.GetMovementComponent()?.AddRotationInput(x, y, z);
         }
 
         public void AddMovementInput(float x, float y, float z) {
-            ControlledPawn.GetMovementComponent().AddMovementInput(x, y, z);
+            ControlledPawn.GetMovementComponent()?.AddMovementInput(x, y, z);
         }
     }
 }

@@ -16,9 +16,6 @@ namespace Broilerplate.Gameplay {
         public override void BeginPlay() {
             base.BeginPlay();
             movementComponent = GetGameComponent<MovementComponent>();
-            if (!movementComponent) {
-                throw new UnassignedReferenceException("Pawn requires movement input component. None found");
-            }
         }
 
         public virtual void OnControlTaken(ControllerBase inController) {
