@@ -15,7 +15,7 @@ namespace Broilerplate.Core.Components {
         /// No matter if attached or not.
         /// </summary>
         [SerializeField]
-        private bool detachAtRuntime;
+        protected bool detachAtRuntime;
 
         public override void BeginPlay() {
             base.BeginPlay();
@@ -30,7 +30,7 @@ namespace Broilerplate.Core.Components {
         /// in its component list regardless.
         /// </summary>
         public void DetachFromActor() {
-            transform.parent = null;
+            transform.SetParent(null, true);
         }
 
         protected override void OnDestroy() {
