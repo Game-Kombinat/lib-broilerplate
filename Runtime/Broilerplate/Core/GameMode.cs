@@ -32,7 +32,7 @@ namespace Broilerplate.Core {
         public PlayerController SpawnPlayer(PlayerInfo playerInfo, Vector3 spawnPosition, Quaternion spawnRotation) {
             PlayerController pc = SpawnPlayerController();
             playerInfo.SetPlayerController(pc);
-            Pawn p = SpawnPlayPawn();
+            Pawn p = SpawnPlayPawn(spawnPosition, spawnRotation);
             pc.transform.SetPositionAndRotation(spawnPosition, spawnRotation);
             p.transform.SetPositionAndRotation(spawnPosition, spawnRotation);
             pc.ControlPawn(p);
@@ -54,12 +54,12 @@ namespace Broilerplate.Core {
             return pc;
         }
 
-        private Pawn SpawnPlayPawn() {
+        private Pawn SpawnPlayPawn(Vector3 spawnPosition, Quaternion spawnRotation) {
             Pawn p;
             Pawn pawnType = GetPlayerPawnType();
             
             if (pawnType != null) {
-                p = GetWorld().SpawnActor(pawnType, Vector3.zero, Quaternion.identity);
+                p = GetWorld().SpawnActor(pawnType, spawnPosition, spawnRotation);
             }
             else {
                 var go = new GameObject("Default Player Pawn");
