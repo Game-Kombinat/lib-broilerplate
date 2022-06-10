@@ -63,8 +63,6 @@ namespace Broilerplate.Core {
             liveActors.Clear();
             liveActors.AddRange(FindObjectsOfType<Actor>());
             gameMode = gameModePrefab ? SpawnActor(gameModePrefab, Vector3.zero,Quaternion.identity) : SpawnActorOn<GameMode>(new GameObject("Default Game Mode"));
-            
-            BeginPlay();
         }
 
         public void RegisterActor(Actor actor) {

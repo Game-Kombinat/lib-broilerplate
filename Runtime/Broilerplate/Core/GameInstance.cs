@@ -96,6 +96,7 @@ namespace Broilerplate.Core {
             world = Instantiate(configuration.WorldType);
             world.BootWorld(configuration.GetGameModeFor(scene));
             world.SpawnPlayer(GetInitialLocalPlayer());
+            world.BeginPlay();
         }
 
         public World GetWorld() {
