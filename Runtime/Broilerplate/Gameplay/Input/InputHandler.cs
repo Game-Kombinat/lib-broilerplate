@@ -37,6 +37,7 @@ namespace Broilerplate.Gameplay.Input {
         private readonly Dictionary<string, ButtonPress> releaseEvents = new();
         private readonly Dictionary<string, AxisInputData<float>> singleAxisEvents = new();
         private readonly Dictionary<string, AxisInputData<Vector2>> doubleAxisEvents = new();
+        private readonly Dictionary<string, AxisInputData<Touch>> touchEvents = new();
         
         private readonly TickFunc inputTick;
         
@@ -63,6 +64,7 @@ namespace Broilerplate.Gameplay.Input {
             releaseEvents.Clear();
             singleAxisEvents.Clear();
             doubleAxisEvents.Clear();
+            touchEvents.Clear();
             
             playerController.GetWorld().UnregisterTickFunc(inputTick);
         }
@@ -113,6 +115,13 @@ namespace Broilerplate.Gameplay.Input {
             }
             doubleAxisEvents[action].Inputs += callback;
         }
+        
+        public void BindAxis(string action, AxisInputData<Touch>.AxisInput callback) {
+            if (!touchEvents.ContainsKey(action)) {
+                touchEvents.Add(action, new AxisInputData<Touch>());
+            }
+            touchEvents[action].Inputs += callback;
+        }
 
         public bool ProcessAxisInput() {
             // just calls the registered callbacks with the currently known axis values.
@@ -130,6 +139,14 @@ namespace Broilerplate.Gameplay.Input {
             foreach (var kvp in doubleAxisEvents) {
                 kvp.Value.Invoke();
                 if (kvp.Value.lastInput != Vector2.zero) {
+                    repeatNextFrame = true;
+                }
+            }
+            
+            foreach (var kvp in touchEvents) {
+                kvp.Value.Invoke();
+                
+                if (kvp.Value.lastInput.position != Vector2.zero) {
                     repeatNextFrame = true;
                 }
             }
@@ -182,6 +199,14 @@ namespace Broilerplate.Gameplay.Input {
                     }
                     
                     doubleAxisEvents[ctx.action.name].UpdateInput(ctx.ReadValue<Vector2>());
+                    SetEnableTick(true);
+                }
+                else if (ctx.valueType == typeof(Touch)) {
+                    if (!touchEvents.ContainsKey(ctx.action.name)) {
+                        return;
+                    }
+                    
+                    touchEvents[ctx.action.name].UpdateInput(ctx.ReadValue<Touch>());
                     SetEnableTick(true);
                 }
             }
