@@ -140,5 +140,10 @@ namespace Broilerplate.Ticking {
         public void SetTickGroup(TickGroup inTickGroup) {
             tickGroup = inTickGroup;
         }
+
+        public void SetStartWithTickEnabled(bool startEnabled)
+        {
+            startTickEnabled = startEnabled;
+        }
     }
 }
