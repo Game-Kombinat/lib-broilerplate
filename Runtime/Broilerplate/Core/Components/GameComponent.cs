@@ -6,7 +6,7 @@ namespace Broilerplate.Core.Components {
     /// <summary>
     /// Component that explicitly ties to an actor.
     /// </summary>
-    public class GameComponent : MonoBehaviour, ITickable {
+    public class GameComponent : MonoBehaviour, ITickable, IThing {
         [SerializeField]
         protected Actor owner;
         

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Broilerplate.Core.Subsystems;
 using Broilerplate.Gameplay;
 using Broilerplate.Ticking;
 using UnityEngine;
@@ -21,7 +22,8 @@ namespace Broilerplate.Core {
         private TickManager tickManager;
         private GameMode gameMode;
         private readonly List<Actor> liveActors = new();
-        
+        private readonly List<WorldSubsystem> subsystems = new();
+
         public TickManager TickManager => tickManager;
         public bool HasActors => liveActors.Count > 0;
         public int NumActors => liveActors.Count;
@@ -48,7 +50,7 @@ namespace Broilerplate.Core {
             Destroy(unityTickerInstance.gameObject);
         }
 
-        public void BootWorld(GameMode gameModePrefab) {
+        public void BootWorld(GameMode gameModePrefab, List<WorldSubsystem> worldSubsystems) {
             timeData.timeDilation = 1;
             timeData.lastTick = timeData.thisTick = DateTime.Now;
             timeData.timeSinceWorldBooted = 0;
@@ -63,6 +65,18 @@ namespace Broilerplate.Core {
             liveActors.Clear();
             liveActors.AddRange(FindObjectsOfType<Actor>());
             gameMode = gameModePrefab ? SpawnActor(gameModePrefab, Vector3.zero,Quaternion.identity) : SpawnActorOn<GameMode>(new GameObject("Default Game Mode"));
+            if (worldSubsystems != null) {
+                for (int i = 0; i < worldSubsystems.Count; i++) {
+                    RegisterSubsystem(worldSubsystems[i]);
+                }
+            }
+        }
+
+        public void RegisterSubsystem(WorldSubsystem system) {
+            var newSystem = Instantiate(system);
+            subsystems.Add(newSystem);
+            newSystem.SetWorld(this);
+            newSystem.BeginPlay();
         }
 
         public void RegisterActor(Actor actor) {
@@ -144,6 +158,17 @@ namespace Broilerplate.Core {
 
         public GameMode GetGameMode() {
             return gameMode;
+        }
+
+        public T GetSubsystem<T>() where T : WorldSubsystem {
+            for (int i = 0; i < subsystems.Count; i++) {
+                var s = subsystems[i];
+                if (s is T castSystem) {
+                    return castSystem;
+                }
+            }
+
+            return null;
         }
     }
 }

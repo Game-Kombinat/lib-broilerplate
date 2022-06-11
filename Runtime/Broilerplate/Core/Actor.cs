@@ -11,7 +11,7 @@ namespace Broilerplate.Core {
     /// Every prefab needs to have an actor on its root object.
     /// </summary>
     [DisallowMultipleComponent]
-    public class Actor : MonoBehaviour, ITickable {
+    public class Actor : MonoBehaviour, ITickable, IThing {
         protected World world;
 
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using Broilerplate.Core.Subsystems;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -30,10 +31,16 @@ namespace Broilerplate.Core {
 
         [SerializeField]
         private List<MapGameModeOverrides> gameModeOverrides = new();
+        
+        [Header("Subsystems")]
+        [SerializeField]
+        private List<WorldSubsystem> worldSubsystems = new();
 
         public GameInstance GameInstanceType => defaultGameInstancePrefab == null ? CreateInstance<GameInstance>() : defaultGameInstancePrefab;
 
         public World WorldType => defaultWorldPrefab == null ? CreateInstance<World>() : defaultWorldPrefab;
+
+        public List<WorldSubsystem> WorldSubsystems => worldSubsystems;
 
         public GameMode GetGameModeFor(Scene scene) {
             for (int i = 0; i < gameModeOverrides.Count; ++i) {

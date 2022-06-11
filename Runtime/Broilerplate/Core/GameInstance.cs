@@ -94,7 +94,7 @@ namespace Broilerplate.Core {
             // create a mapping scene => world.
             // call RegisterActors() on world to kick off managed BeginPlay() callbacks.
             world = Instantiate(configuration.WorldType);
-            world.BootWorld(configuration.GetGameModeFor(scene));
+            world.BootWorld(configuration.GetGameModeFor(scene), configuration.WorldSubsystems);
             world.SpawnPlayer(GetInitialLocalPlayer());
             world.BeginPlay();
         }
