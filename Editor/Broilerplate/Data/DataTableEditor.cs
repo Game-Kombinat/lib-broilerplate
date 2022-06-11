@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Broilerplate.Data;
-using Codice.Client.BaseCommands.Download;
 using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEngine;

@@ -2,10 +2,10 @@
     "name": "GameKombinat.Broilerplate.Editor",
     "rootNamespace": "",
     "references": [
-        "GUID:aa73bcf563c9f9b43bb8e3be5e991a17",
         "GUID:776d03a35f1b52c4a9aed9f56d7b4229",
         "GUID:75469ad4d38634e559750d17036d5f7c",
-        "GUID:4307f53044263cf4b835bd812fc161a4"
+        "GUID:4307f53044263cf4b835bd812fc161a4",
+        "GameKombinat.Broilerplate"
     ],
     "includePlatforms": [
         "Editor"
