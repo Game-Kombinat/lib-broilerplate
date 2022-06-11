@@ -82,6 +82,14 @@ namespace Broilerplate.Core {
             }
         }
 
+        public T SpawnActor<T>(T prefab) where T : Actor {
+            var a = Instantiate(prefab, Vector3.zero, Quaternion.identity);
+            RegisterActor(a);
+
+            return a;
+
+        }
+        
         public T SpawnActor<T>(T prefab, Vector3 position, Quaternion rotation) where T : Actor {
             var a = Instantiate(prefab, position, rotation);
             RegisterActor(a);
