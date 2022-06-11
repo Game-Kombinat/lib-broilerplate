@@ -10,6 +10,10 @@ namespace Broilerplate.Tools {
             return Dot(direction, (facingThis - fromHere).normalized) >= precision;
         }
         
+        public static bool IsFacingDirection(Vector3 direction, Vector3 otherDirection, float precision = .55f) {
+            return Dot(direction, otherDirection) >= precision;
+        }
+
         public static bool IsFacingWithinAngle(Vector3 direction, Vector3 fromHere, Vector3 facingThis, float angle = 15f) {
             float dot = Dot(direction, (facingThis - fromHere).normalized);
             return Mathf.Acos(dot) * Mathf.Rad2Deg <= angle;
