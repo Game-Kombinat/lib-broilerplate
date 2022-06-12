@@ -6,5 +6,7 @@
     public interface IThing {
 
         public World GetWorld();
+
+        public int GetRuntimeId();
     }
 }

@@ -22,6 +22,9 @@ namespace Broilerplate.Core.Subsystems {
         }
 
         public World GetWorld() => world;
+        public int GetRuntimeId() {
+            return GetInstanceID();
+        }
 
         public void SetWorld(World inWorld) {
             world = inWorld;

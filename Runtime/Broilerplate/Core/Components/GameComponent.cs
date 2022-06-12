@@ -63,6 +63,10 @@ namespace Broilerplate.Core.Components {
             return owner == null ? null : owner.GetWorld();
         }
 
+        public int GetRuntimeId() {
+            return GetInstanceID();
+        }
+
         public void UnregisterTickFunc() {
             var world = GetWorld();
             if (world) {

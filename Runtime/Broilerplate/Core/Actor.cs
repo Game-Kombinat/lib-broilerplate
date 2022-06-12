@@ -125,6 +125,10 @@ namespace Broilerplate.Core {
             return world;
         }
 
+        public int GetRuntimeId() {
+            return GetInstanceID();
+        }
+
         protected virtual void DestroyActor() {
             if (world) {
                 for (int i = 0; i < registeredComponents.Count; ++i) {
