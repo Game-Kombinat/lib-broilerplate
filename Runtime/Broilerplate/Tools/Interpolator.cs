@@ -123,7 +123,7 @@ namespace Broilerplate.Tools {
         }
     }
     
-    class CoroutineJobs : MonoBehaviour
+    public class CoroutineJobs : MonoBehaviour
     {
         private static CoroutineJobs instance;
 
