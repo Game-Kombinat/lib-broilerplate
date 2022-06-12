@@ -7,11 +7,18 @@ namespace Broilerplate.Tools {
         public PoolingPostProcessor postProcessor;
         public int poolSize;
         private List<T> pooledObjects;
+        [SerializeField]
+        private bool loadPoolInAwake = false;
 
-        private void Awake() {
+        protected virtual void Awake() {
+            if (loadPoolInAwake) {
+                LoadPool();
+            }
+        }
+
+        public void LoadPool() {
             pooledObjects = new List<T>(poolSize);
             for (int i = 0; i < poolSize; ++i) {
-                
                 var instantiatedObject = Instantiate(poolingObject, Vector3.zero, Quaternion.identity);
                 if (postProcessor != null) {
                     postProcessor.PostProcessOnSpawn(instantiatedObject.gameObject);
