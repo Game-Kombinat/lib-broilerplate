@@ -108,5 +108,9 @@ namespace Broilerplate.Gameplay.Input {
         public void AddMovementInput(float x, float y, float z) {
             ControlledPawn.GetMovementComponent()?.AddMovementInput(x, y, z);
         }
+
+        public CameraManager GetCameraManager() {
+            return cameraManagerInstance;
+        }
     }
 }
