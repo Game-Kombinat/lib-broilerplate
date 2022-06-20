@@ -10,7 +10,7 @@ namespace Broilerplate.Core {
     [Serializable]
     class MapGameModeOverrides {
         [SerializeField]
-        public Scene scene;
+        public LevelReference scene;
 
         [SerializeField]
         public GameMode gameModeOverridePrefab;
@@ -60,7 +60,7 @@ namespace Broilerplate.Core {
                 }
             }
             // new
-            gameModeOverrides.Add(new MapGameModeOverrides() {scene = scene, gameModeOverridePrefab = gameModeOverride});
+            gameModeOverrides.Add(new MapGameModeOverrides() {scene = new LevelReference(scene), gameModeOverridePrefab = gameModeOverride});
         }
 
         public static BroilerConfiguration GetConfiguration() {
