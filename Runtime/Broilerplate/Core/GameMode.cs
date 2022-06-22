@@ -31,12 +31,15 @@ namespace Broilerplate.Core {
 
         public PlayerController SpawnPlayer(PlayerInfo playerInfo, Vector3 spawnPosition, Quaternion spawnRotation) {
             PlayerController pc = SpawnPlayerController();
+            // SpawnPlayerPawn might have components on it that require the player controller,
+            // and by extension all of its systems, to be accessible. So Add this first thing.
+            playerControllers.Add(pc);
+            
             playerInfo.SetPlayerController(pc);
-            Pawn p = SpawnPlayPawn(spawnPosition, spawnRotation);
+            Pawn p = SpawnPlayerPawn(spawnPosition, spawnRotation);
             pc.transform.SetPositionAndRotation(spawnPosition, spawnRotation);
             p.transform.SetPositionAndRotation(spawnPosition, spawnRotation);
             pc.ControlPawn(p);
-            playerControllers.Add(pc);
             return pc;
         }
 
@@ -54,7 +57,7 @@ namespace Broilerplate.Core {
             return pc;
         }
 
-        private Pawn SpawnPlayPawn(Vector3 spawnPosition, Quaternion spawnRotation) {
+        private Pawn SpawnPlayerPawn(Vector3 spawnPosition, Quaternion spawnRotation) {
             Pawn p;
             Pawn pawnType = GetPlayerPawnType();
             

@@ -23,7 +23,7 @@ namespace Broilerplate.Core.Components {
             componentTick.SetCanEverTick(true);
         }
 
-        private void Awake() {
+        protected virtual void Awake() {
             EnsureIntegrity(true);
         }
 
