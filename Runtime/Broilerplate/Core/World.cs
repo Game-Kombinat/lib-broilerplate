@@ -106,7 +106,11 @@ namespace Broilerplate.Core {
         }
         
         public T SpawnActor<T>(GameObject prefab) where T : Actor {
-            var a = Instantiate(prefab, Vector3.zero, Quaternion.identity);
+            return SpawnActor<T>(prefab, Vector3.zero, Quaternion.identity);
+        }
+        
+        public T SpawnActor<T>(GameObject prefab, Vector3 position, Quaternion rotation) where T : Actor {
+            var a = Instantiate(prefab, position, rotation);
             var t = a.GetComponent<T>();
             if (!t) {
                 throw new ActorSpawnException($"Could not spawn actor of type {typeof(T)} from Prefab called {prefab.name}");
