@@ -182,7 +182,7 @@ namespace Broilerplate.Core {
             
         }
 
-        private T FindActorOfType<T>() where T : Actor {
+        public T FindActorOfType<T>() where T : Actor {
             for (int i = 0; i < liveActors.Count; i++) {
                 var a = liveActors[i];
                 if (a is T t) {
