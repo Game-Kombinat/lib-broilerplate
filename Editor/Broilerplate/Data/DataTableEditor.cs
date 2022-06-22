@@ -14,9 +14,16 @@ namespace Editor.Broilerplate.Data {
     public class DataTableEditor : EditorWindow {
         #region static stuff
 
+        // Oh lord ...
         [OnOpenAsset]
-        public static bool OpenEditor(int instanceId) {
-            var obj = EditorUtility.InstanceIDToObject(instanceId) as IDataTable;
+#if UNITY_2021_3_OR_NEWER
+        public static bool OpenEditor(int instanceID) {
+#else
+        public static bool OpenEditor(int instanceID, int line) {
+#endif
+        
+        
+            var obj = EditorUtility.InstanceIDToObject(instanceID) as IDataTable;
             if (obj == null) {
                 return false;
             }
