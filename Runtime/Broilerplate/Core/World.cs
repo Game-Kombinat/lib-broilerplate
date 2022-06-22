@@ -21,8 +21,8 @@ namespace Broilerplate.Core {
         private UnityTicker unityTickerInstance;
         private TickManager tickManager;
         private GameMode gameMode;
-        private readonly List<Actor> liveActors = new();
-        private readonly List<WorldSubsystem> subsystems = new();
+        private readonly List<Actor> liveActors = new List<Actor>();
+        private readonly List<WorldSubsystem> subsystems = new List<WorldSubsystem>();
 
         public TickManager TickManager => tickManager;
         public bool HasActors => liveActors.Count > 0;

@@ -4,7 +4,7 @@ using UnityEditor;
 using UnityEditor.VersionControl;
 using UnityEngine;
 // https://github.com/JohannesMP/unity-scene-reference
-namespace Editor.Broilerplate.Core {
+namespace Broilerplate.Editor.Broilerplate.Core {
     [CustomPropertyDrawer(typeof(LevelReference))]
     public class LevelReferenceDrawer : PropertyDrawer {
         // The exact name of the asset Object variable in the SceneReference object

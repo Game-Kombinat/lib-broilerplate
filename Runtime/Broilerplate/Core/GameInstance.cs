@@ -15,7 +15,7 @@ namespace Broilerplate.Core {
         private BroilerConfiguration configuration;
         public BroilerConfiguration Configuration => configuration;
 
-        private List<PlayerInfo> localPlayers = new();
+        private List<PlayerInfo> localPlayers = new List<PlayerInfo>();
         
         public int NumLocalPlayers => localPlayers.Count;
 

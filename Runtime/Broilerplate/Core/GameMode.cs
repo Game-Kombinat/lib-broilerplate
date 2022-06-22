@@ -17,7 +17,7 @@ namespace Broilerplate.Core {
         [SerializeField]
         private Pawn defaultPlayerPawnType;
 
-        private List<PlayerController> playerControllers = new();
+        private List<PlayerController> playerControllers = new List<PlayerController>();
         
 
         // register player

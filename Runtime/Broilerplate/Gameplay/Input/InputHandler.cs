@@ -32,12 +32,12 @@ namespace Broilerplate.Gameplay.Input {
         protected PlayerInput inputs;
         protected PlayerController playerController;
 
-        private readonly Dictionary<string, ButtonPress> pressEvents = new();
-        private readonly Dictionary<string, ButtonPress> holdEvents = new();
-        private readonly Dictionary<string, ButtonPress> releaseEvents = new();
-        private readonly Dictionary<string, AxisInputData<float>> singleAxisEvents = new();
-        private readonly Dictionary<string, AxisInputData<Vector2>> doubleAxisEvents = new();
-        private readonly Dictionary<string, AxisInputData<Touch>> touchEvents = new();
+        private readonly Dictionary<string, ButtonPress> pressEvents = new Dictionary<string, ButtonPress>();
+        private readonly Dictionary<string, ButtonPress> holdEvents = new Dictionary<string, ButtonPress>();
+        private readonly Dictionary<string, ButtonPress> releaseEvents = new Dictionary<string, ButtonPress>();
+        private readonly Dictionary<string, AxisInputData<float>> singleAxisEvents = new Dictionary<string, AxisInputData<float>>();
+        private readonly Dictionary<string, AxisInputData<Vector2>> doubleAxisEvents = new Dictionary<string, AxisInputData<Vector2>>();
+        private readonly Dictionary<string, AxisInputData<Touch>> touchEvents = new Dictionary<string, AxisInputData<Touch>>();
         
         private readonly TickFunc inputTick;
         

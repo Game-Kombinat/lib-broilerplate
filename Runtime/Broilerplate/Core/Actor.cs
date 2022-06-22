@@ -23,7 +23,7 @@ namespace Broilerplate.Core {
 
         public bool HasBegunPlaying { get; private set; } = false;
 
-        private readonly List<GameComponent> registeredComponents = new();
+        private readonly List<GameComponent> registeredComponents = new List<GameComponent>();
 
 
         public TickFunc ActorTick => actorTick;

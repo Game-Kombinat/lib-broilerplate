@@ -30,11 +30,11 @@ namespace Broilerplate.Core {
         private World defaultWorldPrefab;
 
         [SerializeField]
-        private List<MapGameModeOverrides> gameModeOverrides = new();
+        private List<MapGameModeOverrides> gameModeOverrides = new List<MapGameModeOverrides>();
         
         [Header("Subsystems")]
         [SerializeField]
-        private List<WorldSubsystem> worldSubsystems = new();
+        private List<WorldSubsystem> worldSubsystems = new List<WorldSubsystem>();
 
         public GameInstance GameInstanceType => defaultGameInstancePrefab == null ? CreateInstance<GameInstance>() : defaultGameInstancePrefab;
 

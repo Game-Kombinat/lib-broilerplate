@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using ColorUtility = UnityEngine.ColorUtility;
 
@@ -26,7 +25,7 @@ namespace Broilerplate.Tools {
             }
 
             public override int GetHashCode() {
-                return HashCode.Combine(timeToRemove, contents, color);
+                return contents.GetHashCode() * 31 + color.GetHashCode();
             }
         }
         private static DebugGui instance;
@@ -41,7 +40,7 @@ namespace Broilerplate.Tools {
                 return instance;
             }
         }
-        private List<DisplayInfo> displayList = new();
+        private List<DisplayInfo> displayList = new List<DisplayInfo>();
 
         public static void Print(string contents, float duration = 0) {
             Print(contents, Color.gray, duration);

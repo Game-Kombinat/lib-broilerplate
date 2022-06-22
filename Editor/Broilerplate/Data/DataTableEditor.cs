@@ -16,8 +16,8 @@ namespace Editor.Broilerplate.Data {
 
         [OnOpenAsset]
         public static bool OpenEditor(int instanceId) {
-            var obj = EditorUtility.InstanceIDToObject(instanceId);
-            if (obj is not IDataTable) {
+            var obj = EditorUtility.InstanceIDToObject(instanceId) as IDataTable;
+            if (obj == null) {
                 return false;
             }
             
