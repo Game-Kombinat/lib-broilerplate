@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Broilerplate.Core.Exceptions;
 using Broilerplate.Core.Subsystems;
 using Broilerplate.Gameplay;
 using Broilerplate.Ticking;
@@ -101,6 +102,19 @@ namespace Broilerplate.Core {
             RegisterActor(a);
 
             return a;
+
+        }
+        
+        public T SpawnActor<T>(GameObject prefab) where T : Actor {
+            var a = Instantiate(prefab, Vector3.zero, Quaternion.identity);
+            var t = a.GetComponent<T>();
+            if (!t)
+            {
+                throw new ActorSpawnException($"Could not spawn actor of type {typeof(T)} from Prefab called {prefab.name}");
+            }
+            RegisterActor(t);
+
+            return t;
 
         }
         
