@@ -105,6 +105,14 @@ namespace Broilerplate.Core {
 
         }
         
+        public T SpawnActor<T>(T prefab, Vector3 position, Quaternion rotation) where T : Actor {
+            var a = Instantiate(prefab, position, rotation);
+            RegisterActor(a);
+
+            return a;
+
+        }
+        
         public T SpawnActor<T>(GameObject prefab) where T : Actor {
             return SpawnActor<T>(prefab, Vector3.zero, Quaternion.identity);
         }
@@ -119,12 +127,26 @@ namespace Broilerplate.Core {
             return t;
         }
         
-        public T SpawnActor<T>(T prefab, Vector3 position, Quaternion rotation) where T : Actor {
+        public GameObject SpawnActor(GameObject prefab) {
+            return SpawnActor(prefab, Vector3.zero, Quaternion.identity);
+        }
+        
+        /// <summary>
+        /// Spawns whatever actor is on the given prefab
+        /// </summary>
+        /// <param name="prefab"></param>
+        /// <param name="position"></param>
+        /// <param name="rotation"></param>
+        /// <exception cref="ActorSpawnException"></exception>
+        public GameObject SpawnActor(GameObject prefab, Vector3 position, Quaternion rotation) {
             var a = Instantiate(prefab, position, rotation);
-            RegisterActor(a);
+            var t = a.GetComponent<Actor>();
+            if (!t) {
+                throw new ActorSpawnException($"Could not spawn actor from Prefab called {prefab.name} (use Instantiate() for non-actor prefabs)");
+            }
+            RegisterActor(t);
 
             return a;
-
         }
         
         public T SpawnActorOn<T>(GameObject targetGo) where T : Actor {
