@@ -9,7 +9,7 @@ namespace Broilerplate.Tools.Fsm {
 
         private State currentState;
         private readonly Dictionary<int, State> states = new Dictionary<int, State>();
-        public int CurrentState => currentState.id;
+        public int CurrentState => currentState != null ? currentState.id : -1;
 
         public bool StateNeedsTicking => currentState != null && currentState.tick != null;
 
