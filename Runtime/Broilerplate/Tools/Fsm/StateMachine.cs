@@ -11,6 +11,8 @@ namespace Broilerplate.Tools.Fsm {
         private readonly Dictionary<int, State> states = new Dictionary<int, State>();
         public int CurrentState => currentState.id;
 
+        public bool StateNeedsTicking => currentState != null && currentState.tick != null;
+
         public void Add(int state, StateFunc onEnter, StateFunc update, StateFunc onExit) {
             states.Add(state, new State(state, onEnter, update, onExit));
         }
