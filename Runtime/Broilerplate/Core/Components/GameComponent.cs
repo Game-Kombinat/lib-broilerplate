@@ -42,18 +42,21 @@ namespace Broilerplate.Core.Components {
         }
 
         public virtual void EnsureIntegrity(bool autoRegister = false) {
-            var actor = transform.root.gameObject.GetComponent<Actor>();
-            if (!actor) {
-                if (!Application.isPlaying) {
-                    DestroyImmediate(this);
+            if (!owner) {
+                var actor = transform.root.gameObject.GetComponent<Actor>();
+                if (!actor) {
+                    if (!Application.isPlaying) {
+                        DestroyImmediate(this);
+                    }
+                    else {
+                        Destroy(this);
+                    }
+                    throw new InvalidOperationException($"Component {GetType().Name} requires an Actor component on the root object!");
                 }
-                else {
-                    Destroy(this);
-                }
-                throw new InvalidOperationException($"Component {GetType().Name} requires an Actor component on the root object!");
-            }
 
-            owner = actor;
+                owner = actor;
+            }
+            
             if (autoRegister) {
                 owner.RegisterComponent(this);
             }
