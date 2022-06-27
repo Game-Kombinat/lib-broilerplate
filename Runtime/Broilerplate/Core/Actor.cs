@@ -41,13 +41,10 @@ namespace Broilerplate.Core {
         /// </summary>
         public virtual void BeginPlay() {
             // register tick function to world.
-            if (!HasTickFunc || !actorTick.CanEverTick) {
-                return;
+            if (HasTickFunc && actorTick.CanEverTick) {
+                actorTick.SetTickTarget(this);
+                world.RegisterTickFunc(actorTick);;
             }
-
-            actorTick.SetTickTarget(this);
-
-            world.RegisterTickFunc(actorTick);
 
             var attachedComps = GetComponentsInChildren<GameComponent>();
 
