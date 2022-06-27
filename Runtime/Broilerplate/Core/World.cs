@@ -128,7 +128,7 @@ namespace Broilerplate.Core {
         }
         
         public GameObject SpawnActor(GameObject prefab) {
-            return SpawnActor(prefab, Vector3.zero, Quaternion.identity);
+            return SpawnActor(prefab, prefab.transform.position, prefab.transform.rotation);
         }
         
         /// <summary>

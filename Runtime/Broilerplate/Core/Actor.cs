@@ -146,7 +146,7 @@ namespace Broilerplate.Core {
             Destroy(gameObject);
         }
 
-        private void OnDestroy() {
+        protected virtual void OnDestroy() {
             DestroyActor();
         }
 
