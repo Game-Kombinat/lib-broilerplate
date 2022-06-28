@@ -1,6 +1,5 @@
 ﻿using System;
 using UnityEditor;
-using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -8,8 +7,11 @@ namespace Broilerplate.Core {
     // https://github.com/JohannesMP/unity-scene-reference
     [Serializable]
     public class LevelReference : ISerializationCallbackReceiver {
-        [SerializeField] private SceneAsset sceneAsset;
+#if UNITY_EDITOR
+        [SerializeField] 
+        private SceneAsset sceneAsset;
         private bool IsValidScene => sceneAsset != null;
+#endif
 
         [SerializeField] private string scenePath;
 
@@ -77,7 +79,7 @@ namespace Broilerplate.Core {
                     scenePath = string.Empty;
                 }
 
-                EditorSceneManager.MarkAllScenesDirty();
+                UnityEditor.SceneManagement.EditorSceneManager.MarkAllScenesDirty();
             }
             // Asset takes precendence and overwrites Path
             else {
@@ -97,7 +99,7 @@ namespace Broilerplate.Core {
             // No asset found, path was invalid. Make sure we don't carry over the old invalid path
             if (!sceneAsset) scenePath = string.Empty;
 
-            if (!Application.isPlaying) EditorSceneManager.MarkAllScenesDirty();
+            if (!Application.isPlaying) UnityEditor.SceneManagement.EditorSceneManager.MarkAllScenesDirty();
         }
 #endif
     }
