@@ -25,8 +25,7 @@ namespace Editor.Broilerplate.Tools {
             if (File.Exists("UserSettings/ScreenshotToolConfig.json")) {
                 EditorJsonUtility.FromJsonOverwrite(File.ReadAllText(fileName), configuration);
             }
-            else
-            {
+            else {
                 File.WriteAllText(fileName, EditorJsonUtility.ToJson(configuration));
             }
         }
@@ -43,8 +42,7 @@ namespace Editor.Broilerplate.Tools {
             DrawScreenshotPathCombo();
             DrawMultiplier();
 
-            if (GUILayout.Button("Take Screenshot"))
-            {
+            if (GUILayout.Button("Take Screenshot")) {
                 var dt = DateTime.Now;
                 string file = configuration.screenshotPath;
                 file += "/Screenshot_" + dt.ToString("yy-MM-dd-hh-mm-ss") + ".png"; 
@@ -54,33 +52,28 @@ namespace Editor.Broilerplate.Tools {
             EditorGUILayout.EndVertical();
         }
 
-        private void DrawMultiplier()
-        {
+        private void DrawMultiplier() {
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField("Resolution Multiplier:", GUILayout.Width(150));
             configuration.resolutionMultiplier = EditorGUILayout.IntField(configuration.resolutionMultiplier, GUILayout.Width(80));
             EditorGUILayout.EndHorizontal();
-            if (configuration.resolutionMultiplier > 4)
-            {
+            if (configuration.resolutionMultiplier > 4) {
                 EditorGUILayout.HelpBox("Large Multipliers may slow down or downright crash your graphics device. Beware!", MessageType.Warning);
             }
         }
 
-        private void DrawScreenshotPathCombo()
-        {
+        private void DrawScreenshotPathCombo() {
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField("Path:", GUILayout.Width(30));
             EditorGUILayout.LabelField(configuration.screenshotPath, GUILayout.Width(120));
-            if (EditorGUILayout.LinkButton("Change"))
-            {
+            if (EditorGUILayout.LinkButton("Change")) {
                 configuration.screenshotPath = EditorUtility.OpenFolderPanel("Select Screenshot Directory", configuration.screenshotPath, "");
                 configuration.screenshotPath = configuration.screenshotPath.Substring(configuration.screenshotPath.IndexOf("Assets", StringComparison.Ordinal));
             }
             EditorGUILayout.EndHorizontal();
         }
 
-        private void OnDestroy()
-        {
+        private void OnDestroy() {
             Save();
         }
     }
