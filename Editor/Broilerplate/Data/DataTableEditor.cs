@@ -5,7 +5,7 @@ using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEngine;
 
-namespace Editor.Broilerplate.Data {
+namespace Broilerplate.Editor.Broilerplate.Data {
     public enum ClickAction {
         Nothing,
         Edit,

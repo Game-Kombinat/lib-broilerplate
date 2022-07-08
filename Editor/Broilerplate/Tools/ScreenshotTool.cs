@@ -3,7 +3,7 @@ using System.IO;
 using UnityEditor;
 using UnityEngine;
 
-namespace Editor.Broilerplate.Tools {
+namespace Broilerplate.Editor.Broilerplate.Tools {
     public class ScreenshotTool : EditorWindow {
         [MenuItem("Game Kombinat/Screenshot Tool")]
         public static void OpenEd() {
