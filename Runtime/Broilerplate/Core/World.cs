@@ -21,9 +21,9 @@ namespace Broilerplate.Core {
 
         private UnityTicker unityTickerInstance;
         private TickManager tickManager;
-        private GameMode gameMode;
-        private readonly List<Actor> liveActors = new List<Actor>();
-        private readonly List<WorldSubsystem> subsystems = new List<WorldSubsystem>();
+        protected GameMode gameMode;
+        protected readonly List<Actor> liveActors = new List<Actor>();
+        protected readonly List<WorldSubsystem> subsystems = new List<WorldSubsystem>();
 
         public TickManager TickManager => tickManager;
         public bool HasActors => liveActors.Count > 0;
@@ -51,7 +51,7 @@ namespace Broilerplate.Core {
             Destroy(unityTickerInstance.gameObject);
         }
 
-        public void BootWorld(GameMode gameModePrefab, List<WorldSubsystem> worldSubsystems) {
+        public virtual void BootWorld(GameMode gameModePrefab, List<WorldSubsystem> worldSubsystems) {
             timeData.timeDilation = 1;
             timeData.lastTick = timeData.thisTick = DateTime.Now;
             timeData.timeSinceWorldBooted = 0;
@@ -65,7 +65,10 @@ namespace Broilerplate.Core {
             
             liveActors.Clear();
             liveActors.AddRange(FindObjectsOfType<Actor>());
-            gameMode = gameModePrefab ? SpawnActor(gameModePrefab, Vector3.zero,Quaternion.identity) : SpawnActorOn<GameMode>(new GameObject("Default Game Mode"));
+            // A world implementation might have overridden the creation of the game mode, so check if it's already there.
+            if (!gameMode) {
+                gameMode = gameModePrefab ? SpawnActor(gameModePrefab, Vector3.zero,Quaternion.identity) : SpawnActorOn<GameMode>(new GameObject("Default Game Mode"));
+            }
             if (worldSubsystems != null) {
                 for (int i = 0; i < worldSubsystems.Count; i++) {
                     RegisterSubsystem(worldSubsystems[i]);
@@ -73,20 +76,20 @@ namespace Broilerplate.Core {
             }
         }
 
-        public void RegisterSubsystem(WorldSubsystem system) {
+        public virtual void RegisterSubsystem(WorldSubsystem system) {
             var newSystem = Instantiate(system);
             subsystems.Add(newSystem);
             newSystem.SetWorld(this);
             newSystem.BeginPlay();
         }
 
-        public void RegisterActor(Actor actor) {
+        public virtual void RegisterActor(Actor actor) {
             liveActors.Add(actor);
             actor.SetWorld(this);
             actor.BeginPlay();
         }
 
-        public void BeginPlay() {
+        public virtual void BeginPlay() {
             for (int i = 0; i < liveActors.Count; i++) {
                 if (liveActors[i].GetWorld() == this) {
                     // this was already registered, like a game mode for instance.
@@ -97,12 +100,9 @@ namespace Broilerplate.Core {
             }
         }
 
-        public T SpawnActor<T>(T prefab) where T : Actor {
-            var a = Instantiate(prefab, Vector3.zero, Quaternion.identity);
-            RegisterActor(a);
-
-            return a;
-
+        public T SpawnActor<T>(T prefab) where T : Actor
+        {
+            return SpawnActor(prefab, Vector3.zero, Quaternion.identity);
         }
         
         public T SpawnActor<T>(T prefab, Vector3 position, Quaternion rotation) where T : Actor {
