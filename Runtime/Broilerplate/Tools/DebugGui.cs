@@ -73,7 +73,7 @@ namespace Broilerplate.Tools {
                 var actualText = new GUIContent($"<color=#{ColorUtility.ToHtmlStringRGB(key.color)}>{key.contents}</color>");
                 var shadowText = new GUIContent($"<color=#444>{key.contents}</color>");
                 float y = num++;
-                GUI.Label(new Rect(10.5f, (20.5f * y), 350f, 50f), shadowText, s);
+                GUI.Label(new Rect(10.5f, (20 * y) + .5f, 350f, 50f), shadowText, s);
                 GUI.Label(new Rect(10f, (20 * y), 350f, 50f), actualText, s);
                 if (Time.time > key.timeToRemove) {
                     displayList.Remove(key);
