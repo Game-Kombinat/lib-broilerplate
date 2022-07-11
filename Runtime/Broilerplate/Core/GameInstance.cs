@@ -98,7 +98,7 @@ namespace Broilerplate.Core {
             world.SpawnPlayer(GetInitialLocalPlayer());
             // Finalise bootstrapping game mode with player controller having been initialised.
             // BeginPlay for GameMode has been called way before this point when the game world has spawned it.
-            world.GetGameMode().StartPlay();
+            world.GetGameMode().LateBeginPlay();
             world.BeginPlay();
         }
 

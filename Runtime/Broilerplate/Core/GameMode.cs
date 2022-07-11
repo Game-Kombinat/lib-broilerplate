@@ -25,7 +25,7 @@ namespace Broilerplate.Core {
         /// This happens after player controller was initialised and before
         /// actors get their BeginPlay calls.
         /// </summary>
-        public virtual void StartPlay() {}
+        public virtual void LateBeginPlay() {}
 
         // register player
         public PlayerController GetPlayerControllerType() {
