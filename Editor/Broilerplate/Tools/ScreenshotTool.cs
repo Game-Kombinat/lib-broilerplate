@@ -66,10 +66,17 @@ namespace Broilerplate.Editor.Broilerplate.Tools {
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField("Path:", GUILayout.Width(30));
             EditorGUILayout.LabelField(configuration.screenshotPath, GUILayout.Width(120));
+            #if UNITY_2021_3_OR_NEWER
             if (EditorGUILayout.LinkButton("Change")) {
                 configuration.screenshotPath = EditorUtility.OpenFolderPanel("Select Screenshot Directory", configuration.screenshotPath, "");
                 configuration.screenshotPath = configuration.screenshotPath.Substring(configuration.screenshotPath.IndexOf("Assets", StringComparison.Ordinal));
             }
+            #else
+            if (GUILayout.Button("Change")) {
+                configuration.screenshotPath = EditorUtility.OpenFolderPanel("Select Screenshot Directory", configuration.screenshotPath, "");
+                configuration.screenshotPath = configuration.screenshotPath.Substring(configuration.screenshotPath.IndexOf("Assets", StringComparison.Ordinal));
+            }
+            #endif
             EditorGUILayout.EndHorizontal();
         }
 
