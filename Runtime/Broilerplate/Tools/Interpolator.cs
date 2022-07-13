@@ -134,6 +134,15 @@ namespace Broilerplate.Tools {
             }
             return instance._StartJob(ie);
         }
+        
+        public static void RestartJob(IEnumerator ie, ref Coroutine routine) {
+            StopJob(routine);
+            if(instance == null) {
+                var go = new GameObject("InterpolatorHelper");
+                instance = go.AddComponent<CoroutineJobs>();
+            }
+            routine = StartJob(ie);
+        }
 
         private Coroutine _StartJob(IEnumerator ie)
         {
