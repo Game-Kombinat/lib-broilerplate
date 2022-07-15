@@ -8,7 +8,9 @@ namespace Broilerplate.Core.Components {
     /// </summary>
     public class ActorComponent : GameComponent {
         public override void EnsureIntegrity(bool autoRegister = false) {
-            if (transform != transform.root) {
+            base.EnsureIntegrity(autoRegister);
+            
+            if (transform != Owner.transform) {
                 if (Application.isPlaying) {
                     Destroy(this);
                 }
@@ -18,7 +20,7 @@ namespace Broilerplate.Core.Components {
                 
                 throw new InvalidOperationException("Actor Component must be added to the root, where the actor is located!");
             }
-            base.EnsureIntegrity(autoRegister);
+            
         }
     }
 }
