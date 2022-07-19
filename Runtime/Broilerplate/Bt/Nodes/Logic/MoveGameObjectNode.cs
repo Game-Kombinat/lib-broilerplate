@@ -1,5 +1,4 @@
-﻿using GameKombinat.ControlFlow.Bt;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Broilerplate.Bt.Nodes.Logic {
     [NodeTint(NodeColors.Green)]

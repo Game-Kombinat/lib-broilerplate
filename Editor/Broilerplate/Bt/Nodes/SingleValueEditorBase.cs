@@ -1,6 +1,6 @@
-﻿using Broilerplate.Bt.Nodes.Data.Graph;
+﻿using Broilerplate.Bt.Data;
+using Broilerplate.Bt.Nodes.Data.Graph;
 using Broilerplate.Bt.Nodes.Ports;
-using GameKombinat.ControlFlow.Bt.Data;
 using GameKombinat.Fnbt;
 using UnityEditor;
 using UnityEngine;

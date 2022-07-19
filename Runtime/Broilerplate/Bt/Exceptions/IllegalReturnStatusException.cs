@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace GameKombinat.ControlFlow.Bt.Exceptions {
+namespace Broilerplate.Bt.Exceptions {
 
-    internal class IllegalReturnStatusException : Exception {
+    public class IllegalReturnStatusException : BtException {
 
         public IllegalReturnStatusException(string msg) : base(msg) {
         }

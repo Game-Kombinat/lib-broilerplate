@@ -1,5 +1,4 @@
 ﻿using Broilerplate.Bt.Nodes.Ports;
-using GameKombinat.ControlFlow.Bt;
 
 namespace Broilerplate.Bt.Nodes.Composite {
     /// <summary>
@@ -12,6 +11,7 @@ namespace Broilerplate.Bt.Nodes.Composite {
         private BaseNode activeChild;
 
         protected override void InternalSpawn() {
+            base.InternalSpawn();
             activeChildIndex = 0;
             activeChild = childNodes[activeChildIndex];
             activeChild.Spawn();

@@ -1,6 +1,4 @@
 ﻿using Broilerplate.Bt.Nodes.Ports;
-using Broilerplate.Core;
-using GameKombinat.ControlFlow.Bt;
 
 namespace Broilerplate.Bt.Nodes {
 
@@ -26,13 +24,9 @@ namespace Broilerplate.Bt.Nodes {
         public Port child;
 
         public RunMode runMode;
-
-        public Actor actor;
-
         private BaseNode childNode;
 
         protected override void InternalSpawn() {
-            Tree.Actor = actor;
             childNode = GetNext(nameof(child));
             childNode.Spawn();
         }

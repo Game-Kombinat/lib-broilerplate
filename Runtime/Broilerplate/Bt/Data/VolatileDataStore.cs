@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace GameKombinat.ControlFlow.Bt.Data {
+namespace Broilerplate.Bt.Data {
     /// <summary>
     /// A storage for GameObjects and components.
     /// This is volatile data and does not persist anywhere in any way.

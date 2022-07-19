@@ -1,4 +1,4 @@
-﻿namespace GameKombinat.ControlFlow.Bt {
+﻿namespace Broilerplate.Bt {
     public enum TaskStatus {
         Uninitialised,
         Running,

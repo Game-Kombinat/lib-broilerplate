@@ -2,7 +2,7 @@
 using GameKombinat.Fnbt;
 using UnityEngine;
 
-namespace GameKombinat.ControlFlow.Bt.Data {
+namespace Broilerplate.Bt.Data {
     [CreateAssetMenu(menuName = "Game Kombinat/Create Data Context Asset", fileName = "New Data Context")]
     public class DataContext : ScriptableObject, ISerializationCallbackReceiver {
         // runtime data

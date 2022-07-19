@@ -1,5 +1,5 @@
 ﻿using System;
-using GameKombinat.ControlFlow.Bt.Data;
+using Broilerplate.Bt.Data;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 

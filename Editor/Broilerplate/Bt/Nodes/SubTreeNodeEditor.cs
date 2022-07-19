@@ -1,5 +1,5 @@
-﻿using Broilerplate.Bt.Nodes;
-using GameKombinat.ControlFlow.Bt;
+﻿using Broilerplate.Bt;
+using Broilerplate.Bt.Nodes;
 using UnityEditor;
 using UnityEngine;
 using XNodeEditor;

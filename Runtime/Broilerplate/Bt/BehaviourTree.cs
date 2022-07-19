@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Broilerplate.Bt.Data;
 using Broilerplate.Bt.Nodes;
 using Broilerplate.Core;
-using GameKombinat.ControlFlow.Bt.Data;
 using UnityEngine;
 using XNode;
 
-namespace GameKombinat.ControlFlow.Bt {
+namespace Broilerplate.Bt {
     [CreateAssetMenu(fileName = "Behaviour Tree", menuName = "Game Kombinat/Ai/Behaviour Tree")]
     [RequireNode(typeof(RootNode))]
     public class BehaviourTree : NodeGraph {
@@ -116,16 +116,14 @@ namespace GameKombinat.ControlFlow.Bt {
             }
             TaskStatus currentStatus = Status;
             if (currentStatus == TaskStatus.Running || currentStatus == TaskStatus.Uninitialised) {
-                ProcessQueues();
                 if (!isInitialised) {
                     root = RootNode;
                     root.Spawn();
                     isInitialised = true;
                 }
-                else {
-                    for (int i = 0; i < tickableTasks.Count; ++i) {
-                        tickableTasks[i].Tick();
-                    }
+                ProcessQueues();
+                for (int i = 0; i < tickableTasks.Count; ++i) {
+                    tickableTasks[i].Tick();
                 }
             }
         }

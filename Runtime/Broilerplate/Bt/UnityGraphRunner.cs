@@ -3,7 +3,7 @@ using System.Collections;
 using NaughtyAttributes;
 using UnityEngine;
 
-namespace GameKombinat.ControlFlow.Bt {
+namespace Broilerplate.Bt {
     /// <summary>
     /// This behaviour tree runner will cache the active children in a list and tick them through.
     /// This effectively means the tree will not be traversed on each frame.
