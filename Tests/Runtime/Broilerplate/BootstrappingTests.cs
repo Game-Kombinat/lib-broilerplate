@@ -21,8 +21,8 @@ namespace Tests.Runtime.Broilerplate {
         
         [Test]
         public void TestBroilerConfigBasicTypes() {
-            Assert.NotNull(instance.Configuration, "instance.Configuration != null");
-            var cfg = instance.Configuration;
+            Assert.NotNull(instance.GameInstanceConfiguration, "instance.Configuration != null");
+            var cfg = instance.GameInstanceConfiguration;
             // assert rudimentary facts
             Assert.NotNull(cfg.WorldType, "cfg.WorldType != null");
             Assert.NotNull(cfg.GameInstanceType, "cfg.GameInstanceType != null");
@@ -59,7 +59,7 @@ namespace Tests.Runtime.Broilerplate {
         public void TestGameModeIntegrity() {
             GameMode mode = instance.GetWorld().GetGameMode();
             Assert.NotNull(mode, "mode != null");
-            var cfg = instance.Configuration;
+            var cfg = instance.GameInstanceConfiguration;
             var gmType = cfg.GetGameModeFor(SceneManager.GetActiveScene());
             
             if (gmType == null) {

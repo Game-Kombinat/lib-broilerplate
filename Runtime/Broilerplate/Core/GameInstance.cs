@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -9,47 +8,51 @@ namespace Broilerplate.Core {
     /// It gives you a singular entry point from which everything is started.
     /// </summary>
     public class GameInstance : ScriptableObject {
-        private static GameInstance game;
+
+        private static GameInstance gameInstance;
         // todo: multi world setup: make dictionary scene => world hand handle that.
         private World world;
-        private BroilerConfiguration configuration;
-        public BroilerConfiguration Configuration => configuration;
 
+        public BroilerConfiguration GameInstanceConfiguration { get; private set; }
+
+        // Will probably be used for multiplayer concept, right now its gonna be only 1.
         private List<PlayerInfo> localPlayers = new List<PlayerInfo>();
         
-        public int NumLocalPlayers => localPlayers.Count;
+        public int TotalLocalPlayers => localPlayers.Count;
 
         [RuntimeInitializeOnLoadMethod]
-        public static void OnGameLoad() {
+        public static void OnGameLoad() 
+        {
             // todo:
             // get additional level overrides from asset bundles
             
-            Debug.Log("OnGameLoad");
-            var config = BroilerConfiguration.GetConfiguration();
-            if (game) {
+            Debug.Log("OnGameLoad, It should be loaded only once");
+            var broilerConfigFile = BroilerConfiguration.GetConfiguration();
+
+            if (gameInstance) {
                 Debug.LogError("Calling GameLoad but GameInstance already exists. Will not override.");
                 return;
             }
-            game = Instantiate(config.GameInstanceType);
-            game.InitiateGame(config);
+            gameInstance = Instantiate(broilerConfigFile.GameInstanceType);
+            gameInstance.InitiateGame(broilerConfigFile);
         }
 
         public static GameInstance GetInstance() {
-            return game;
+            return gameInstance;
         }
 
         /// <summary>
         /// Does some first-time bootstrapping processes.
         /// Does not need to be called again after level switch etc
         /// </summary>
-        /// <param name="config"></param>
-        public void InitiateGame(BroilerConfiguration config) {
-            Debug.Log("Game Instance Initiate Game");
+        /// <param name="broilerConfiguration"></param>
+        public void InitiateGame(BroilerConfiguration broilerConfiguration) 
+        {
             DontDestroyOnLoad(this);
             LevelManager.OnLevelLoaded += OnLevelLoaded;
             LevelManager.BeforeLevelUnload += OnLevelUnloading;
             
-            configuration = config;
+            GameInstanceConfiguration = broilerConfiguration;
             // we have to manually init the world at this point because when GameInstance awakes first time, 
             // the scene was already loaded.
             var scene = SceneManager.GetActiveScene();
@@ -63,7 +66,7 @@ namespace Broilerplate.Core {
         /// Except we're on a server build but lets cross that bridge when we get there.
         /// </summary>
         public PlayerInfo GetInitialLocalPlayer() {
-            if (NumLocalPlayers > 0) {
+            if (TotalLocalPlayers > 0) {
                 // this could return null but by design of this method, it shouldn't
                 return GetPlayerOne();
             }
@@ -93,8 +96,8 @@ namespace Broilerplate.Core {
             // create a new world from project config
             // create a mapping scene => world.
             // call RegisterActors() on world to kick off managed BeginPlay() callbacks.
-            world = Instantiate(configuration.WorldType);
-            world.BootWorld(configuration.GetGameModeFor(scene), configuration.WorldSubsystems);
+            world = Instantiate(GameInstanceConfiguration.WorldType);
+            world.BootWorld(GameInstanceConfiguration.GetGameModeFor(scene), GameInstanceConfiguration.WorldSubsystems);
             world.SpawnPlayer(GetInitialLocalPlayer());
             // Finalise bootstrapping game mode with player controller having been initialised.
             // BeginPlay for GameMode has been called way before this point when the game world has spawned it.
