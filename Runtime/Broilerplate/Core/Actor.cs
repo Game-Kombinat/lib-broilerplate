@@ -94,7 +94,7 @@ namespace Broilerplate.Core {
         }
 
         public T AddGameComponent<T>() where T : GameComponent {
-            if (typeof(T) == typeof(SceneComponent)) {
+            if (typeof(T) == typeof(ActorComponent)) {
                 var go = new GameObject($"{typeof(T).Name} Container");
                 go.transform.SetParent(transform);
                 var c = go.AddComponent<T>();

@@ -9,7 +9,7 @@ namespace Broilerplate.Gameplay.View {
     /// It adds an extra layer of control that is exposed for the CameraManager
     /// to make use of controlling view targets and so forth.
     /// </summary>
-    public class CameraComponent : SceneComponent {
+    public class CameraComponent : ActorComponent {
         private CinemachineVirtualCameraBase cameraHandle;
 
         public CinemachineVirtualCameraBase CameraHandle => cameraHandle;

@@ -1,14 +1,13 @@
-using System;
 using System.Collections;
 using System.Text.RegularExpressions;
 using Broilerplate.Core;
 using Broilerplate.Core.Components;
 using NUnit.Framework;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.TestTools;
 using Object = UnityEngine.Object;
 
+// todo: fix these tests, the actor/scene component differentiation has been removed.
 namespace Tests.Runtime.Broilerplate {
     public class ComponentBehaviorTests
     {
@@ -23,7 +22,7 @@ namespace Tests.Runtime.Broilerplate {
         public IEnumerator TestComponentTargetObjects() {
             var go = new GameObject("Test Actor");
             var actor = instance.GetWorld().SpawnActorOn<Actor>(go);
-            var sc = actor.AddGameComponent<SceneComponent>();
+            var sc = actor.AddGameComponent<ActorComponent>();
             Assert.NotNull(sc, "sc != null");
             // assert that scene component landed on a different game object because that is the expected behaviour
             Assert.True(sc.gameObject != actor.gameObject, "sc.gameObject != actor.gameObject");
@@ -41,9 +40,9 @@ namespace Tests.Runtime.Broilerplate {
             var actor = instance.GetWorld().SpawnActorOn<Actor>(go);
             Assert.True(actor.HasTickFunc, "actor.HasTickFunc");
             // we assert in another test that the adding works
-            var sc = actor.AddGameComponent<SceneComponent>();
+            var sc = actor.AddGameComponent<ActorComponent>();
             var ac = actor.AddGameComponent<ActorComponent>();
-            var testSc = actor.GetGameComponent<SceneComponent>();
+            var testSc = actor.GetGameComponent<ActorComponent>();
             var testAc = actor.GetGameComponent<ActorComponent>();
             // Asset that the scene component we added added is the same that is returned afterwards
             Assert.True(testSc == sc, "testSc == sc");
@@ -58,8 +57,8 @@ namespace Tests.Runtime.Broilerplate {
             var go = new GameObject("Test Actor");
             var actor = instance.GetWorld().SpawnActorOn<Actor>(go);
             // we assert in another test that the adding works
-            var cp1 = actor.AddGameComponent<SceneComponent>();
-            var cp2 = actor.AddGameComponent<SceneComponent>();
+            var cp1 = actor.AddGameComponent<ActorComponent>();
+            var cp2 = actor.AddGameComponent<ActorComponent>();
             // ssert that we have 2 components now
             Assert.True(actor.NumComponents == 2, "actor.NumComponents == 2");
             
@@ -68,14 +67,14 @@ namespace Tests.Runtime.Broilerplate {
             
             Assert.True(actor.NumComponents == 1, "actor.NumComponents == 1");
             
-            cp1 = actor.AddGameComponent<SceneComponent>();
+            cp1 = actor.AddGameComponent<ActorComponent>();
             Object.Destroy(cp1);
             Object.Destroy(cp2);
             yield return null;
             Assert.True(actor.NumComponents == 0, "actor.NumComponents == 0");
 
             var ac = actor.AddGameComponent<ActorComponent>();
-            cp1 = actor.AddGameComponent<SceneComponent>();
+            cp1 = actor.AddGameComponent<ActorComponent>();
             Assert.True(actor.NumComponents == 2, "actor.NumComponents == 2");
             Object.Destroy(cp1);
             Object.Destroy(ac);
@@ -90,7 +89,7 @@ namespace Tests.Runtime.Broilerplate {
         public IEnumerator TestDetachedActorIsDestroyed() {
             var go = new GameObject("Test Actor");
             var actor = instance.GetWorld().SpawnActorOn<Actor>(go);
-            var sc = actor.AddGameComponent<SceneComponent>();
+            var sc = actor.AddGameComponent<ActorComponent>();
             sc.DetachFromActor();
             Assert.True(actor.NumComponents == 1, "actor.NumComponents == 1 (after scene component detached)");
             Object.Destroy(actor);
@@ -104,7 +103,7 @@ namespace Tests.Runtime.Broilerplate {
         public IEnumerator TestAddActorComponentOnChildObjectThrows() {
             var go = new GameObject("Test Actor");
             var actor = instance.GetWorld().SpawnActorOn<Actor>(go);
-            var sc = actor.AddGameComponent<SceneComponent>();
+            var sc = actor.AddGameComponent<ActorComponent>();
 
             // this actually throws in ActorComponent.Awake() but unity catches that and
             // turns it into a log message therefore we have to do a LogAssert.
@@ -118,7 +117,7 @@ namespace Tests.Runtime.Broilerplate {
         [UnityTest]
         public IEnumerator TestAddComponentOnEmptyObject() {
             var go = new GameObject("None Actor");
-            var sc = go.AddComponent<SceneComponent>();
+            var sc = go.AddComponent<ActorComponent>();
             LogAssert.Expect(LogType.Exception, new Regex("requires an Actor component on the root object"));
             yield return null;
             Assert.True(sc == null, "sc == null after invalid component adding");
@@ -138,7 +137,7 @@ namespace Tests.Runtime.Broilerplate {
         public IEnumerator TestSceneCompDeletesOwnGameObject() {
             var go = new GameObject("Test Actor");
             var actor = instance.GetWorld().SpawnActorOn<Actor>(go);
-            var sc = actor.AddGameComponent<SceneComponent>();
+            var sc = actor.AddGameComponent<ActorComponent>();
             var scGo = sc.gameObject;
             Assert.True(go != scGo, "go != scGo");
             Object.Destroy(sc);
@@ -163,11 +162,11 @@ namespace Tests.Runtime.Broilerplate {
         public IEnumerator TestGetComponentFromDetachedObject() {
             var go = new GameObject("Test Actor");
             var actor = instance.GetWorld().SpawnActorOn<Actor>(go);
-            var sc = actor.AddGameComponent<SceneComponent>();
+            var sc = actor.AddGameComponent<ActorComponent>();
             sc.DetachFromActor();
-            actor.GetGameComponent<SceneComponent>();
+            actor.GetGameComponent<ActorComponent>();
 
-            var fetchedSc = actor.GetGameComponent<SceneComponent>();
+            var fetchedSc = actor.GetGameComponent<ActorComponent>();
             
             Assert.True(sc == fetchedSc, "sc == fetchedSc");
             yield break;
@@ -179,7 +178,7 @@ namespace Tests.Runtime.Broilerplate {
             var actor = instance.GetWorld().SpawnActorOn<Actor>(go);
             actor.SetEnableTick(true);
             // we assert in another test that the adding works
-            var sc = actor.AddGameComponent<SceneComponent>();
+            var sc = actor.AddGameComponent<ActorComponent>();
             sc.SetEnableTick(true);
             yield return null;
             // todo: we would have to mock up the actor and component types here
