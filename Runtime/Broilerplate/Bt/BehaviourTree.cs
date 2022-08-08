@@ -87,9 +87,7 @@ namespace Broilerplate.Bt {
         }
         
         public void Begin() {
-            if (Data == null) {
-                Data = CreateInstance<DataContext>();
-            }
+            Prepare();
 
             isRunning = true;
         }
