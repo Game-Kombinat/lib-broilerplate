@@ -19,7 +19,7 @@ namespace Broilerplate.Core {
         public static event Action<string> OnLevelUnloaded;
         public static event Action<Scene> BeforeLevelUnload;
 
-        private static Scene loadingScene;
+        private static string loadingScene;
 
         /// <summary>
         /// Loads in loading scene,
@@ -29,23 +29,29 @@ namespace Broilerplate.Core {
         public static void LoadLevel(string levelName) {
             // if we need to load levels from asset bundles, this is the place to check for them
             string currentScene = SceneManager.GetActiveScene().name;
-            if (!string.IsNullOrEmpty(loadingScene.name)) {
-                var loadTask = SceneManager.LoadSceneAsync(loadingScene.name, LoadSceneMode.Additive);
-                loadTask.completed += _ => {
-                    Resources.UnloadUnusedAssets();
-                    GC.Collect();
-                    HandleLoadLevel(levelName, currentScene);
-                };
+            if (!string.IsNullOrEmpty(loadingScene)) {
+                if (loadingScene != currentScene) {
+                    var loadTask = SceneManager.LoadSceneAsync(loadingScene, LoadSceneMode.Additive);
+                    loadTask.completed += _ => {
+                        Resources.UnloadUnusedAssets();
+                        GC.Collect();
+                        HandleLoadLevel(levelName, currentScene);
+                    };  
+                }
+                else {
+                    // If we booted into the loading scene, or don't have any, just load new one
+                    HandleLoadLevel(levelName, currentScene, false);
+                }
+
             }
-            else
-            {
+            else {
+                // If we booted into the loading scene, or don't have any, just load new one
                 HandleLoadLevel(levelName, currentScene, false);
             }
         }
 
-        public static void SetLoadingScene(Scene ls)
-        {
-            loadingScene = ls;
+        public static void SetLoadingScene(Scene ls) {
+            loadingScene = ls.name;
         }
 
         /// <summary>
@@ -63,30 +69,32 @@ namespace Broilerplate.Core {
 
         private static void HandleLoadLevel(string targetScene, string unloadScene, bool unloadLoadingScene = true) {
             BeforeLevelLoad?.Invoke(targetScene);
-            var task = SceneManager.LoadSceneAsync(targetScene,
+            var loadNewScene = SceneManager.LoadSceneAsync(targetScene,
                 unloadLoadingScene ? LoadSceneMode.Additive : LoadSceneMode.Single);
-            task.completed += _ => {
-                if (unloadLoadingScene) {
-                    BeforeLevelUnload?.Invoke(SceneManager.GetSceneByName(unloadScene));
+            loadNewScene.completed += _ => {
+                BeforeLevelUnload?.Invoke(SceneManager.GetSceneByName(unloadScene));
+                // very important, it won't let us unload the loading scene otherwise if we're starting fresh
+                SceneManager.SetActiveScene(SceneManager.GetSceneByName(targetScene));
+                if (unloadLoadingScene) { // if this was false we had loaded the new scene as single, that means unity auto unloaded all other scenes.
                     var unloadOldSceneTask = SceneManager.UnloadSceneAsync(unloadScene);
                     unloadOldSceneTask.completed += _ => {
                         OnLevelUnloaded?.Invoke(unloadScene);
                         Resources.UnloadUnusedAssets();
                         GC.Collect();
+                        // don't much care to wait for this, it oughta be quick.
+                        SceneManager.UnloadSceneAsync(loadingScene);
+                    
                         // we call this after the loading scene is gone to please the unitar.
                         // It would otherwise get confused if, for instance, new gameobjects were created
                         // before the loading scene is gone.
-                        // Now: We could set the active scene. But for reasons unknown, that doesn't always work.
-                        SceneManager.SetActiveScene(SceneManager.GetSceneByName(targetScene));
                         OnLevelLoaded?.Invoke(SceneManager.GetSceneByName(targetScene));
                     };
                 }
                 else {
+                    OnLevelUnloaded?.Invoke(unloadScene);
                     Resources.UnloadUnusedAssets();
                     GC.Collect();
-                    OnLevelUnloaded?.Invoke(unloadScene);
                     OnLevelLoaded?.Invoke(SceneManager.GetSceneByName(targetScene));
-                    
                 }
             };
 
