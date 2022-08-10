@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Broilerplate.Tools;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -58,9 +59,9 @@ namespace Broilerplate.Core {
             // the scene was already loaded.
             var scene = SceneManager.GetActiveScene();
             
-            if (scene.path == this.GameInstanceConfiguration.LoadingScene?.ScenePath)
+            if (scene.path == GameInstanceConfiguration.LoadingScene?.ScenePath)
             {
-                LevelManager.LoadLevel(GameInstanceConfiguration.StartupScene);
+                LevelManager.LoadLevelAsync(GameInstanceConfiguration.StartupScene, GameInstanceConfiguration.DefaultSceneLoadMultiplier, LevelLoadProgress.OnProgress);
             }
             else
             {

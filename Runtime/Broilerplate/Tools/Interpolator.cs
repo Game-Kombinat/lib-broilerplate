@@ -123,41 +123,49 @@ namespace Broilerplate.Tools {
         }
     }
     
-    public class CoroutineJobs : MonoBehaviour
-    {
-        private static CoroutineJobs instance;
+    public class CoroutineJobs : MonoBehaviour {
+        private static CoroutineJobs localInstance; // scene local jobs
+        private static CoroutineJobs globalInstance; // jobs that run across multiple scenes
 
-        public static Coroutine StartJob(IEnumerator ie) {
-            if(instance == null) {
-                var go = new GameObject("InterpolatorHelper");
-                instance = go.AddComponent<CoroutineJobs>();
+        private static CoroutineJobs GetJobs(bool global) {
+            if (global) {
+                if (!globalInstance) {
+                    var go = new GameObject("InterpolatorHelper - Global");
+                    globalInstance = go.AddComponent<CoroutineJobs>();
+                    DontDestroyOnLoad(go);
+                }
+
+                return globalInstance;
             }
-            return instance._StartJob(ie);
+
+            if (!localInstance) {
+                var go = new GameObject("InterpolatorHelper - Scene");
+                localInstance = go.AddComponent<CoroutineJobs>();
+            }
+
+            return localInstance;
+        }
+
+        public static Coroutine StartJob(IEnumerator ie, bool global = false) {
+            
+            return GetJobs(global)._StartJob(ie);
         }
         
-        public static void RestartJob(IEnumerator ie, ref Coroutine routine) {
+        public static void RestartJob(IEnumerator ie, ref Coroutine routine, bool global = false) {
             StopJob(routine);
-            if(instance == null) {
-                var go = new GameObject("InterpolatorHelper");
-                instance = go.AddComponent<CoroutineJobs>();
+            
+            routine = StartJob(ie, global);
+        }
+        
+        public static void StopJob(Coroutine previous, bool global = false) {
+            if (previous != null) {
+                GetJobs(global).StopCoroutine(previous);
             }
-            routine = StartJob(ie);
         }
 
         private Coroutine _StartJob(IEnumerator ie)
         {
             return StartCoroutine(ie);
-        }
-
-        public static void StopJob(Coroutine previous) {
-            if(instance == null) {
-                var go = new GameObject("InterpolatorHelper");
-                instance = go.AddComponent<CoroutineJobs>();
-            }
-
-            if (previous != null) {
-                instance.StopCoroutine(previous);
-            }
         }
     }
 }
