@@ -6,7 +6,6 @@ namespace Broilerplate.Tools {
         public static Action<float> yourActions;
 
         public static void OnProgress(float t) {
-            Debug.Log($"Progress: {t}");
             yourActions?.Invoke(Mathf.Clamp01(t));
         }
 
