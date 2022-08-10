@@ -69,6 +69,7 @@ namespace Broilerplate.Core {
             if (!gameMode) {
                 gameMode = gameModePrefab ? SpawnActor(gameModePrefab, Vector3.zero,Quaternion.identity) : SpawnActorOn<GameMode>(new GameObject("Default Game Mode"));
             }
+            unityTicker.transform.SetParent(gameMode.transform);
             if (worldSubsystems != null) {
                 for (int i = 0; i < worldSubsystems.Count; i++) {
                     RegisterSubsystem(worldSubsystems[i]);

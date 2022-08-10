@@ -37,8 +37,15 @@ namespace Broilerplate.Core {
                     HandleLoadLevel(levelName, currentScene);
                 };
             }
-            
-            HandleLoadLevel(levelName, currentScene, false);
+            else
+            {
+                HandleLoadLevel(levelName, currentScene, false);
+            }
+        }
+
+        public static void SetLoadingScene(Scene ls)
+        {
+            loadingScene = ls;
         }
 
         /// <summary>
@@ -59,14 +66,14 @@ namespace Broilerplate.Core {
             var task = SceneManager.LoadSceneAsync(targetScene,
                 unloadLoadingScene ? LoadSceneMode.Additive : LoadSceneMode.Single);
             task.completed += _ => {
+                SceneManager.SetActiveScene(SceneManager.GetSceneByName(targetScene));
                 OnLevelLoaded?.Invoke(SceneManager.GetSceneByName(targetScene));
-
                 if (unloadLoadingScene) {
                     BeforeLevelUnload?.Invoke(SceneManager.GetSceneByName(unloadScene));
                     var unloadOldSceneTask = SceneManager.UnloadSceneAsync(unloadScene);
                     unloadOldSceneTask.completed += _ => {
                         OnLevelUnloaded?.Invoke(unloadScene);
-                        SceneManager.UnloadSceneAsync(loadingScene);
+                        SceneManager.UnloadSceneAsync(unloadScene);
                         Resources.UnloadUnusedAssets();
                         GC.Collect();
                     };

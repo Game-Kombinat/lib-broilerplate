@@ -49,6 +49,7 @@ namespace Broilerplate.Core {
         public void InitiateGame(BroilerConfiguration broilerConfiguration) 
         {
             DontDestroyOnLoad(this);
+            LevelManager.SetLoadingScene(broilerConfiguration.LoadingScene);
             LevelManager.OnLevelLoaded += OnLevelLoaded;
             LevelManager.BeforeLevelUnload += OnLevelUnloading;
             
@@ -56,7 +57,16 @@ namespace Broilerplate.Core {
             // we have to manually init the world at this point because when GameInstance awakes first time, 
             // the scene was already loaded.
             var scene = SceneManager.GetActiveScene();
-            OnLevelLoaded(scene);
+            
+            if (scene.path == this.GameInstanceConfiguration.LoadingScene?.ScenePath)
+            {
+                LevelManager.LoadLevel(GameInstanceConfiguration.StartupScene);
+            }
+            else
+            {
+                OnLevelLoaded(scene);
+            }
+            
         }
 
         /// <summary>
@@ -93,11 +103,18 @@ namespace Broilerplate.Core {
         }
 
         private void OnLevelLoaded(Scene scene) {
+            if (scene.path == this.GameInstanceConfiguration.LoadingScene?.ScenePath) {
+                return;
+            }
             // create a new world from project config
             // create a mapping scene => world.
             // call RegisterActors() on world to kick off managed BeginPlay() callbacks.
+            var gmPrefab = GameInstanceConfiguration.GetGameModeFor(scene);
+            if (!gmPrefab) {
+                throw new System.Exception($"Scene without game mode being loaded! {scene.path}");
+            }
             world = Instantiate(GameInstanceConfiguration.WorldType);
-            world.BootWorld(GameInstanceConfiguration.GetGameModeFor(scene), GameInstanceConfiguration.WorldSubsystems);
+            world.BootWorld(gmPrefab, GameInstanceConfiguration.WorldSubsystems);
             world.SpawnPlayer(GetInitialLocalPlayer());
             // Finalise bootstrapping game mode with player controller having been initialised.
             // BeginPlay for GameMode has been called way before this point when the game world has spawned it.

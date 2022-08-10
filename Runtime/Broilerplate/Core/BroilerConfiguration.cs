@@ -30,6 +30,12 @@ namespace Broilerplate.Core {
         private World defaultWorldPrefab;
 
         [SerializeField]
+        private LevelReference startupScene;
+
+        [SerializeField]
+        private LevelReference loadingScene;
+
+        [SerializeField]
         private List<MapGameModeOverrides> gameModeOverrides = new List<MapGameModeOverrides>();
         
         [Header("Subsystems")]
@@ -41,6 +47,10 @@ namespace Broilerplate.Core {
         public World WorldType => defaultWorldPrefab == null ? CreateInstance<World>() : defaultWorldPrefab;
 
         public List<WorldSubsystem> WorldSubsystems => worldSubsystems;
+
+        public LevelReference LoadingScene => loadingScene;
+
+        public LevelReference StartupScene => startupScene;
 
         public GameMode GetGameModeFor(Scene scene) {
             for (int i = 0; i < gameModeOverrides.Count; ++i) {
