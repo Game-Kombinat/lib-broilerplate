@@ -66,7 +66,6 @@ namespace Broilerplate.Core {
             var task = SceneManager.LoadSceneAsync(targetScene,
                 unloadLoadingScene ? LoadSceneMode.Additive : LoadSceneMode.Single);
             task.completed += _ => {
-                SceneManager.SetActiveScene(SceneManager.GetSceneByName(targetScene));
                 if (unloadLoadingScene) {
                     BeforeLevelUnload?.Invoke(SceneManager.GetSceneByName(unloadScene));
                     var unloadOldSceneTask = SceneManager.UnloadSceneAsync(unloadScene);
@@ -78,6 +77,7 @@ namespace Broilerplate.Core {
                         // It would otherwise get confused if, for instance, new gameobjects were created
                         // before the loading scene is gone.
                         // Now: We could set the active scene. But for reasons unknown, that doesn't always work.
+                        SceneManager.SetActiveScene(SceneManager.GetSceneByName(targetScene));
                         OnLevelLoaded?.Invoke(SceneManager.GetSceneByName(targetScene));
                     };
                 }
