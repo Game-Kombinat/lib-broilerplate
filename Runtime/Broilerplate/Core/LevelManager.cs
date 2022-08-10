@@ -22,11 +22,14 @@ namespace Broilerplate.Core {
 
         private static string loadingScene;
         
-        public static void LoadLevelAsync(string levelName, float loadMultiplier = 1, Action<float> progress = null) {
-            CoroutineJobs.StartJob(DoLoadLevelAsync(levelName, loadMultiplier, progress), true);
+        public static void LoadLevelAsync(string levelName, Action<float> progress = null, float minimumLoadingTime = -1) {
+            if (minimumLoadingTime < 0) {
+                minimumLoadingTime = GameInstance.GetInstance().GameInstanceConfiguration.DefaultMinimumLoadingTime;
+            }
+            CoroutineJobs.StartJob(DoLoadLevelAsync(levelName, minimumLoadingTime, progress), true);
         }
         
-        private static IEnumerator DoLoadLevelAsync(string levelName, float loadMultiplier, Action<float> progress) {
+        private static IEnumerator DoLoadLevelAsync(string levelName, float fakeLoadingTime, Action<float> progress) {
             string currentScene = SceneManager.GetActiveScene().name;
             if (!string.IsNullOrEmpty(loadingScene)) {
                 if (loadingScene != currentScene) {
@@ -35,12 +38,7 @@ namespace Broilerplate.Core {
 
                 BeforeLevelLoad?.Invoke(levelName);
                 AsyncOperation loadNewScene = SceneManager.LoadSceneAsync(levelName, LoadSceneMode.Additive);
-                float loadingProgress = 0;
-                while (loadingProgress < 1 || !loadNewScene.isDone) {
-                    loadingProgress += loadNewScene.progress * loadMultiplier;
-                    progress?.Invoke(loadingProgress);
-                    yield return null;
-                }
+                yield return LoadingLoop(fakeLoadingTime, progress, loadNewScene);
 
                 BeforeLevelUnload?.Invoke(SceneManager.GetSceneByName(currentScene));
                 yield return SceneManager.UnloadSceneAsync(currentScene);
@@ -55,12 +53,7 @@ namespace Broilerplate.Core {
             }
             else {
                 var sceneProgress = SceneManager.LoadSceneAsync(levelName); // will unload all previous ofc
-                float loadingProgress = 0;
-                while (loadingProgress < 1 || !sceneProgress.isDone) {
-                    loadingProgress += sceneProgress.progress * loadMultiplier;
-                    progress?.Invoke(loadingProgress);
-                    yield return null;
-                }
+                yield return LoadingLoop(fakeLoadingTime, progress, sceneProgress);
                 Resources.UnloadUnusedAssets();
                 GC.Collect();
                 OnLevelLoaded?.Invoke(SceneManager.GetSceneByName(levelName));
@@ -68,6 +61,22 @@ namespace Broilerplate.Core {
             yield return null;
         }
 
+        private static IEnumerator LoadingLoop(float fakeLoadingTime, Action<float> progress, AsyncOperation loadNewScene) {
+            float loadingProgress = 0;
+            float fakeProgress = 0;
+            do {
+                if (fakeLoadingTime > 0) {
+                    fakeProgress += Time.deltaTime;
+                    loadingProgress = Mathf.InverseLerp(0, fakeLoadingTime, fakeProgress);
+                }
+                else {
+                    loadingProgress = loadNewScene.progress;
+                }
+                progress?.Invoke(loadingProgress);
+
+                yield return null;
+            } while (loadingProgress < 1 || !loadNewScene.isDone);
+        }
 
 
         public static void SetLoadingScene(Scene ls) {

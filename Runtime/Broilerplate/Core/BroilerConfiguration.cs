@@ -37,9 +37,8 @@ namespace Broilerplate.Core {
         private LevelReference loadingScene;
         
         [SerializeField]
-        [Tooltip("Use this to increase the loading times (if you artificially want to show loading screen for longer for some reason)")]
-        [Range(0, 1)]
-        private float defaultSceneLoadMultiplier = 1;
+        [Tooltip("Use this to artificially prolong loading screen time. This is the time in seconds a loading screen will be shown.")]
+        private float defaultMinimumLoadingTime = 0;
 
         [SerializeField]
         private List<MapGameModeOverrides> gameModeOverrides = new List<MapGameModeOverrides>();
@@ -58,7 +57,7 @@ namespace Broilerplate.Core {
 
         public LevelReference StartupScene => startupScene;
 
-        public float DefaultSceneLoadMultiplier => defaultSceneLoadMultiplier;
+        public float DefaultMinimumLoadingTime => defaultMinimumLoadingTime;
 
         public GameMode GetGameModeFor(Scene scene) {
             for (int i = 0; i < gameModeOverrides.Count; ++i) {

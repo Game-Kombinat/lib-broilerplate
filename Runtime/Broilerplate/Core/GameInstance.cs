@@ -61,7 +61,7 @@ namespace Broilerplate.Core {
             
             if (scene.path == GameInstanceConfiguration.LoadingScene?.ScenePath)
             {
-                LevelManager.LoadLevelAsync(GameInstanceConfiguration.StartupScene, GameInstanceConfiguration.DefaultSceneLoadMultiplier, LevelLoadProgress.OnProgress);
+                LevelManager.LoadLevelAsync(GameInstanceConfiguration.StartupScene, LevelLoadProgress.OnProgress);
             }
             else
             {
