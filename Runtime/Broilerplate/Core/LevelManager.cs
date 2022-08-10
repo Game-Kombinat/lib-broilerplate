@@ -79,15 +79,18 @@ namespace Broilerplate.Core {
                     var unloadOldSceneTask = SceneManager.UnloadSceneAsync(unloadScene);
                     unloadOldSceneTask.completed += _ => {
                         OnLevelUnloaded?.Invoke(unloadScene);
-                        Resources.UnloadUnusedAssets();
-                        GC.Collect();
                         // don't much care to wait for this, it oughta be quick.
-                        SceneManager.UnloadSceneAsync(loadingScene);
+                        var lsUnload = SceneManager.UnloadSceneAsync(loadingScene);
+                        lsUnload.completed += _ => {
+                            Resources.UnloadUnusedAssets();
+                            GC.Collect();
+                            // we call this after the loading scene is gone to please the unitar.
+                            // It would otherwise get confused if, for instance, new gameobjects were created
+                            // before the loading scene is gone.
+                            OnLevelLoaded?.Invoke(SceneManager.GetSceneByName(targetScene));
+                        };
                     
-                        // we call this after the loading scene is gone to please the unitar.
-                        // It would otherwise get confused if, for instance, new gameobjects were created
-                        // before the loading scene is gone.
-                        OnLevelLoaded?.Invoke(SceneManager.GetSceneByName(targetScene));
+                        
                     };
                 }
                 else {
