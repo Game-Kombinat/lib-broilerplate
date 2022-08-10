@@ -72,10 +72,10 @@ namespace Broilerplate.Core {
             var loadNewScene = SceneManager.LoadSceneAsync(targetScene,
                 unloadLoadingScene ? LoadSceneMode.Additive : LoadSceneMode.Single);
             loadNewScene.completed += _ => {
-                BeforeLevelUnload?.Invoke(SceneManager.GetSceneByName(unloadScene));
                 // very important, it won't let us unload the loading scene otherwise if we're starting fresh
                 SceneManager.SetActiveScene(SceneManager.GetSceneByName(targetScene));
                 if (unloadLoadingScene) { // if this was false we had loaded the new scene as single, that means unity auto unloaded all other scenes.
+                    BeforeLevelUnload?.Invoke(SceneManager.GetSceneByName(unloadScene));
                     var unloadOldSceneTask = SceneManager.UnloadSceneAsync(unloadScene);
                     unloadOldSceneTask.completed += _ => {
                         OnLevelUnloaded?.Invoke(unloadScene);
