@@ -198,5 +198,16 @@ namespace Broilerplate.Bt.Data {
             dataRoot = (NbtList)data["dataList"];
         }
         #endregion
+
+        public void Remove(string tagName) {
+            
+            for (int i = 0; i < dataRoot.Count; ++i) {
+                var t = dataRoot[i];
+                if (t["tagName"].StringValue == tagName) {
+                    dataRoot.Remove(t);
+                    return;
+                }
+            }
+        }
     }
 }
