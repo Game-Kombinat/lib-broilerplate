@@ -11,6 +11,7 @@ namespace Broilerplate.Bt.Nodes {
         protected readonly List<BaseNode> childNodes = new List<BaseNode>();
 
         protected override void InternalSpawn() {
+            childNodes.Clear();
             int numChildren = children.Length;
             for (int i = 0; i < numChildren; ++i) {
                 var port = GetOutputPort(nameof(children) + " " + i); // very nasty but xnode does it like this.
