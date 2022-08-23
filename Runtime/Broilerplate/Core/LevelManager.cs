@@ -79,8 +79,8 @@ namespace Broilerplate.Core {
         }
 
 
-        public static void SetLoadingScene(Scene ls) {
-            loadingScene = ls.name;
+        public static void SetLoadingScene(string ls) {
+            loadingScene = ls;
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -40,15 +41,19 @@ namespace Broilerplate.Core
 
         public static implicit operator string(LevelReference levelReference)
         {
-            int unity = levelReference.ScenePath.LastIndexOf(".unity", StringComparison.Ordinal) - 7;
-            return levelReference.ScenePath.Substring(7, unity);
+            string name = Path.GetFileName(levelReference.ScenePath);
+            int unity = name.LastIndexOf(".unity", StringComparison.Ordinal);
+            name = name.Substring(0, unity);
+            return name;
         }
 
         public static implicit operator Scene(LevelReference levelReference)
         {
-            int unity = levelReference.ScenePath.LastIndexOf(".unity", StringComparison.Ordinal) - 7;
-            string name = levelReference.ScenePath.Substring(7, unity);
-
+            
+            string name = Path.GetFileName(levelReference.ScenePath);
+            int unity = name.LastIndexOf(".unity", StringComparison.Ordinal);
+            name = name.Substring(0, unity);
+            
             return SceneManager.GetSceneByName(name);
         }
 
