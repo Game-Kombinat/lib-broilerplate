@@ -36,16 +36,17 @@ namespace Broilerplate.Core
             }
         }
 
+        public string SceneName => this; // invokes implicit to-string operator
+
         public static implicit operator string(LevelReference levelReference)
         {
-            int unity = levelReference.ScenePath.LastIndexOf(".unity") - 7;
+            int unity = levelReference.ScenePath.LastIndexOf(".unity", StringComparison.Ordinal) - 7;
             return levelReference.ScenePath.Substring(7, unity);
         }
 
         public static implicit operator Scene(LevelReference levelReference)
         {
-            // int unity = levelReference.ScenePath.LastIndexOf(".unity");
-            int unity = levelReference.ScenePath.LastIndexOf(".unity") - 7;
+            int unity = levelReference.ScenePath.LastIndexOf(".unity", StringComparison.Ordinal) - 7;
             string name = levelReference.ScenePath.Substring(7, unity);
 
             return SceneManager.GetSceneByName(name);
