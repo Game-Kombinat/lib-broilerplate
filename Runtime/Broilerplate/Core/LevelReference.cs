@@ -41,11 +41,10 @@ namespace Broilerplate.Core
 
         public static implicit operator string(LevelReference levelReference)
         {
-            if (!levelReference.IsValidScene) {
+            string name = Path.GetFileName(levelReference.ScenePath);
+            if (string.IsNullOrEmpty(name)) {
                 return default;
             }
-            
-            string name = Path.GetFileName(levelReference.ScenePath);
             int unity = name.LastIndexOf(".unity", StringComparison.Ordinal);
             name = name.Substring(0, unity);
             return name;
@@ -53,11 +52,12 @@ namespace Broilerplate.Core
 
         public static implicit operator Scene(LevelReference levelReference)
         {
-            if (!levelReference.IsValidScene) {
+            string name = Path.GetFileName(levelReference.ScenePath);
+            
+            if (string.IsNullOrEmpty(name)) {
                 return default;
             }
             
-            string name = Path.GetFileName(levelReference.ScenePath);
             int unity = name.LastIndexOf(".unity", StringComparison.Ordinal);
             name = name.Substring(0, unity);
             
