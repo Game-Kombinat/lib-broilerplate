@@ -156,7 +156,7 @@ namespace Broilerplate.Core {
         }
         
         public T SpawnActorOn<T>(GameObject targetGo) where T : Actor {
-            targetGo = targetGo.transform.root.gameObject;
+            targetGo = targetGo.transform.gameObject;
             Actor a = targetGo.AddComponent<T>();
             RegisterActor(a);
 

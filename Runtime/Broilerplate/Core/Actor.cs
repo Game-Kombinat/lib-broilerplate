@@ -18,6 +18,8 @@ namespace Broilerplate.Core {
         [SerializeField] protected TickFunc actorTick = new TickFunc();
 
         public int NumComponents => registeredComponents.Count;
+        
+        public Actor ParentActor { get; private set; }
 
         public bool HasTickFunc => actorTick != null;
 
@@ -30,6 +32,19 @@ namespace Broilerplate.Core {
 
         public Actor() {
             actorTick.SetCanEverTick(true);
+        }
+
+        private void Awake() {
+            Reset();
+        }
+
+        private void OnTransformParentChanged() {
+            if (!transform.parent) {
+                ParentActor = null;
+                return;
+            }
+
+            ParentActor = transform.parent.GetComponentInParent<Actor>();
         }
 
 
@@ -46,13 +61,15 @@ namespace Broilerplate.Core {
                 world.RegisterTickFunc(actorTick);;
             }
 
-            var attachedComps = GetComponentsInChildren<GameComponent>();
-
             // why do this? So we know the owner actor has been initialised with BeginPlay before its components.
             // Now we get a known execution order.
-            for (int i = 0; i < attachedComps.Length; ++i) {
-                var comp = attachedComps[i];
-                comp.BeginPlay();
+            for (int i = 0; i < registeredComponents.Count; ++i) {
+                var comp = registeredComponents[i];
+                // If this component was originally part of another actor (we inserted a nested actor into an actors hierarchy)
+                // It doesn't need to get a new BeginPlay call.
+                if (!comp.HasBegunPlaying) {
+                    comp.BeginPlay();
+                }
             }
 
             // mark as ready so when components get added now, during runtime,
@@ -136,17 +153,33 @@ namespace Broilerplate.Core {
         }
 
         protected virtual void Reset() {
-            if (transform.root != transform) {
-                Debug.LogError(
-                    $"Actor components must be added on the root component {transform.root.name} but this is {name}");
-                DestroyImmediate(this);
+            // take the parent because otherwise this will always get this actor.
+            // But we need the immediate next
+            Actor parentActor = null;
+            if (transform.parent) {
+                parentActor = transform.parent.GetComponentInParent<Actor>();
+            } 
+            
+            // Clear my registered components because Reset will re populate
+            registeredComponents.Clear();
+            if (parentActor && parentActor != this) {
+                ParentActor = parentActor;
+                // Resetting it will ensure integrity on all child components.
+                // Child components will find this new actor as their new next closest actor in parents and attach themselves there instead.
+                // Therefore we don't need to repeat this process here.
+                parentActor.Reset();
             }
-
-            // get all components that may already exist because an actor was deleted and make them register themselves here.
-            var childs = GetComponentsInChildren<GameComponent>();
-            for (int i = 0; i < childs.Length; ++i) {
-                childs[i].EnsureIntegrity();
+            else {
+                ParentActor = null;
+                // This is happening on root actors that have no parent.
+                // get all components that may already exist because an actor was deleted and make them register themselves here.
+                // This would also update components below this actor, if we added it to an existing actor
+                var childs = GetComponentsInChildren<GameComponent>();
+                for (int i = 0; i < childs.Length; ++i) {
+                    childs[i].EnsureIntegrity(true);
+                }
             }
+            
         }
 
         public void RegisterComponent(GameComponent component) {
@@ -157,7 +190,9 @@ namespace Broilerplate.Core {
 
             registeredComponents.Add(component);
             if (HasBegunPlaying) {
-                component.BeginPlay();
+                if (!component.HasBegunPlaying) {
+                    component.BeginPlay();
+                }
             }
         }
 
@@ -172,15 +207,16 @@ namespace Broilerplate.Core {
         public virtual void ProcessTick(float deltaTime) {
             // there is no default behaviour
         }
-    }
 
-    public static class ActorHelperExtensions {
-        // todo: this is not test covered, test cover it. Doesn't look like this would work atm
-        public static T SpawnActor<T>(this GameObject go, World world) where T : Actor {
-            var actor = go.AddComponent<Actor>();
-            actor.SetWorld(world);
-            actor.BeginPlay();
-            return (T)actor;
+        public bool HasComponent(GameComponent component) {
+            for (int i = 0; i < registeredComponents.Count; i++) {
+                var comp = registeredComponents[i];
+                if (comp == component) {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

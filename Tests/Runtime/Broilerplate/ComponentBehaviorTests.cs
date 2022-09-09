@@ -75,79 +75,7 @@ namespace Tests.Runtime.Broilerplate {
             yield return null;
         }
         
-        [UnityTest]
-        public IEnumerator TestActorIntegrityMeasures() {
-            var actorObject = new GameObject("Test Actor");
-            var actorChild = new GameObject("Actor Child");
-            actorChild.transform.parent = actorObject.transform;
-
-            var actorGrandChild = new GameObject("Actor Grandchild");
-            actorGrandChild.transform.parent = actorChild.transform;
-            
-            var actor = instance.GetWorld().SpawnActorOn<Actor>(actorObject);
-            
-            // note: we test that we cannot add components on non-actor objects in another test, no need to repeat that here.
-
-            var ac = actor.AddGameComponent<ActorComponent>();
-            Assert.True(ac != null, "ac != null");
-            Assert.True(actor.NumComponents == 1, "actor.NumComponents == 1");
-
-            // This should still register to actor
-            ac = actorChild.AddComponent<ActorComponent>();
-            Assert.True(ac != null, "ac != null");
-            Assert.True(actor.NumComponents == 2, "actor.NumComponents == 2");
-            
-            // Doesn't matter where we add the actor component, it must find its actor
-            ac = actorGrandChild.AddComponent<ActorComponent>();
-            Assert.True(ac != null, "ac != null");
-            Assert.True(actor.NumComponents == 3, "actor.NumComponents == 3");
-
-            // change the root, this must make no difference to the component integrity measures
-            var root = new GameObject("Root");
-            actor.transform.parent = root.transform;
-
-            // None of these may throw and should find their actors
-            ac = actor.AddGameComponent<ActorComponent>();
-            Assert.True(ac != null, "ac != null");
-            ac = actorGrandChild.AddComponent<ActorComponent>();
-            Assert.True(ac != null, "ac != null");
-            
-            Assert.True(actor.NumComponents == 5, "actor.NumComponents == 3");
-            
-            yield return null;
-        }
         
-        [UnityTest]
-        public IEnumerator TestComponentIntegrityWithNestedActors() {
-            var actorObject = new GameObject("Test Actor");
-            var nestedActorObject = new GameObject("Nested Actor");
-
-            var actor = instance.GetWorld().SpawnActorOn<Actor>(actorObject);
-            var nestedActor = instance.GetWorld().SpawnActorOn<Actor>(nestedActorObject);
-
-            var ac = actor.AddGameComponent<ActorComponent>();
-            Assert.True(ac != null, "ac != null");
-            Assert.True(ac.Owner == actor, "ac.Owner == actor");
-            
-            var nac = nestedActor.AddGameComponent<ActorComponent>();
-            Assert.True(nac != null, "nac != null");
-            Assert.True(nac.Owner == nestedActor, "nac.Owner == nestedActor");
-
-            var baseNestedObject = new GameObject("Actor Nest");
-            baseNestedObject.transform.parent = actor.transform;
-            ac = baseNestedObject.AddComponent<ActorComponent>();
-            Assert.True(ac != null, "ac != null");
-            Assert.True(ac.Owner == actor, "ac.Owner == actor");
-
-            var nestedNestedObject = new GameObject("Nested Actor Nest");
-            nestedNestedObject.transform.parent = nestedActor.transform;
-
-            nac = nestedNestedObject.AddComponent<ActorComponent>();
-            Assert.True(nac != null, "nac != null");
-            Assert.True(nac.Owner == nestedActor, "nac.Owner == nestedActor");
-            
-            yield return null;
-        }
 
         [UnityTest]
         public IEnumerator TestDetachedActorIsDestroyed() {

@@ -17,19 +17,29 @@ namespace Broilerplate.Core.Components {
 
         public Actor Owner => owner;
 
-        public bool IsBeingDestroyed { get; private set; }
+        public bool IsBeingDestroyed { get; private set; } = false;
+        
+        public bool HasBegunPlaying { get; private set; } = false;
 
         public GameComponent() {
             componentTick.SetCanEverTick(true);
         }
 
         protected virtual void Awake() {
+            // Have to have this for components added during runtime.
+            // Editor-time authored components will be handled from actors Awake()
             EnsureIntegrity(true);
         }
 
         public virtual void BeginPlay() {
+            HasBegunPlaying = true;
             componentTick.SetTickTarget(this);
             GetWorld().RegisterTickFunc(componentTick);
+        }
+
+        // Change of owning actor if an actor has been injected into the hierarchy after the fact.
+        public virtual void OnOwnerActorChanged(Actor newActor) {
+            // owner = newActor;
         }
         
         public void SetEnableTick(bool shouldTick) {
@@ -42,22 +52,23 @@ namespace Broilerplate.Core.Components {
         }
 
         public virtual void EnsureIntegrity(bool autoRegister = false) {
-            if (!owner) {
-                var actor = transform.gameObject.GetComponentInParent<Actor>();
-                if (!actor) {
-                    if (!Application.isPlaying) {
-                        DestroyImmediate(this);
-                    }
-                    else {
-                        Destroy(this);
-                    }
-                    throw new InvalidOperationException($"Component {GetType().Name} requires an Actor component on the root object!");
+            var actor = transform.gameObject.GetComponentInParent<Actor>();
+            if (!actor) {
+                if (!Application.isPlaying) {
+                    DestroyImmediate(this);
                 }
-
-                owner = actor;
+                else {
+                    Destroy(this);
+                }
+                throw new InvalidOperationException($"Component {GetType().Name} requires an Actor component on the root object!");
             }
             
-            if (autoRegister) {
+            if (!owner || owner != actor) {
+                owner = actor;
+                OnOwnerActorChanged(owner);
+            }
+            
+            if (autoRegister && !owner.HasComponent(this)) {
                 owner.RegisterComponent(this);
             }
         }
