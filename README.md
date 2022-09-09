@@ -10,31 +10,23 @@ execution path from boot to destroy, while at the same time not completely worki
 the strengths that Unity has on offer.
 
 What I'm doing here is a very naive implementation of a very small subset of Unreals game framework, re-imagined for Unity.
+Conversely this code may or may not change in inconvenient ways in the future.
+
+### What is this good for?
+* Single player games
+* Big single player games
+* Small single player games
+* 2D or 3D, doesn't really matter
+
+### What is this not good for?
+* Networked games. I have plans for that but currently no time.
+
 
 ### How does this work, how is it done?
+I'll eventually put together some documentation on how to work this code.
+If you're curious, it's not super complicated to figure out. 
 
-We begin with adding a single-relevant entry point of the application.
-Unity offers the `RuntimeInitializeOnLoadMethod` attribute. The class `GameInstace` has
-a method decorated with this attribute. It will spawn a game instance after the first scene was loaded.
-
-Which one depends on the project configuration.
-
-The GameInstance will then boot up a World object. Which one, again, depends on your configuration.
-The world will spawn a `GameMode` which may contain data and logic relevant to your gameplay.
-Which `GameMode` type it is in detail, depends on your configuration.
-
-After this is bootstrapped, the world will use the `GameMode` to spawn a player controller,
-a player pawn which the player controller will take control of.
-
-The types of `PlayerController` and `Pawn` that are spawned depend on your configuration.
-
-I am not done with this library yet in any way. It might change around very drastically
-when I'm taking it for some spins in a couple games. Expect change.
-
-I'm also planning on adding more test coverage and making more test cases
-to cover as much ground as possible.
-
-TBC when I have time. 
-
-But at that point, surely you get the picture.
-But if you're in doubt about the usefulness of this: Trust me. You will love it.
+Look at the `GameInstance` class which has an entry point for the framework defined.
+It's used to bootstrap a `World` and from there a `GameMode`. 
+You define what exactly those are in  the `BroilerConfiguration` class which 
+is a `ScriptableObject` that contains all the necessary details to bootstrap a game.
