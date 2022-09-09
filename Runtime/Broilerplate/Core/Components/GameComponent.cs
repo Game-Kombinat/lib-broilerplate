@@ -43,7 +43,7 @@ namespace Broilerplate.Core.Components {
 
         public virtual void EnsureIntegrity(bool autoRegister = false) {
             if (!owner) {
-                var actor = transform.root.gameObject.GetComponent<Actor>();
+                var actor = transform.gameObject.GetComponentInParent<Actor>();
                 if (!actor) {
                     if (!Application.isPlaying) {
                         DestroyImmediate(this);

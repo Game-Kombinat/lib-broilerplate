@@ -94,21 +94,6 @@ namespace Broilerplate.Core {
         }
 
         public T AddGameComponent<T>() where T : GameComponent {
-            if (typeof(T) == typeof(ActorComponent)) {
-                var go = new GameObject($"{typeof(T).Name} Container");
-                go.transform.SetParent(transform);
-                var c = go.AddComponent<T>();
-                // this is a case when creating actor prefabs with scripts.
-                // Then neither Reset nor Awake are called to ensure integrity.
-                // So we do it manually.
-                if (!Application.isPlaying) {
-                    // otherwise Awake() is called and that calls EnsureIntegrity
-                    c.EnsureIntegrity();
-                }
-
-                return c;
-            }
-
             var comp = gameObject.AddComponent<T>();
             if (!Application.isPlaying) {
                 // otherwise Awake() is called and that calls EnsureIntegrity

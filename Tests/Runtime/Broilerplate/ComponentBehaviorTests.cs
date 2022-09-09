@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Text.RegularExpressions;
 using Broilerplate.Core;
@@ -24,13 +25,7 @@ namespace Tests.Runtime.Broilerplate {
             var actor = instance.GetWorld().SpawnActorOn<Actor>(go);
             var sc = actor.AddGameComponent<ActorComponent>();
             Assert.NotNull(sc, "sc != null");
-            // assert that scene component landed on a different game object because that is the expected behaviour
-            Assert.True(sc.gameObject != actor.gameObject, "sc.gameObject != actor.gameObject");
-
-            var ac = actor.AddGameComponent<ActorComponent>();
-            Assert.NotNull(ac, "ac != null");
-            // assert that adding a new actor component did not put it on a new gameobject
-            Assert.True(ac.gameObject == actor.gameObject, "ac.gameObject == actor.gameObject");
+            Assert.True(sc.gameObject == actor.gameObject, "sc.gameObject == actor.gameObject");
             yield return null;
         }
         
@@ -41,14 +36,9 @@ namespace Tests.Runtime.Broilerplate {
             Assert.True(actor.HasTickFunc, "actor.HasTickFunc");
             // we assert in another test that the adding works
             var sc = actor.AddGameComponent<ActorComponent>();
-            var ac = actor.AddGameComponent<ActorComponent>();
             var testSc = actor.GetGameComponent<ActorComponent>();
-            var testAc = actor.GetGameComponent<ActorComponent>();
             // Asset that the scene component we added added is the same that is returned afterwards
             Assert.True(testSc == sc, "testSc == sc");
-            Assert.True(testAc == ac, "testAc == ac");
-            
-            // assert that adding a new actor component did not put it on a new gameobject
             yield return null;
         }
         
@@ -59,7 +49,7 @@ namespace Tests.Runtime.Broilerplate {
             // we assert in another test that the adding works
             var cp1 = actor.AddGameComponent<ActorComponent>();
             var cp2 = actor.AddGameComponent<ActorComponent>();
-            // ssert that we have 2 components now
+            // assert that we have 2 components now
             Assert.True(actor.NumComponents == 2, "actor.NumComponents == 2");
             
             Object.Destroy(cp1);
@@ -84,6 +74,80 @@ namespace Tests.Runtime.Broilerplate {
             
             yield return null;
         }
+        
+        [UnityTest]
+        public IEnumerator TestActorIntegrityMeasures() {
+            var actorObject = new GameObject("Test Actor");
+            var actorChild = new GameObject("Actor Child");
+            actorChild.transform.parent = actorObject.transform;
+
+            var actorGrandChild = new GameObject("Actor Grandchild");
+            actorGrandChild.transform.parent = actorChild.transform;
+            
+            var actor = instance.GetWorld().SpawnActorOn<Actor>(actorObject);
+            
+            // note: we test that we cannot add components on non-actor objects in another test, no need to repeat that here.
+
+            var ac = actor.AddGameComponent<ActorComponent>();
+            Assert.True(ac != null, "ac != null");
+            Assert.True(actor.NumComponents == 1, "actor.NumComponents == 1");
+
+            // This should still register to actor
+            ac = actorChild.AddComponent<ActorComponent>();
+            Assert.True(ac != null, "ac != null");
+            Assert.True(actor.NumComponents == 2, "actor.NumComponents == 2");
+            
+            // Doesn't matter where we add the actor component, it must find its actor
+            ac = actorGrandChild.AddComponent<ActorComponent>();
+            Assert.True(ac != null, "ac != null");
+            Assert.True(actor.NumComponents == 3, "actor.NumComponents == 3");
+
+            // change the root, this must make no difference to the component integrity measures
+            var root = new GameObject("Root");
+            actor.transform.parent = root.transform;
+
+            // None of these may throw and should find their actors
+            ac = actor.AddGameComponent<ActorComponent>();
+            Assert.True(ac != null, "ac != null");
+            ac = actorGrandChild.AddComponent<ActorComponent>();
+            Assert.True(ac != null, "ac != null");
+            
+            Assert.True(actor.NumComponents == 5, "actor.NumComponents == 3");
+            
+            yield return null;
+        }
+        
+        [UnityTest]
+        public IEnumerator TestComponentIntegrityWithNestedActors() {
+            var actorObject = new GameObject("Test Actor");
+            var nestedActorObject = new GameObject("Nested Actor");
+
+            var actor = instance.GetWorld().SpawnActorOn<Actor>(actorObject);
+            var nestedActor = instance.GetWorld().SpawnActorOn<Actor>(nestedActorObject);
+
+            var ac = actor.AddGameComponent<ActorComponent>();
+            Assert.True(ac != null, "ac != null");
+            Assert.True(ac.Owner == actor, "ac.Owner == actor");
+            
+            var nac = nestedActor.AddGameComponent<ActorComponent>();
+            Assert.True(nac != null, "nac != null");
+            Assert.True(nac.Owner == nestedActor, "nac.Owner == nestedActor");
+
+            var baseNestedObject = new GameObject("Actor Nest");
+            baseNestedObject.transform.parent = actor.transform;
+            ac = baseNestedObject.AddComponent<ActorComponent>();
+            Assert.True(ac != null, "ac != null");
+            Assert.True(ac.Owner == actor, "ac.Owner == actor");
+
+            var nestedNestedObject = new GameObject("Nested Actor Nest");
+            nestedNestedObject.transform.parent = nestedActor.transform;
+
+            nac = nestedNestedObject.AddComponent<ActorComponent>();
+            Assert.True(nac != null, "nac != null");
+            Assert.True(nac.Owner == nestedActor, "nac.Owner == nestedActor");
+            
+            yield return null;
+        }
 
         [UnityTest]
         public IEnumerator TestDetachedActorIsDestroyed() {
@@ -100,51 +164,13 @@ namespace Tests.Runtime.Broilerplate {
         }
         
         [UnityTest]
-        public IEnumerator TestAddActorComponentOnChildObjectThrows() {
-            var go = new GameObject("Test Actor");
-            var actor = instance.GetWorld().SpawnActorOn<Actor>(go);
-            var sc = actor.AddGameComponent<ActorComponent>();
-
-            // this actually throws in ActorComponent.Awake() but unity catches that and
-            // turns it into a log message therefore we have to do a LogAssert.
-            var ac = sc.gameObject.AddComponent<ActorComponent>();
-            LogAssert.Expect(LogType.Exception, new Regex("Actor Component must be added to the root"));
-            yield return null;
-            // again: can't assert.null because unitys null override isn't the exact same as the null expected from the assert.
-            Assert.True(ac == null, "ac == null after invalid component adding");
-        }
-        
-        [UnityTest]
         public IEnumerator TestAddComponentOnEmptyObject() {
             var go = new GameObject("None Actor");
             var sc = go.AddComponent<ActorComponent>();
+            // Assert.Throws<InvalidOperationException>(() => { sc = go.AddComponent<ActorComponent>(); });
             LogAssert.Expect(LogType.Exception, new Regex("requires an Actor component on the root object"));
             yield return null;
             Assert.True(sc == null, "sc == null after invalid component adding");
-            // because scene components delete their game object along with them
-            Assert.True(go == null, "go == null after invalid component adding");
-
-            go = new GameObject("None Actor");
-            var ac = go.AddComponent<ActorComponent>();
-            LogAssert.Expect(LogType.Exception, new Regex("requires an Actor component on the root object"));
-            yield return null;
-            Assert.True(ac == null, "ac == null after invalid component adding");
-            // actor components don't delete their game object
-            Assert.True(go != null, "go != null after invalid component adding");
-        }
-        
-        [UnityTest]
-        public IEnumerator TestSceneCompDeletesOwnGameObject() {
-            var go = new GameObject("Test Actor");
-            var actor = instance.GetWorld().SpawnActorOn<Actor>(go);
-            var sc = actor.AddGameComponent<ActorComponent>();
-            var scGo = sc.gameObject;
-            Assert.True(go != scGo, "go != scGo");
-            Object.Destroy(sc);
-            yield return null;
-            Assert.True(sc == null, "sc == null");
-            Assert.True(scGo == null, "scGo == null");
-            Assert.True(go != null, "go != null");
         }
         
         [UnityTest]
