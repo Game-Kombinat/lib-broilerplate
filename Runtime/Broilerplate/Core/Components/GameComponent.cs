@@ -60,7 +60,7 @@ namespace Broilerplate.Core.Components {
                 else {
                     Destroy(this);
                 }
-                throw new InvalidOperationException($"Component {GetType().Name} requires an Actor component on the root object!");
+                throw new InvalidOperationException($"Component {GetType().Name} requires an Actor component on the same or a parent object!");
             }
             
             if (!owner || owner != actor) {
