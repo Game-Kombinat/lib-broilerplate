@@ -56,6 +56,8 @@ namespace Broilerplate.Gameplay.Input {
         protected override void Reset() {
             base.Reset();
             actorTick.SetTickGroup(TickGroup.LateTick);
+            playerInput = GetComponent<PlayerInput>();
+            playerInput.notificationBehavior = PlayerNotifications.InvokeCSharpEvents;
         }
 
         public void ShowMouseCursor() {
