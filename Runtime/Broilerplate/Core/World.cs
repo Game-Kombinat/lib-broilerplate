@@ -128,6 +128,22 @@ namespace Broilerplate.Core {
             return t;
         }
         
+        public T SpawnActor<T>(GameObject prefab, Transform parent) where T : Actor {
+            return SpawnActor<T>(prefab, parent, Vector3.zero, Quaternion.identity);
+        }
+        
+        public T SpawnActor<T>(GameObject prefab, Transform parent, Vector3 position, Quaternion rotation) where T : Actor {
+            var a = Instantiate(prefab, parent);
+            a.transform.localPosition = position;
+            a.transform.localRotation = rotation;
+            var t = a.GetComponent<T>();
+            if (!t) {
+                throw new ActorSpawnException($"Could not spawn actor of type {typeof(T)} from Prefab called {prefab.name}");
+            }
+            RegisterActor(t);
+            return t;
+        }
+        
         public GameObject SpawnActor(GameObject prefab) {
             return SpawnActor(prefab, prefab.transform.position, prefab.transform.rotation);
         }
@@ -141,6 +157,29 @@ namespace Broilerplate.Core {
         /// <exception cref="ActorSpawnException"></exception>
         public GameObject SpawnActor(GameObject prefab, Vector3 position, Quaternion rotation) {
             var a = Instantiate(prefab, position, rotation);
+            var actors = a.GetComponentsInChildren<Actor>();
+            if (actors == null || actors.Length == 0)
+            {
+                return a;
+            }
+
+            for (int i = 0; i < actors.Length; ++i)
+            {
+                RegisterActor(actors[i]);
+            }
+            
+            return a;
+        }
+        
+        public GameObject SpawnActor(GameObject prefab, Transform parent) {
+            return SpawnActor(prefab, parent, Vector3.zero, Quaternion.identity);
+        }
+        
+        public GameObject SpawnActor(GameObject prefab, Transform parent, Vector3 position, Quaternion rotation) {
+            var a = Instantiate(prefab, parent);
+            a.transform.localPosition = position;
+            a.transform.localRotation = rotation;
+            
             var actors = a.GetComponentsInChildren<Actor>();
             if (actors == null || actors.Length == 0)
             {
