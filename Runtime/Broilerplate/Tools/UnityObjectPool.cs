@@ -9,6 +9,8 @@ namespace Broilerplate.Tools {
         private List<T> pooledObjects;
         [SerializeField]
         private bool loadPoolInAwake = false;
+        [SerializeField]
+        private bool instantiateInParent;
 
         protected virtual void Awake() {
             if (loadPoolInAwake) {
@@ -19,7 +21,14 @@ namespace Broilerplate.Tools {
         public void LoadPool() {
             pooledObjects = new List<T>(poolSize);
             for (int i = 0; i < poolSize; ++i) {
-                var instantiatedObject = Instantiate(poolingObject, Vector3.zero, Quaternion.identity);
+                T instantiatedObject;
+                if (instantiateInParent) {
+                    instantiatedObject = Instantiate(poolingObject, poolingObject.transform.parent);
+                }
+                else {
+                    instantiatedObject = Instantiate(poolingObject);
+                }
+                
                 if (postProcessor != null) {
                     postProcessor.PostProcessOnSpawn(instantiatedObject.gameObject);
                 }
