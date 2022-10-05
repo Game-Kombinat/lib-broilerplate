@@ -51,9 +51,13 @@ namespace Broilerplate.Core.Components {
             componentTick.SetEnableTick(shouldTick);
         }
 
-        public virtual void EnsureIntegrity(bool autoRegister = false) {
+        public virtual void EnsureIntegrity(bool autoRegister = false, bool ignoreMissingActor = false) {
             var actor = transform.gameObject.GetComponentInParent<Actor>();
             if (!actor) {
+                if (ignoreMissingActor) {
+                    Debug.LogWarning("You added an ActorComponent to a GameObject without an Actor in the parent hierarchy. Beware!");
+                    return;
+                }
                 if (!Application.isPlaying) {
                     DestroyImmediate(this);
                 }
@@ -110,7 +114,7 @@ namespace Broilerplate.Core.Components {
         }
 
         protected virtual void Reset() {
-            EnsureIntegrity();
+            EnsureIntegrity(false, true);
         }
     }
 }
