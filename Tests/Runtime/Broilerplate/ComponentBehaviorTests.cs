@@ -96,7 +96,7 @@ namespace Tests.Runtime.Broilerplate {
             var go = new GameObject("None Actor");
             var sc = go.AddComponent<ActorComponent>();
             // Assert.Throws<InvalidOperationException>(() => { sc = go.AddComponent<ActorComponent>(); });
-            LogAssert.Expect(LogType.Exception, new Regex("requires an Actor component on the root object"));
+            LogAssert.Expect(LogType.Exception, new Regex("requires an Actor component on the"));
             yield return null;
             Assert.True(sc == null, "sc == null after invalid component adding");
         }
