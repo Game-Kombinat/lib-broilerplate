@@ -25,7 +25,7 @@ namespace Broilerplate.Core {
 
         public bool HasBegunPlaying { get; private set; } = false;
 
-        private readonly List<GameComponent> registeredComponents = new List<GameComponent>();
+        private readonly List<ActorComponent> registeredComponents = new List<ActorComponent>();
 
 
         public TickFunc ActorTick => actorTick;
@@ -100,7 +100,7 @@ namespace Broilerplate.Core {
             world = inWorld;
         }
 
-        public T GetGameComponent<T>() where T : GameComponent {
+        public T GetGameComponent<T>() where T : ActorComponent {
             for (int i = 0; i < registeredComponents.Count; ++i) {
                 if (registeredComponents[i] is T) {
                     return (T)registeredComponents[i];
@@ -110,7 +110,7 @@ namespace Broilerplate.Core {
             return null;
         }
 
-        public T AddGameComponent<T>() where T : GameComponent {
+        public T AddGameComponent<T>() where T : ActorComponent {
             var comp = gameObject.AddComponent<T>();
             if (!Application.isPlaying) {
                 // otherwise Awake() is called and that calls EnsureIntegrity
@@ -174,7 +174,7 @@ namespace Broilerplate.Core {
                 // This is happening on root actors that have no parent.
                 // get all components that may already exist because an actor was deleted and make them register themselves here.
                 // This would also update components below this actor, if we added it to an existing actor
-                var childs = GetComponentsInChildren<GameComponent>();
+                var childs = GetComponentsInChildren<ActorComponent>();
                 for (int i = 0; i < childs.Length; ++i) {
                     childs[i].EnsureIntegrity(true);
                 }
@@ -182,7 +182,7 @@ namespace Broilerplate.Core {
             
         }
 
-        public void RegisterComponent(GameComponent component) {
+        public void RegisterComponent(ActorComponent component) {
             if (registeredComponents.Contains(component)) {
                 Debug.LogWarning($"Attempted to register component {component.GetType().Name} twice on actor {name}");
                 return;
@@ -196,7 +196,7 @@ namespace Broilerplate.Core {
             }
         }
 
-        public void UnregisterComponent(GameComponent component) {
+        public void UnregisterComponent(ActorComponent component) {
             registeredComponents.Remove(component);
             if (!component.IsBeingDestroyed) {
                 Debug.LogWarning("Unregistered a component that wasn't being destroyed. Will destroy it now.");
@@ -208,7 +208,7 @@ namespace Broilerplate.Core {
             // there is no default behaviour
         }
 
-        public bool HasComponent(GameComponent component) {
+        public bool HasComponent(ActorComponent component) {
             for (int i = 0; i < registeredComponents.Count; i++) {
                 var comp = registeredComponents[i];
                 if (comp == component) {
