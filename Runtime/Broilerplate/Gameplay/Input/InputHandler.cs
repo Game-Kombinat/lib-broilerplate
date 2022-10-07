@@ -65,8 +65,7 @@ namespace Broilerplate.Gameplay.Input {
             singleAxisEvents.Clear();
             doubleAxisEvents.Clear();
             touchEvents.Clear();
-            
-            playerController.GetWorld().UnregisterTickFunc(inputTick);
+            UnregisterTickFunc();
         }
         
         public void BindAction(string action, ButtonActivatorType type, ButtonPress callback) {
@@ -158,6 +157,10 @@ namespace Broilerplate.Gameplay.Input {
             // we ignore the "can ever tick" flag here because
             // we know that we must tick this
             inputTick.SetEnableTick(shouldTick);
+        }
+
+        public void UnregisterTickFunc() {
+            playerController.GetWorld().UnregisterTickFunc(inputTick);
         }
 
         private void InputActionReceived(InputAction.CallbackContext ctx) {

@@ -92,6 +92,12 @@ namespace Broilerplate.Core {
             actorTick.SetEnableTick(shouldTick);
         }
 
+        public void UnregisterTickFunc() {
+            if (world) {
+                world.UnregisterTickFunc(actorTick);
+            }
+        }
+
         /// <summary>
         /// Called before BeginPlay either when actor is spawned or fetched from existing world.
         /// </summary>

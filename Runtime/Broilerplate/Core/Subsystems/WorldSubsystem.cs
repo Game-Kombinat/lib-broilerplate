@@ -21,6 +21,21 @@ namespace Broilerplate.Core.Subsystems {
             
         }
 
+        public void SetEnableTick(bool shouldTick) {
+            if (!worldTick.CanEverTick) {
+                Debug.LogWarning($"Attempted to change tick on WorldSubsystem that never ticks: {name}");
+                return;
+            }
+
+            worldTick.SetEnableTick(shouldTick);
+        }
+
+        public void UnregisterTickFunc() {
+            if (world) {
+                world.UnregisterTickFunc(worldTick);
+            }
+        }
+
         public World GetWorld() => world;
         public int GetRuntimeId() {
             return GetInstanceID();
