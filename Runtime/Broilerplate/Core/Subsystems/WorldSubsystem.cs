@@ -36,6 +36,14 @@ namespace Broilerplate.Core.Subsystems {
             }
         }
 
+        public virtual void OnEnableTick() {
+            
+        }
+
+        public virtual void OnDisableTick() {
+            
+        }
+
         public World GetWorld() => world;
         public int GetRuntimeId() {
             return GetInstanceID();

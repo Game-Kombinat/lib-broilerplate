@@ -57,6 +57,8 @@ namespace Broilerplate.Ticking {
 
         private float lastTick;
 
+        private int tickTargetHash;
+
         /// <summary>
         /// If false, this tick function will never tick at all.
         /// It will not be registered with the Tick Loop
@@ -104,11 +106,11 @@ namespace Broilerplate.Ticking {
             if (!(obj is TickFunc otherFunc)) {
                 return false;
             }
-            return otherFunc.tickTarget == tickTarget;
+            return otherFunc.tickTargetHash == tickTargetHash;
         }
 
         public override int GetHashCode() {
-            return tickTarget.GetHashCode();
+            return tickTargetHash;
         }
 
         public bool CanTickNow(float currentTime) {
@@ -127,6 +129,12 @@ namespace Broilerplate.Ticking {
 
         public void SetEnableTick(bool shouldTick) {
             tickEnabled = shouldTick;
+            if (shouldTick) {
+                tickTarget?.OnEnableTick();
+            }
+            else {
+                tickTarget?.OnDisableTick();
+            }
         }
 
         public void SetTickTarget(ITickable tickable) {
@@ -135,6 +143,7 @@ namespace Broilerplate.Ticking {
                 return;
             }
             tickTarget = tickable;
+            tickTargetHash = tickable.GetHashCode();
         }
 
         public void SetTickGroup(TickGroup inTickGroup) {

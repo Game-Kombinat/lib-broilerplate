@@ -98,12 +98,27 @@ namespace Broilerplate.Core {
             }
         }
 
+        public virtual void OnEnableTick() {
+            
+        }
+
+        public virtual void OnDisableTick() {
+            
+        }
+
         /// <summary>
         /// Called before BeginPlay either when actor is spawned or fetched from existing world.
         /// </summary>
         /// <param name="inWorld"></param>
         public void SetWorld(World inWorld) {
             world = inWorld;
+        }
+
+        public void SetGameObjectActive(bool active) {
+            gameObject.SetActive(active);
+            for (int i = 0; i < registeredComponents.Count; i++) {
+                registeredComponents[i].OnGameObjectStatusChange(active);
+            }
         }
 
         public T GetGameComponent<T>() where T : ActorComponent {
@@ -133,17 +148,23 @@ namespace Broilerplate.Core {
         public int GetRuntimeId() {
             return GetInstanceID();
         }
+        
+        public void Kill() {
+            for (int i = 0; i < registeredComponents.Count; ++i) {
+                // First thing, get rid of the tick funcs to avoid shenanigans in the tickloop.
+                // This ultimately happens before unity schedules OnDestroy calls.
+                registeredComponents[i].UnregisterTickFunc();
+            }
+            Destroy(this);
+        }
 
         protected virtual void DestroyActor() {
             if (world) {
                 for (int i = 0; i < registeredComponents.Count; ++i) {
-                    // Destroy components that are part of the actor but not part of the game object hierarchy.
-                    // These are detached scene components. And they would not be caught when destroying the game object
-                    // of this actor
+                    // Destroy components manually because they might be detached and will not be
+                    // auto-removed when gameObject is destroyed.
                     var comp = registeredComponents[i];
-                    if (comp.transform.root != transform) {
-                        Destroy(comp);
-                    }
+                    Destroy(comp);
                 }
 
                 world.UnregisterTickFunc(actorTick);

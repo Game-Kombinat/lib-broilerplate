@@ -38,6 +38,10 @@ namespace Broilerplate.Core {
             timeData.thisTick = DateTime.Now;
             timeData.deltaTime = (float)(timeData.thisTick - timeData.lastTick).TotalSeconds * timeData.timeDilation;
             timeData.timeSinceWorldBooted += timeData.deltaTime;
+            HandleTickChanges();
+        }
+
+        public void HandleTickChanges() {
             // before ticks are called, process any new adds that have been made.
             tickManager.HandleScheduledTickAdds();
             // Handle ticks that want removing.

@@ -1,5 +1,6 @@
 ﻿using System;
 using Broilerplate.Ticking;
+using NaughtyAttributes;
 using UnityEngine;
 
 namespace Broilerplate.Core.Components {
@@ -14,6 +15,8 @@ namespace Broilerplate.Core.Components {
         
         [SerializeField]
         protected TickFunc componentTick = new TickFunc();
+
+        private World world;
 
         public TickFunc ComponentTick => componentTick;
 
@@ -34,6 +37,9 @@ namespace Broilerplate.Core.Components {
         /// </summary>
         [SerializeField]
         protected bool detachAtRuntime;
+
+        [SerializeField, ShowIf(nameof(detachAtRuntime))]
+        protected bool keepPosition = true;
         
         public ActorComponent() {
             componentTick.SetCanEverTick(true);
@@ -48,6 +54,7 @@ namespace Broilerplate.Core.Components {
         public virtual void BeginPlay() {
             HasBegunPlaying = true;
             componentTick.SetTickTarget(this);
+            world = owner.GetWorld();
             GetWorld().RegisterTickFunc(componentTick);
             if (detachAtRuntime) {
                 DetachFromActor();
@@ -60,15 +67,20 @@ namespace Broilerplate.Core.Components {
         
         protected virtual void Decommission() {
             UnregisterTickFunc();
+            IsBeingDestroyed = true;
             // when called from OnDestroy this will become a null pointer before the deletion can be processed.
             // But it's okay, we don't dereference it. And all it does is destroying them anyway.
             // Would be a double-destroy
             owner.UnregisterComponent(this);
+            // If we're detached and are being decommissioned we clear out everything
+            if (detachAtRuntime) {
+                Destroy(gameObject);
+            }
         }
 
 
         protected virtual void OnDestroy() {
-            IsBeingDestroyed = true;
+            
             // when the world is already destroyed there is no use in trying to do anything here.
             if (GetWorld() != null) {
                 Decommission();
@@ -86,6 +98,10 @@ namespace Broilerplate.Core.Components {
             }
             
             componentTick.SetEnableTick(shouldTick);
+        }
+
+        public virtual void OnGameObjectStatusChange(bool isActive) {
+            
         }
 
         public virtual void EnsureIntegrity(bool autoRegister = false, bool ignoreMissingActor = false) {
@@ -115,7 +131,7 @@ namespace Broilerplate.Core.Components {
         }
 
         public World GetWorld() {
-            return owner == null ? null : owner.GetWorld();
+            return world;
         }
 
         public int GetRuntimeId() {
@@ -129,14 +145,22 @@ namespace Broilerplate.Core.Components {
             }
         }
 
+        public virtual void OnEnableTick() {
+            
+        }
+
+        public virtual void OnDisableTick() {
+            
+        }
+
         /// <summary>
-        /// This will break this scene component out of its actors game object hierarchy
+        /// This will break this actor component out of its actors game object hierarchy
         /// but will retain the connection to its actor. And the actor will keep this component
         /// in its component list regardless.
         /// </summary>
         public void DetachFromActor() {
             if (transform != Owner.transform) {
-                transform.SetParent(null, true);
+                transform.SetParent(null, keepPosition);
             }
         }
         
