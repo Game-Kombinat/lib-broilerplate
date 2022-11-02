@@ -10,7 +10,7 @@ namespace Broilerplate.Gameplay {
     public class Pawn : Actor {
 
         private ControllerBase controller;
-        private InputHandler inputs;
+        private IInputHandler inputs;
         private MovementComponent movementComponent;
 
         public override void BeginPlay() {
@@ -32,7 +32,7 @@ namespace Broilerplate.Gameplay {
 
         public bool IsPlayerControlled() => controller is PlayerController;
 
-        public virtual InputHandler GetInputHandler() {
+        public virtual IInputHandler GetInputHandler() {
             return inputs;
         }
 
@@ -44,7 +44,7 @@ namespace Broilerplate.Gameplay {
             return movementComponent;
         }
 
-        protected virtual void SetupInputs(InputHandler inputHandler) {
+        protected virtual void SetupInputs(IInputHandler inputHandler) {
             // base function. override this to bind your inputs
         }
 
