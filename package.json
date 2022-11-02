@@ -5,7 +5,6 @@
     "description": "Contains a bunch of Boilerplate code and opinions on how to make a game to allow you to make games faster that's akin to Unreals game framework",
     "unity": "2021.2",
     "dependencies": {
-        "com.unity.inputsystem": "1.3.0",
         "com.unity.cinemachine": "2.8.4",
         "com.dbrizov.naughtyattributes": "2.0.4",
         "com.github.siccity.xnode": "1.8.0"
