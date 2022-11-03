@@ -27,15 +27,23 @@ namespace Broilerplate.Editor.Broilerplate.Data {
             if (obj == null) {
                 return false;
             }
-            
-            var window = GetWindow<DataTableEditor>();
-            if (!window) {
-                window = CreateWindow<DataTableEditor>("Data Table Editor");
+
+
+            var openEditors = Resources.FindObjectsOfTypeAll<DataTableEditor>();
+            for (int i = 0; i < openEditors.Length; i++) {
+                var ed = openEditors[i];
+                if (ed.iDataTable == obj) {
+                    ed.Prepare(obj as ScriptableObject);
+                    ed.Show();
+                    ed.Focus();
+                    return true;
+                }
             }
+            var window = CreateWindow<DataTableEditor>("Data Table Editor");
 
             window.Prepare(obj as ScriptableObject);
-
             window.Show();
+            window.Focus();
             return true;
         }
 
