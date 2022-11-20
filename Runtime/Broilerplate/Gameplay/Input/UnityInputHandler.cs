@@ -45,7 +45,6 @@ namespace Broilerplate.Gameplay.Input {
             releaseEvents.Clear();
             singleAxisEvents.Clear();
             doubleAxisEvents.Clear();
-            touchEvents.Clear();
             UnregisterTickFunc();
         }
         
@@ -85,7 +84,7 @@ namespace Broilerplate.Gameplay.Input {
             if (!singleAxisEvents.ContainsKey(action)) {
                 singleAxisEvents.Add(action, new AxisInputData<float>());
             }
-            singleAxisEvents[action].Inputs += callback;
+            singleAxisEvents[action].InputCallbacks += callback;
             
         }
         
@@ -93,7 +92,11 @@ namespace Broilerplate.Gameplay.Input {
             if (!doubleAxisEvents.ContainsKey(action)) {
                 doubleAxisEvents.Add(action, new AxisInputData<Vector2>());
             }
-            doubleAxisEvents[action].Inputs += callback;
+            doubleAxisEvents[action].InputCallbacks += callback;
+        }
+
+        public void BindPointerPositionUpdate(Action<Vector2> callback) {
+            throw new NotImplementedException("Got no time rn to implement this correctly. hang in tight! Meanwhile use Mouse device access directly if you must.");
         }
 
         public bool ProcessAxisInput() {
@@ -112,14 +115,6 @@ namespace Broilerplate.Gameplay.Input {
             foreach (var kvp in doubleAxisEvents) {
                 kvp.Value.Invoke();
                 if (kvp.Value.lastInput != Vector2.zero) {
-                    repeatNextFrame = true;
-                }
-            }
-            
-            foreach (var kvp in touchEvents) {
-                kvp.Value.Invoke();
-                
-                if (kvp.Value.lastInput.position != Vector2.zero) {
                     repeatNextFrame = true;
                 }
             }
@@ -184,14 +179,6 @@ namespace Broilerplate.Gameplay.Input {
                     }
                     
                     doubleAxisEvents[ctx.action.name].UpdateInput(ctx.ReadValue<Vector2>());
-                    SetEnableTick(true);
-                }
-                else if (ctx.valueType == typeof(Touch)) {
-                    if (!touchEvents.ContainsKey(ctx.action.name)) {
-                        return;
-                    }
-                    
-                    touchEvents[ctx.action.name].UpdateInput(ctx.ReadValue<Touch>());
                     SetEnableTick(true);
                 }
             }
