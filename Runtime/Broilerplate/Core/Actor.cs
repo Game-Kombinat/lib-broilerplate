@@ -148,6 +148,10 @@ namespace Broilerplate.Core {
         public int GetRuntimeId() {
             return GetInstanceID();
         }
+
+        public bool Is<T>() {
+            return typeof(T).IsAssignableFrom(GetType());
+        }
         
         public void Kill() {
             for (int i = 0; i < registeredComponents.Count; ++i) {
