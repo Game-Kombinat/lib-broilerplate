@@ -12,10 +12,13 @@ namespace Broilerplate.Bt.Nodes.Data.Graph {
     public abstract class ContextDataAccessNode : BaseNode {
         
         #if UNITY_EDITOR
-        // Used within the editor code to detect renames
         [SerializeField]
         [HideInInspector]
+        // Used within the editor code to detect renames
+        // ReSharper disable once NotAccessedField.Local
+        #pragma warning disable CS0414
         private int nameListIndex = 0;
+        #pragma warning restore CS0414
         #endif
 
         /// <summary>
