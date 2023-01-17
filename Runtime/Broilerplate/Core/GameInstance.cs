@@ -27,7 +27,6 @@ namespace Broilerplate.Core {
             // todo:
             // get additional level overrides from asset bundles
             
-            Debug.Log("OnGameLoad, It should be loaded only once");
             var broilerConfigFile = BroilerConfiguration.GetConfiguration();
 
             if (gameInstance) {
@@ -120,9 +119,6 @@ namespace Broilerplate.Core {
 
         public void BootstrapWorldForLevel(Scene scene) {
             var gmPrefab = GameInstanceConfiguration.GetGameModeFor(scene);
-            if (!gmPrefab) {
-                throw new System.Exception($"Scene without game mode being loaded! {scene.path}");
-            }
 
             world = Instantiate(GameInstanceConfiguration.WorldType);
             world.BootWorld(gmPrefab, GameInstanceConfiguration.WorldSubsystems);
