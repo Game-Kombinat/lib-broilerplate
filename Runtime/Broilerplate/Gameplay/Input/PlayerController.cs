@@ -74,7 +74,7 @@ namespace Broilerplate.Gameplay.Input {
         
         public void HideMouseCursor() {
             Cursor.visible = false;
-            Cursor.lockState = CursorLockMode.Confined;
+            Cursor.lockState = CursorLockMode.Locked;
         }
 
         public override void ControlPawn(Pawn pawn) {
