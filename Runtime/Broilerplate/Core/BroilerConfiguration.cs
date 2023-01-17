@@ -5,6 +5,7 @@ using Broilerplate.Core.Subsystems;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
 
 namespace Broilerplate.Core {
     [Serializable]
@@ -20,6 +21,10 @@ namespace Broilerplate.Core {
     /// Configures the Broiler!
     /// </summary>
     public class BroilerConfiguration : ScriptableObject {
+        [Tooltip("When false you will have to call GameInstance.BootstrapWorldForLevel manually. Otherwise it gets called as soon as level is ready.")]
+        [SerializeField]
+        private bool autoBootstrapWorld = true;
+        
         [SerializeField]
         private GameMode defaultGameModePrefab;
 
@@ -58,6 +63,8 @@ namespace Broilerplate.Core {
         public LevelReference StartupScene => startupScene;
 
         public float DefaultMinimumLoadingTime => defaultMinimumLoadingTime;
+
+        public bool AutoBootstrapWorld => autoBootstrapWorld;
 
         public GameMode GetGameModeFor(Scene scene) {
             for (int i = 0; i < gameModeOverrides.Count; ++i) {

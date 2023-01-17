@@ -112,10 +112,18 @@ namespace Broilerplate.Core {
             // create a new world from project config
             // create a mapping scene => world.
             // call RegisterActors() on world to kick off managed BeginPlay() callbacks.
+            if (GameInstanceConfiguration.AutoBootstrapWorld) {
+                BootstrapWorldForLevel(scene);
+            }
+            
+        }
+
+        public void BootstrapWorldForLevel(Scene scene) {
             var gmPrefab = GameInstanceConfiguration.GetGameModeFor(scene);
             if (!gmPrefab) {
                 throw new System.Exception($"Scene without game mode being loaded! {scene.path}");
             }
+
             world = Instantiate(GameInstanceConfiguration.WorldType);
             world.BootWorld(gmPrefab, GameInstanceConfiguration.WorldSubsystems);
             world.SpawnPlayer(GetInitialLocalPlayer());
