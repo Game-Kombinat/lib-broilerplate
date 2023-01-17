@@ -72,6 +72,19 @@ namespace Broilerplate.Core {
                 p = GetWorld().SpawnActor(pawnType, spawnPosition, spawnRotation);
             }
             else {
+                var testPawn = GetWorld().FindActorOfType<Pawn>();
+
+                if (testPawn) {
+                    if (!testPawn.HasBegunPlaying) {
+                        // that happens when the pawn was in the scene already. But the BeginPlay calls for in-scene actors are usually called after all
+                        // the game mode bootstrapping is done.
+                        // So we have to manually call it here.
+                        testPawn.SetWorld(GetWorld());
+                        testPawn.BeginPlay();
+                    }
+                    return testPawn;
+                }
+                // No pawn found, spawn a default one
                 var go = new GameObject("Default Player Pawn");
                 p = GetWorld().SpawnActorOn<Pawn>(go);
             }
