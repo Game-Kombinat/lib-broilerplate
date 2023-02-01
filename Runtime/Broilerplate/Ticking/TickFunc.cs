@@ -113,13 +113,17 @@ namespace Broilerplate.Ticking {
             return tickTargetHash;
         }
 
+        public bool IsInTickGroup(TickGroup other) {
+            return (tickGroup & other) != TickGroup.None;
+        }
+
         public bool CanTickNow(float currentTime) {
             return tickEnabled && lastTick + tickInterval <= currentTime;
         }
 
         public void Tick(float deltaTime, float currentTime) {
             lastTick = currentTime;
-            tickTarget.ProcessTick(deltaTime);
+            tickTarget.ProcessTick(deltaTime, tickGroup);
         }
 
         public void OnReset() {

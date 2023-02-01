@@ -73,8 +73,7 @@ namespace Broilerplate.Gameplay {
             componentTick.SetTickGroup(TickGroup.LateTick);
         }
 
-        public override void ProcessTick(float deltaTime) {
-            base.ProcessTick(deltaTime);
+        public override void ProcessTick(float deltaTime, TickGroup tickGroup) {
             if (!IgnoreMovementInput) {
                 InternalApplyInput(deltaTime);
             }

@@ -34,7 +34,7 @@ namespace Broilerplate.Core {
             actorTick.SetCanEverTick(true);
         }
 
-        private void Awake() {
+        protected virtual void Awake() {
             Reset();
         }
 
@@ -235,7 +235,7 @@ namespace Broilerplate.Core {
             }
         }
 
-        public virtual void ProcessTick(float deltaTime) {
+        public virtual void ProcessTick(float deltaTime, TickGroup tickGroup) {
             // there is no default behaviour
         }
 

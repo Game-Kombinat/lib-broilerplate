@@ -40,18 +40,16 @@ namespace Broilerplate.Ticking {
         public void HandleScheduledTickRemovals() {
             for (int i = 0; i < scheduledRemovals.Count; ++i) {
                 var tickFunc = scheduledRemovals[i];
-                switch (tickFunc.TickGroup) {
-                    case TickGroup.Tick:
-                        ticks.Remove(tickFunc);
-                        break;
-                    case TickGroup.LateTick:
-                        lateTicks.Remove(tickFunc);
-                        break;
-                    case TickGroup.Physics:
-                        physicsTicks.Remove(tickFunc);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException($"Unknown tick group: {tickFunc.TickGroup}");
+                if (tickFunc.IsInTickGroup(TickGroup.Tick)) {
+                    ticks.Remove(tickFunc);
+                }
+
+                if (tickFunc.IsInTickGroup(TickGroup.LateTick)) {
+                    lateTicks.Remove(tickFunc);
+                }
+
+                if (tickFunc.IsInTickGroup(TickGroup.Physics)) {
+                    physicsTicks.Remove(tickFunc);
                 }
             }
             
@@ -64,21 +62,20 @@ namespace Broilerplate.Ticking {
             bool sortPhysTicks = false;
             for (int i = 0; i < scheduledAdds.Count; ++i) {
                 var tickFunc = scheduledAdds[i];
-                switch (tickFunc.TickGroup) {
-                    case TickGroup.Tick:
-                        ticks.Add(tickFunc);
-                        sortTicks = true;
-                        break;
-                    case TickGroup.LateTick:
-                        lateTicks.Add(tickFunc);
-                        sortLateTicks = true;
-                        break;
-                    case TickGroup.Physics:
-                        physicsTicks.Add(tickFunc);
-                        sortPhysTicks = true;
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException($"Unknown tick group: {tickFunc.TickGroup}");
+                
+                if (tickFunc.IsInTickGroup(TickGroup.Tick)) {
+                    ticks.Add(tickFunc);
+                    sortTicks = true;
+                }
+
+                if (tickFunc.IsInTickGroup(TickGroup.LateTick)) {
+                    lateTicks.Add(tickFunc);
+                    sortLateTicks = true;
+                }
+
+                if (tickFunc.IsInTickGroup(TickGroup.Physics)) {
+                    physicsTicks.Add(tickFunc);
+                    sortPhysTicks = true;
                 }
             }
 
@@ -94,19 +91,6 @@ namespace Broilerplate.Ticking {
 
             if (sortPhysTicks) {
                 physicsTicks.Sort();
-            }
-        }
-
-        private TickList GetListForTickGroup(TickGroup group) {
-            switch (group) {
-                case TickGroup.Tick:
-                    return ticks;
-                case TickGroup.LateTick:
-                    return lateTicks;
-                case TickGroup.Physics:
-                    return physicsTicks;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(@group), @group, null);
             }
         }
     }

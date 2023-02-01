@@ -92,7 +92,7 @@ namespace Broilerplate.Gameplay.Input {
             controller.GetWorld().RegisterTickFunc(tickFunc);
         }
 
-        public void ProcessTick(float deltaTime) {
+        public void ProcessTick(float deltaTime, TickGroup tickGroup) {
             // unity default input doesn't do events so we have to poll everything each frame manually
             // Update pointer position first, then run through the bindings.
             PointerPositionUpdates?.Invoke(UnityEngine.Input.mousePosition);

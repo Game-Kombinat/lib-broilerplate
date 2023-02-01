@@ -17,7 +17,7 @@ namespace Broilerplate.Core.Subsystems {
             }
         }
 
-        public virtual void ProcessTick(float deltaTime) {
+        public virtual void ProcessTick(float deltaTime, TickGroup tickGroup) {
             
         }
 

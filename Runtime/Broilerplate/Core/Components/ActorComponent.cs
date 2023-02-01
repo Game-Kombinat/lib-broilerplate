@@ -61,7 +61,7 @@ namespace Broilerplate.Core.Components {
             }
         }
         
-        public virtual void ProcessTick(float deltaTime) {
+        public virtual void ProcessTick(float deltaTime, TickGroup tickGroup) {
             // there is no default behaviour
         }
         

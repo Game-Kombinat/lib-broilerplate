@@ -1,7 +1,7 @@
 ﻿namespace Broilerplate.Ticking {
     public interface ITickable {
         
-        void ProcessTick(float deltaTime);
+        void ProcessTick(float deltaTime, TickGroup tickGroup);
         void SetEnableTick(bool shouldTick);
         void UnregisterTickFunc();
 
