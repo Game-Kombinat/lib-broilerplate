@@ -66,7 +66,7 @@ namespace Broilerplate.Gameplay {
         /// Process the input data here.
         /// Ie. pipe through to a CharacterMovement component or whatever else drives this pawn movement.
         /// </summary>
-        protected abstract void InternalApplyInput(float deltaTime);
+        protected abstract void InternalApplyInput(float deltaTime, TickGroup tickGroup);
 
         protected override void Reset() {
             base.Reset();
@@ -75,7 +75,7 @@ namespace Broilerplate.Gameplay {
 
         public override void ProcessTick(float deltaTime, TickGroup tickGroup) {
             if (!IgnoreMovementInput) {
-                InternalApplyInput(deltaTime);
+                InternalApplyInput(deltaTime, tickGroup);
             }
         }
     }

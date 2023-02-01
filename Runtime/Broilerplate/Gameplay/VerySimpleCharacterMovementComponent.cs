@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Broilerplate.Ticking;
+using UnityEngine;
 
 namespace Broilerplate.Gameplay {
     [RequireComponent(typeof(CharacterController))]
@@ -61,7 +62,7 @@ namespace Broilerplate.Gameplay {
             }
         }
 
-        protected override void InternalApplyInput(float deltaTime) {
+        protected override void InternalApplyInput(float deltaTime, TickGroup tickGroup) {
             frameMovement.y = Mathf.Max(frameMovement.y - gravity * (deltaTime * 2), -gravity);
             var pawnTransform = Pawn.GetControlTransform();
             var pawnForward = pawnTransform.forward;
