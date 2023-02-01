@@ -12,11 +12,11 @@ namespace Broilerplate.Ticking {
             subjects.Sort((a, b) => a.Priority.CompareTo(b.Priority));
         }
 
-        public void Tick(float deltaTime, float timeSinceWorldBoot) {
+        public void Tick(float deltaTime, float timeSinceWorldBoot, TickGroup currentGroup) {
             for (int i = 0; i < subjects.Count; ++i) {
                 var tick = subjects[i];
                 if (tick.CanTickNow(timeSinceWorldBoot)) {
-                    tick.Tick(deltaTime, timeSinceWorldBoot);
+                    tick.Tick(deltaTime, timeSinceWorldBoot, currentGroup);
                 }
             }
         }

@@ -30,10 +30,6 @@ namespace Broilerplate.Core {
 
         public TickFunc ActorTick => actorTick;
 
-        public Actor() {
-            actorTick.SetCanEverTick(true);
-        }
-
         protected virtual void Awake() {
             Reset();
         }
@@ -58,7 +54,7 @@ namespace Broilerplate.Core {
             // register tick function to world.
             if (HasTickFunc && actorTick.CanEverTick) {
                 actorTick.SetTickTarget(this);
-                world.RegisterTickFunc(actorTick);;
+                world.RegisterTickFunc(actorTick);
             }
 
             // why do this? So we know the owner actor has been initialised with BeginPlay before its components.

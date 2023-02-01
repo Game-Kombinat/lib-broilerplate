@@ -1,12 +1,12 @@
-﻿using System;
-using Broilerplate.Core;
+﻿using Broilerplate.Core;
+using Broilerplate.Ticking;
 using UnityEditor;
 using UnityEngine;
 
 namespace Broilerplate.Gameplay {
     public class PlayerStart : Actor {
         public PlayerStart() {
-            actorTick.SetCanEverTick(false);
+            actorTick.SetTickGroup(TickGroup.None);
         }
         
 #if UNITY_EDITOR

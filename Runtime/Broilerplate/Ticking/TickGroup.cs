@@ -6,11 +6,11 @@ namespace Broilerplate.Ticking {
     /// Mandated by Unity, we have 3 tick groups at our disposal.
     /// Any tickfunc can be called in multiple tick groups
     /// </summary>
-    [Flags]
+    [Flags, Serializable]
     public enum TickGroup {
         None = 0,
-        Tick =  1 << 1,
-        LateTick = 1 << 2,
-        Physics = 1 << 3
+        Tick = 1 << 0,
+        LateTick = 1 << 1,
+        Physics = 1 << 2
     }
 }

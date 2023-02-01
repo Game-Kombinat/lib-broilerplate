@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Broilerplate.Core;
 
 namespace Broilerplate.Ticking {
@@ -17,15 +16,15 @@ namespace Broilerplate.Ticking {
 
         public virtual void Tick() {
             world.OnNewTick();
-            ticks.Tick(world.timeData.deltaTime, world.timeData.timeSinceWorldBooted);
+            ticks.Tick(world.timeData.deltaTime, world.timeData.timeSinceWorldBooted, TickGroup.Tick);
         }
 
         public virtual void PhysicsTick() {
-            physicsTicks.Tick(world.timeData.deltaTime, world.timeData.timeSinceWorldBooted);
+            physicsTicks.Tick(world.timeData.deltaTime, world.timeData.timeSinceWorldBooted, TickGroup.Physics);
         }
 
         public virtual void LateTick() {
-            lateTicks.Tick(world.timeData.deltaTime, world.timeData.timeSinceWorldBooted);
+            lateTicks.Tick(world.timeData.deltaTime, world.timeData.timeSinceWorldBooted, TickGroup.LateTick);
         }
 
         public void RegisterTickFunc(TickFunc tickFunc) {

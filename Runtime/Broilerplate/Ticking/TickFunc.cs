@@ -10,12 +10,6 @@ namespace Broilerplate.Ticking {
     /// </summary>
     [Serializable]
     public class TickFunc {
-        /// <summary>
-        /// If false, this tick function will never tick at all.
-        /// It will not be registered with the Tick Loop
-        /// </summary>
-        [SerializeField]
-        private bool canEverTick = false;
 
         /// <summary>
         /// Determines if we start with ticking enabled by default.
@@ -33,7 +27,7 @@ namespace Broilerplate.Ticking {
         /// When this tick is executed.
         /// </summary>
         [SerializeField]
-        private TickGroup tickGroup;
+        private TickGroup tickGroup = TickGroup.Tick;
 
         /// <summary>
         /// Interval in seconds in which the tick is executed.
@@ -63,7 +57,7 @@ namespace Broilerplate.Ticking {
         /// If false, this tick function will never tick at all.
         /// It will not be registered with the Tick Loop
         /// </summary>
-        public bool CanEverTick => canEverTick;
+        public bool CanEverTick => tickGroup != TickGroup.None;
 
         /// <summary>
         /// Determines if we start with ticking enabled by default.
@@ -76,7 +70,7 @@ namespace Broilerplate.Ticking {
         public bool TickEnabled => tickEnabled;
 
         /// <summary>
-        /// When this tick is executed.
+        /// A mask of all tick groups this TickFunc is part of.
         /// </summary>
         public TickGroup TickGroup => tickGroup;
 
@@ -98,10 +92,6 @@ namespace Broilerplate.Ticking {
         /// </summary>
         public ITickable TickTarget => tickTarget;
 
-        public void SetCanEverTick(bool allowTick) {
-            canEverTick = allowTick;
-        }
-
         public override bool Equals(object obj) {
             if (!(obj is TickFunc otherFunc)) {
                 return false;
@@ -121,9 +111,9 @@ namespace Broilerplate.Ticking {
             return tickEnabled && lastTick + tickInterval <= currentTime;
         }
 
-        public void Tick(float deltaTime, float currentTime) {
+        public void Tick(float deltaTime, float currentTime, TickGroup currentGroup) {
             lastTick = currentTime;
-            tickTarget.ProcessTick(deltaTime, tickGroup);
+            tickTarget.ProcessTick(deltaTime, currentGroup);
         }
 
         public void OnReset() {

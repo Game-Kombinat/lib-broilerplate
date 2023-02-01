@@ -3,7 +3,6 @@ using UnityEngine;
 
 namespace Broilerplate.Ticking {
     public class UnityTicker : MonoBehaviour {
-        [SerializeField]
         private TickManager tickManager;
 
         public void SetTickManager(TickManager tm) {

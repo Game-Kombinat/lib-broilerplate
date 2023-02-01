@@ -40,11 +40,7 @@ namespace Broilerplate.Core.Components {
 
         [SerializeField, ShowIf(nameof(detachAtRuntime))]
         protected bool keepPosition = true;
-        
-        public ActorComponent() {
-            componentTick.SetCanEverTick(true);
-        }
-        
+
         protected virtual void Awake() {
             // Have to have this for components added during runtime.
             // Editor-time authored components will be handled from actors Awake()

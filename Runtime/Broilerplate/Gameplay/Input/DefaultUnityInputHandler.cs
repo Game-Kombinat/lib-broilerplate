@@ -85,7 +85,6 @@ namespace Broilerplate.Gameplay.Input {
         public DefaultUnityInputHandler(PlayerController controller) {
             playerController = controller;
             tickFunc = new TickFunc();
-            tickFunc.SetCanEverTick(true);
             tickFunc.SetStartWithTickEnabled(true);
             tickFunc.SetTickTarget(this);
             tickFunc.SetTickGroup(TickGroup.Tick);
