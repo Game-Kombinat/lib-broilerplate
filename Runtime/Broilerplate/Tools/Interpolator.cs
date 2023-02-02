@@ -84,6 +84,25 @@ namespace Broilerplate.Tools {
             return currentValue;
         }
 
+        public float SampleEaseOut() {
+            float alpha = Sample();
+            return 1 - ((1 - alpha) * (1 - alpha));
+        }
+
+        public float SampleEaseIn() {
+            float alpha = Sample();
+            return alpha * alpha;
+        }
+
+        public float SampleEaseInOut() {
+            float alpha = Sample();
+            return Mathf.Lerp(SampleEaseIn(), SampleEaseOut(), alpha);
+        }
+
+        public float SampleOneMinus() {
+            return 1 - Sample();
+        }
+
         public float SampleTime() {
             return Mathf.Clamp((Time.time - startTime), 0, duration) ;
         }
