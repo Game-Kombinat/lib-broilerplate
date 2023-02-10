@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Broilerplate.Core;
+using UnityEngine;
 
 namespace Broilerplate.Ticking {
     public class TickManager {
@@ -10,20 +11,49 @@ namespace Broilerplate.Ticking {
         private readonly List<TickFunc> scheduledAdds = new List<TickFunc>();
         private readonly List<TickFunc> scheduledRemovals = new List<TickFunc>();
 
+        public bool IsPaused { get; private set; }
+
+        private float unityTimescaleAtPause;
+        
+        public void Pause(bool stopUnityTime = false) {
+            IsPaused = true;
+            if (stopUnityTime) {
+                unityTimescaleAtPause = Time.timeScale;
+                Time.timeScale = 0;
+            }
+        }
+
+        public void Resume() {
+            IsPaused = false;
+            if (unityTimescaleAtPause > 0) {
+                Time.timeScale = unityTimescaleAtPause;
+                unityTimescaleAtPause = 0;
+            }
+        }
+
         public TickManager(World world) {
             this.world = world;
         }
 
         public virtual void Tick() {
+            if (IsPaused) {
+                return;
+            }
             world.OnNewTick();
             ticks.Tick(world.timeData.deltaTime, world.timeData.timeSinceWorldBooted, TickGroup.Tick);
         }
 
         public virtual void PhysicsTick() {
+            if (IsPaused) {
+                return;
+            }
             physicsTicks.Tick(world.timeData.deltaTime, world.timeData.timeSinceWorldBooted, TickGroup.Physics);
         }
 
         public virtual void LateTick() {
+            if (IsPaused) {
+                return;
+            }
             lateTicks.Tick(world.timeData.deltaTime, world.timeData.timeSinceWorldBooted, TickGroup.LateTick);
         }
 
