@@ -21,6 +21,7 @@ namespace Broilerplate.Tools {
 
         public bool DirectionIsZeroOne => stateA == 0;
         public float Duration => duration;
+        public bool IsPaused { get; private set; }
 
         public void Pause() {
             if(timeOfPause != 0f) {
@@ -28,6 +29,7 @@ namespace Broilerplate.Tools {
             }
             Sample();
             timeOfPause = Time.time;
+            IsPaused = true;
         }
 
         public void Resume() {
@@ -36,6 +38,7 @@ namespace Broilerplate.Tools {
             }
             startTime = Time.time-(timeOfPause-startTime);
             timeOfPause = 0f;
+            IsPaused = false;
         }
 
         public void StartFade01(bool reset = false) {
@@ -59,6 +62,7 @@ namespace Broilerplate.Tools {
         {
             stateA = 1f - t;
             stateB = t;
+            currentValue = t;
             startTime = Time.time - duration;
         }
 
