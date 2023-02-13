@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Broilerplate.Core.Components;
 using Broilerplate.Core.Exceptions;
 using Broilerplate.Core.Subsystems;
 using Broilerplate.Gameplay;
@@ -103,6 +104,11 @@ namespace Broilerplate.Core {
                 liveActors[i].SetWorld(this);
                 liveActors[i].BeginPlay();
             }
+        }
+        
+        public T SpawnActor<T>(string objectName) where T : Actor {
+            var obj = new GameObject(objectName);
+            return SpawnActorOn<T>(obj);
         }
 
         public T SpawnActor<T>(T prefab) where T : Actor
