@@ -164,5 +164,9 @@ namespace Broilerplate.Core.Components {
         public virtual void OnOwnerActorChanged(Actor newActor) {
             // owner = newActor;
         }
+        
+        public T GetGameMode<T>() where T : GameMode {
+            return Owner.GetGameMode<T>();
+        }
     }
 }

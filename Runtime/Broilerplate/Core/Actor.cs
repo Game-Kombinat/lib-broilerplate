@@ -245,5 +245,9 @@ namespace Broilerplate.Core {
 
             return false;
         }
+        
+        public T GetGameMode<T>() where T : GameMode {
+            return (T)GetWorld().GetGameMode();
+        }
     }
 }
