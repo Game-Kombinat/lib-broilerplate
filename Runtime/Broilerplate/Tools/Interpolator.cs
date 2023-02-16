@@ -58,8 +58,7 @@ namespace Broilerplate.Tools {
             Force(0);
         }
 
-        private void Force(float t)
-        {
+        public void Force(float t) {
             stateA = 1f - t;
             stateB = t;
             currentValue = t;
