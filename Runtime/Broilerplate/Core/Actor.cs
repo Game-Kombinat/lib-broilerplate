@@ -201,7 +201,7 @@ namespace Broilerplate.Core {
                 // This is happening on root actors that have no parent.
                 // get all components that may already exist because an actor was deleted and make them register themselves here.
                 // This would also update components below this actor, if we added it to an existing actor
-                var childs = GetComponentsInChildren<ActorComponent>();
+                var childs = GetComponentsInChildren<ActorComponent>(true);
                 for (int i = 0; i < childs.Length; ++i) {
                     childs[i].EnsureIntegrity(true);
                 }
