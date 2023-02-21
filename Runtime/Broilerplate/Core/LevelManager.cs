@@ -21,7 +21,8 @@ namespace Broilerplate.Core {
         public static event Action<Scene> BeforeLevelUnload;
 
         private static string loadingScene;
-        
+        public static Scene ActiveScene => SceneManager.GetActiveScene();
+
         public static void LoadLevelAsync(string levelName, Action<float> progress = null, float minimumLoadingTime = -1) {
             if (minimumLoadingTime < 0) {
                 minimumLoadingTime = GameInstance.GetInstance().GameInstanceConfiguration.DefaultMinimumLoadingTime;
