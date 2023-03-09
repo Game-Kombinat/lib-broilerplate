@@ -17,6 +17,10 @@ namespace Broilerplate.Core.Subsystems {
             }
         }
 
+        public virtual void OnDestroy() {
+
+        }
+
         public virtual void ProcessTick(float deltaTime, TickGroup tickGroup) {
             
         }

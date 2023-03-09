@@ -54,6 +54,8 @@ namespace Broilerplate.Core {
                 UnregisterActor(liveActors[i--]);
             }
             Destroy(unityTickerInstance.gameObject);
+            
+            ClearSubSystems();
         }
 
         public virtual void BootWorld(GameMode gameModePrefab, List<WorldSubsystem> worldSubsystems) {
@@ -105,7 +107,15 @@ namespace Broilerplate.Core {
                 liveActors[i].BeginPlay();
             }
         }
-        
+
+        private void ClearSubSystems() {
+            for (int i = 0; i < subsystems.Count; i++) {
+                Destroy(subsystems[i]);
+            }
+            
+            subsystems.Clear();
+        }
+
         public T SpawnActor<T>(string objectName) where T : Actor {
             var obj = new GameObject(objectName);
             return SpawnActorOn<T>(obj);
