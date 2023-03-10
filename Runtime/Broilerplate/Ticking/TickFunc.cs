@@ -140,6 +140,12 @@ namespace Broilerplate.Ticking {
             tickTargetHash = tickable.GetHashCode();
         }
 
+        public void ClearTickTarget() {
+            tickTarget = null;
+            // info: we need the tick target hash to remain because if this tickfunc is scheduled for removal
+            // from the tick loop then the hash is used to find it in the tick list
+        }
+
         public void SetTickGroup(TickGroup inTickGroup) {
             tickGroup = inTickGroup;
         }
