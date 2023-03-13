@@ -68,11 +68,11 @@ namespace Broilerplate.Tools {
         void StartFade(float a, float b, bool reset) {
             stateA = a;
             stateB = b;
-            if(reset)
-            {
+            if (reset) {
                 //Just start at A and go to B
                 startTime = Time.time;
-            } else {
+            }
+            else {
                 //If the interpolator gets interrupted in the middle of a fading, continue at the same position
                 startTime = Mathf.Lerp(Time.time, Time.time - duration, Mathf.InverseLerp(stateA, stateB, currentValue));
             }
@@ -123,21 +123,25 @@ namespace Broilerplate.Tools {
             return CoroutineJobs.StartJob(new Interpolator(duration)._Anim8(directionIs01,onSample,onFinish));
         }
 
-        private IEnumerator _Anim8(bool directionIs01, Action<float> onSample, Action onFinish)
-        {
-            if(onSample == null) {
+        private IEnumerator _Anim8(bool directionIs01, Action<float> onSample, Action onFinish) {
+            if (onSample == null) {
                 yield return new WaitForSecondsRealtime(duration);
-            } else {
-                if(directionIs01) {
-                    StartFade01(true);
-                } else {
-                    StartFade10(true);
+            }
+            else {
+                if (directionIs01) {
+                    Force0();
+                    StartFade01();
+                }
+                else {
+                    Force1();
+                    StartFade10();
                 }
 
-                while(!IsDone) {
+                while (!IsDone) {
                     onSample(Sample());
                     yield return null;
                 }
+
                 onSample(Sample());
             }
 
