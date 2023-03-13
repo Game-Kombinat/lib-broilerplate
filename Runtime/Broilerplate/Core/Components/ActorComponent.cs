@@ -9,7 +9,7 @@ namespace Broilerplate.Core.Components {
     /// Its lifecycle is controlled by the actors lifecycle, giving you exact knowledge
     /// when and how this component will be initialised and destroyed.
     /// </summary>
-    public class ActorComponent : MonoBehaviour, ITickable, IThing {
+    public class ActorComponent : MonoBehaviour, ITickable, IThing, IInitialise {
         [SerializeField]
         protected Actor owner;
         
@@ -25,6 +25,8 @@ namespace Broilerplate.Core.Components {
         public bool IsBeingDestroyed { get; private set; } = false;
         
         public bool HasBegunPlaying { get; private set; } = false;
+        
+        public bool HadLateBeginPlay { get; private set; } = false;
 
         /// <summary>
         /// If true, detaches this component from its parent actor in the transform hierarchy.
@@ -47,6 +49,11 @@ namespace Broilerplate.Core.Components {
             EnsureIntegrity(true);
         }
 
+        /// <summary>
+        /// Called with the BeginPlay call on the actor this component is attached to.
+        /// It's guaranteed to be called after the actors BeginPlay
+        /// See <see cref="Actor.BeginPlay"/>
+        /// </summary>
         public virtual void BeginPlay() {
             HasBegunPlaying = true;
             componentTick.SetTickTarget(this);
@@ -55,6 +62,14 @@ namespace Broilerplate.Core.Components {
             if (detachAtRuntime) {
                 DetachFromActor();
             }
+        }
+
+        /// <summary>
+        /// Stage 2 BeginPlay. This is called at the end of the frame the actor for this component
+        /// was spawned in. It's guaranteed to be called after the actors LateBeginPlay.
+        /// </summary>
+        public virtual void LateBeginPlay() {
+            HadLateBeginPlay = true;
         }
         
         public virtual void ProcessTick(float deltaTime, TickGroup tickGroup) {

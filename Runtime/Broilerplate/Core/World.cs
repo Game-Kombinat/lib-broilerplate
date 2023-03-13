@@ -88,13 +88,13 @@ namespace Broilerplate.Core {
             var newSystem = Instantiate(system);
             subsystems.Add(newSystem);
             newSystem.SetWorld(this);
-            newSystem.BeginPlay();
+            ScheduleBeginPlay(newSystem);
         }
 
         public virtual void RegisterActor(Actor actor) {
             liveActors.Add(actor);
             actor.SetWorld(this);
-            actor.BeginPlay();
+            ScheduleBeginPlay(actor);
         }
 
         public virtual void BeginPlay() {
@@ -104,7 +104,7 @@ namespace Broilerplate.Core {
                     continue;
                 }
                 liveActors[i].SetWorld(this);
-                liveActors[i].BeginPlay();
+                ScheduleBeginPlay(liveActors[i]);
             }
         }
 
@@ -234,6 +234,10 @@ namespace Broilerplate.Core {
 
         public void RegisterTickFunc(TickFunc tickFunc) {
             tickManager.RegisterTickFunc(tickFunc);
+        }
+        
+        public void ScheduleBeginPlay(IInitialise i) {
+            tickManager.ScheduleBeginPlay(i);
         }
 
         public void SpawnPlayer(PlayerInfo playerInfo) {

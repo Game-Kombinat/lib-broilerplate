@@ -11,6 +11,8 @@ namespace Broilerplate.Ticking {
         private readonly List<TickFunc> scheduledAdds = new List<TickFunc>();
         private readonly List<TickFunc> scheduledRemovals = new List<TickFunc>();
 
+        private readonly Queue<IInitialise> scheduledLateBeginPlays = new Queue<IInitialise>();
+
         public bool IsPaused { get; private set; }
 
         private float unityTimescaleAtPause;
@@ -55,6 +57,7 @@ namespace Broilerplate.Ticking {
                 return;
             }
             lateTicks.Tick(world.timeData.deltaTime, world.timeData.timeSinceWorldBooted, TickGroup.LateTick);
+            HandleScheduledLateBeginPlays();
         }
 
         public void RegisterTickFunc(TickFunc tickFunc) {
@@ -83,6 +86,25 @@ namespace Broilerplate.Ticking {
             }
             
             scheduledRemovals.Clear();
+        }
+
+        public void ScheduleBeginPlay(IInitialise i) {
+            if (!i.HasBegunPlaying) {
+                i.BeginPlay();
+            }
+            
+            scheduledLateBeginPlays.Enqueue(i);
+        }
+
+        public void HandleScheduledLateBeginPlays() {
+            // order is important, this is why this is a queue.
+            // we want fi-fo. We get fi-fo.
+            while (scheduledLateBeginPlays.Count > 0) {
+                var begin = scheduledLateBeginPlays.Dequeue();
+                if (!begin.HadLateBeginPlay) {
+                    begin.LateBeginPlay();
+                }
+            }
         }
         
         public void HandleScheduledTickAdds() {

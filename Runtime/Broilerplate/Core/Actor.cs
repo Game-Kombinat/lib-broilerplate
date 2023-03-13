@@ -11,7 +11,7 @@ namespace Broilerplate.Core {
     /// Every prefab needs to have an actor on its root object.
     /// </summary>
     [DisallowMultipleComponent]
-    public class Actor : MonoBehaviour, ITickable, IThing {
+    public class Actor : MonoBehaviour, ITickable, IThing, IInitialise {
         protected World world;
 
 
@@ -24,6 +24,8 @@ namespace Broilerplate.Core {
         public bool HasTickFunc => actorTick != null;
 
         public bool HasBegunPlaying { get; private set; } = false;
+        
+        public bool HadLateBeginPlay { get; private set; } = false;
 
         private readonly List<ActorComponent> registeredComponents = new List<ActorComponent>();
 
@@ -46,7 +48,7 @@ namespace Broilerplate.Core {
 
         /// <summary>
         /// Called when this actor is spawned.
-        /// This function replaces Start() with a managed function.
+        /// This method is similar to Awake() but within the execution order the broiler.
         /// Also works on actors already in the scene.
         /// Be sure to call the super function to ensure everything is working!
         /// </summary>
@@ -61,16 +63,20 @@ namespace Broilerplate.Core {
             // Now we get a known execution order.
             for (int i = 0; i < registeredComponents.Count; ++i) {
                 var comp = registeredComponents[i];
-                // If this component was originally part of another actor (we inserted a nested actor into an actors hierarchy)
-                // It doesn't need to get a new BeginPlay call.
-                if (!comp.HasBegunPlaying) {
-                    comp.BeginPlay();
-                }
+                world.ScheduleBeginPlay(comp);
             }
 
             // mark as ready so when components get added now, during runtime,
             // they get BeginPlay called right away.
             HasBegunPlaying = true;
+        }
+
+        /// <summary>
+        /// Called at the end of the frame this actor had been spawned in.
+        /// This method is similar Start() but functions within the execution order of the broiler.
+        /// </summary>
+        public virtual void LateBeginPlay() {
+            HadLateBeginPlay = true;
         }
 
         /// <summary>
@@ -125,6 +131,18 @@ namespace Broilerplate.Core {
             }
 
             return null;
+        }
+
+        public int GetGameComponents<T>(T[] cache) where T : ActorComponent {
+            int hits = 0;
+            for (int i = 0; i < cache.Length; ++i) {
+                if (registeredComponents.Count > i && registeredComponents[i] is T comp) {
+                    cache[i] = comp;
+                    hits++;
+                }
+            }
+
+            return hits;
         }
 
         public T AddGameComponent<T>() where T : ActorComponent {

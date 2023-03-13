@@ -3,6 +3,9 @@ using Broilerplate.Ticking;
 using UnityEngine;
 
 namespace Broilerplate.Core.Subsystems {
+    /// <summary>
+    /// Subsystem that is being instantiated along with the world.
+    /// </summary>
     public class WorldSubsystem : SubsystemBase, ITickable, IThing {
         [SerializeField]
         protected TickFunc worldTick;
