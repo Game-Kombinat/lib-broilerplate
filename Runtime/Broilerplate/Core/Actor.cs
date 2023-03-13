@@ -235,9 +235,7 @@ namespace Broilerplate.Core {
 
             registeredComponents.Add(component);
             if (HasBegunPlaying) {
-                if (!component.HasBegunPlaying) {
-                    component.BeginPlay();
-                }
+                world.ScheduleBeginPlay(component);
             }
         }
 
