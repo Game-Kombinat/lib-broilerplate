@@ -53,12 +53,6 @@ namespace Broilerplate.Core {
         /// Be sure to call the super function to ensure everything is working!
         /// </summary>
         public virtual void BeginPlay() {
-            // register tick function to world.
-            if (HasTickFunc && actorTick.CanEverTick) {
-                actorTick.SetTickTarget(this);
-                world.RegisterTickFunc(actorTick);
-            }
-
             // why do this? So we know the owner actor has been initialised with BeginPlay before its components.
             // Now we get a known execution order.
             for (int i = 0; i < registeredComponents.Count; ++i) {
@@ -77,6 +71,11 @@ namespace Broilerplate.Core {
         /// </summary>
         public virtual void LateBeginPlay() {
             HadLateBeginPlay = true;
+            // register tick function to world.
+            if (HasTickFunc && actorTick.CanEverTick) {
+                actorTick.SetTickTarget(this);
+                world.RegisterTickFunc(actorTick);
+            }
         }
 
         /// <summary>

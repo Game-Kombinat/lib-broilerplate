@@ -56,9 +56,8 @@ namespace Broilerplate.Core.Components {
         /// </summary>
         public virtual void BeginPlay() {
             HasBegunPlaying = true;
-            componentTick.SetTickTarget(this);
             world = owner.GetWorld();
-            GetWorld().RegisterTickFunc(componentTick);
+            
             if (detachAtRuntime) {
                 DetachFromActor();
             }
@@ -70,6 +69,8 @@ namespace Broilerplate.Core.Components {
         /// </summary>
         public virtual void LateBeginPlay() {
             HadLateBeginPlay = true;
+            componentTick.SetTickTarget(this);
+            GetWorld().RegisterTickFunc(componentTick);
         }
         
         public virtual void ProcessTick(float deltaTime, TickGroup tickGroup) {
