@@ -11,9 +11,9 @@ namespace Broilerplate.Core.Subsystems {
         protected TickFunc worldTick;
         
         protected World world;
-        
-        public override void BeginPlay() {
-            base.BeginPlay();
+
+        public override void LateBeginPlay() {
+            base.LateBeginPlay();
             if (worldTick.CanEverTick) {
                 worldTick.SetTickTarget(this);
                 world.RegisterTickFunc(worldTick);
