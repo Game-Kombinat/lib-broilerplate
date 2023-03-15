@@ -39,8 +39,7 @@ namespace Broilerplate.Gameplay.View {
             mainCamera = Camera.main;
             if (!mainCamera) {
                 if (mainCameraType) {
-                    // This is a "unity native" type. We can't spawn it via world.
-                    mainCamera = Instantiate(mainCameraType);
+                    mainCamera = GetWorld().SpawnActor(mainCameraType.gameObject).GetComponent<Camera>();
                     var testBrain = mainCamera.gameObject.GetComponentInChildren<CinemachineBrain>();
                     if (!testBrain) {
                         Debug.LogWarning("the camera type in CameraManager does not have a CinemachineBrain on it. Camera management may not work correctly.");
