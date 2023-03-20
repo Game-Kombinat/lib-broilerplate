@@ -83,5 +83,9 @@ namespace Broilerplate.Core {
         public static void SetLoadingScene(string ls) {
             loadingScene = ls;
         }
+
+        public static void ReloadActiveScene(Action<float> progress = null, float minLoadingTime = -1) {
+            LoadLevelAsync(ActiveScene.name, progress, minLoadingTime);
+        }
     }
 }
