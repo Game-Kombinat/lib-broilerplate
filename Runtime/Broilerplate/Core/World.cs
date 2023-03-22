@@ -49,7 +49,7 @@ namespace Broilerplate.Core {
             tickManager.HandleScheduledTickRemovals();
         }
 
-        public void ShutdownWorld() {
+        public virtual void ShutdownWorld() {
             for (int i = 0; i < liveActors.Count; i++) {
                 UnregisterActor(liveActors[i--]);
             }
