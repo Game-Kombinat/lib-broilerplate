@@ -95,7 +95,7 @@ namespace Broilerplate.Core {
             return null;
         }
 
-        private void OnLevelUnloading(Scene unloadingScene) {
+        private void OnLevelUnloading(string unloadingScene) {
             // get world for scene, call some handling, destroy world.
             // unity does not do this because world isn't under the scene root.
             if (world) {
@@ -105,7 +105,7 @@ namespace Broilerplate.Core {
         }
 
         private void OnLevelLoaded(Scene scene) {
-            if (scene.path == this.GameInstanceConfiguration.LoadingScene?.ScenePath) {
+            if (scene.path == GameInstanceConfiguration.LoadingScene?.ScenePath) {
                 return;
             }
             // create a new world from project config
@@ -121,6 +121,7 @@ namespace Broilerplate.Core {
             var gmPrefab = GameInstanceConfiguration.GetGameModeFor(scene);
 
             world = Instantiate(GameInstanceConfiguration.WorldType);
+            world.name = $"{world.GetType().Name} for {scene.name}";
             world.BootWorld(gmPrefab, GameInstanceConfiguration.WorldSubsystems);
             world.SpawnPlayer(GetInitialLocalPlayer());
             // Finalise bootstrapping game mode with player controller having been initialised.
