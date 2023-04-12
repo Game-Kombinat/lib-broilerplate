@@ -19,13 +19,6 @@ namespace Broilerplate.Core {
 
         private List<PlayerController> playerControllers = new List<PlayerController>();
         
-        
-        /// <summary>
-        /// Called after when booting the world.
-        /// This happens after player controller was initialised and before
-        /// actors get their BeginPlay calls.
-        /// </summary>
-        public virtual void LateBeginPlay() {}
 
         // register player
         public PlayerController GetPlayerControllerType() {
