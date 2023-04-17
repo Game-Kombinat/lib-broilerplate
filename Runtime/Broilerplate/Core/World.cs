@@ -70,6 +70,12 @@ namespace Broilerplate.Core {
             unityTickerInstance = unityTicker.AddComponent<UnityTicker>();
             unityTickerInstance.SetTickManager(tickManager);
             
+            if (worldSubsystems != null) {
+                for (int i = 0; i < worldSubsystems.Count; i++) {
+                    RegisterSubsystem(worldSubsystems[i]);
+                }
+            }
+            
             liveActors.Clear();
             liveActors.AddRange(FindObjectsOfType<Actor>());
             // A world implementation might have overridden the creation of the game mode, so check if it's already there.
@@ -77,11 +83,6 @@ namespace Broilerplate.Core {
                 gameMode = gameModePrefab ? SpawnActor(gameModePrefab, Vector3.zero,Quaternion.identity) : SpawnActorOn<GameMode>(new GameObject("Default Game Mode"));
             }
             unityTicker.transform.SetParent(gameMode.transform);
-            if (worldSubsystems != null) {
-                for (int i = 0; i < worldSubsystems.Count; i++) {
-                    RegisterSubsystem(worldSubsystems[i]);
-                }
-            }
         }
 
         public virtual void RegisterSubsystem(WorldSubsystem system) {
