@@ -122,17 +122,20 @@ namespace Broilerplate.Core {
             return SpawnActorOn<T>(obj);
         }
 
-        public T SpawnActor<T>(T prefab) where T : Actor
-        {
+        public T SpawnActor<T>(T prefab) where T : Actor {
             return SpawnActor(prefab, Vector3.zero, Quaternion.identity);
         }
         
         public T SpawnActor<T>(T prefab, Vector3 position, Quaternion rotation) where T : Actor {
             var a = Instantiate(prefab, position, rotation);
             RegisterActor(a);
-
             return a;
-
+        }
+        
+        public T SpawnActor<T>(T prefab, Transform parent) where T : Actor {
+            var a = Instantiate(prefab, parent);
+            RegisterActor(a);
+            return a;
         }
         
         public T SpawnActor<T>(GameObject prefab) where T : Actor {
