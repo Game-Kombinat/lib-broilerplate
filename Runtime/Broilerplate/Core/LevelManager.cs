@@ -79,7 +79,10 @@ namespace Broilerplate.Core {
             if (unloadLoadingScene) {
                 yield return SceneManager.UnloadSceneAsync(loadingScene);
             }
-            OnLevelLoaded?.Invoke(SceneManager.GetSceneByName(targetLevelName));
+
+            var activeScene = SceneManager.GetSceneByName(targetLevelName);
+            SceneManager.SetActiveScene(activeScene);
+            OnLevelLoaded?.Invoke(activeScene);
         }
         
         private static IEnumerator UnloadLevelRoutine(string currentSceneName) {
