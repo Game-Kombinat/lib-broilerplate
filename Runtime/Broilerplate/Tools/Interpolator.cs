@@ -152,6 +152,7 @@ namespace Broilerplate.Tools {
     public class CoroutineJobs : MonoBehaviour {
         private static CoroutineJobs localInstance; // scene local jobs
         private static CoroutineJobs globalInstance; // jobs that run across multiple scenes
+        public static CoroutineJobs LocalInstance => localInstance;
 
         private static CoroutineJobs GetJobs(bool global) {
             if (global) {
