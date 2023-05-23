@@ -1,4 +1,4 @@
-namespace Broilerplate.Tools.Fsm.Transitional {
+namespace Broilerplate.Tools.Fsm {
     public delegate void StateFunc();
     internal class FsmState<TStateId> {
         public FsmState(TStateId id, StateFunc enter, StateFunc tick, StateFunc lateTick, StateFunc exit) {
