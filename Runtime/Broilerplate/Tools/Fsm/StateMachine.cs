@@ -12,10 +12,18 @@ namespace Broilerplate.Tools.Fsm {
         private readonly Dictionary<TStateId, FsmState<TStateId>> states = new Dictionary<TStateId, FsmState<TStateId>>();
         public TStateId CurrentState => currentState != null ? currentState.id : default;
 
+        public TStateId PreviousState {
+            get;
+            protected set;
+        }
+
         public bool StateNeedsTicking => currentState != null && currentState.tick != null;
 
         public void Add(TStateId state, StateFunc onEnter, StateFunc update, StateFunc onExit) {
             states.Add(state, new FsmState<TStateId>(state, onEnter, update, null, onExit));
+        }
+        public void Add(TStateId state, StateFunc onEnter, StateFunc update, StateFunc lateUpdate, StateFunc onExit) {
+            states.Add(state, new FsmState<TStateId>(state, onEnter, update, lateUpdate, onExit));
         }
 
         public void Tick() {
@@ -31,22 +39,33 @@ namespace Broilerplate.Tools.Fsm {
             if (!states.ContainsKey(state)) {
                 throw new StateMachineException("Trying to switch to unknown state " + state);
             }
-            
-            bool wouldReEnter = currentState.id.CompareTo(state) == 0;
-            if (wouldReEnter && !reEnter) {
-                Debug.LogWarning($"Trying to switch to {state} but that is already current state");
-                return;
-            }
 
-            if (wouldReEnter) {
-                ReEnterState();
-                return;
+            if (currentState != null) {
+                bool wouldReEnter = currentState.id.CompareTo(state) == 0;
+                if (wouldReEnter && !reEnter) {
+                    Debug.LogWarning($"Trying to switch to {state} but that is already current state");
+                    return;
+                }
+
+                if (wouldReEnter) {
+                    // Re-Enter will not update previous state. Obviously.
+                    ReEnterState();
+                    return;
+                }
             }
 
             var newState = states[state];
             currentState?.exit?.Invoke();
+            if (currentState != null) {
+                PreviousState = currentState.id;
+            }
+            
             newState.enter?.Invoke();
             currentState = newState;
+        }
+
+        public void SwitchToPreviousState() {
+            SwitchTo(PreviousState);
         }
 
         private void ReEnterState() {
