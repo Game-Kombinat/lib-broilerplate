@@ -4,6 +4,9 @@ using UnityEngine;
 
 //Courtesy of PhantomLab
 namespace Broilerplate.Tools {
+    /// <summary>
+    /// It's interpolating between 0 and 1 over a given duration.
+    /// </summary>
     public class Interpolator {
         public Interpolator(float duration = 2f) {
             this.duration = duration;

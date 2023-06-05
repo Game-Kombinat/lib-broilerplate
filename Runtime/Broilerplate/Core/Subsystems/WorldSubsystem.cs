@@ -4,7 +4,8 @@ using UnityEngine;
 
 namespace Broilerplate.Core.Subsystems {
     /// <summary>
-    /// Subsystem that is being instantiated along with the world.
+    /// Subsystem whose life-cycle is tied to the life cycle of a world.
+    /// That is: It gets loaded with a scene and destroyed with the unloading of a scene.
     /// </summary>
     public class WorldSubsystem : SubsystemBase, ITickable, IThing {
         [SerializeField]

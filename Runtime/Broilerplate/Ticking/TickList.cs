@@ -1,6 +1,10 @@
 ﻿using System.Collections.Generic;
 
 namespace Broilerplate.Ticking {
+    /// <summary>
+    /// This is a list that contains <see cref="TickFunc"/> references.
+    /// There is one TickList for every relevant update loop (Pre Physics, Physics, Late Update)
+    /// </summary>
     public class TickList {
         public readonly List<TickFunc> subjects = new List<TickFunc>();
 

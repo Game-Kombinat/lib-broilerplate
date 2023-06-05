@@ -7,20 +7,42 @@ namespace Broilerplate.Core {
     /// <summary>
     /// This is the lowest level unit of Broilerplate.
     /// It gives you a singular entry point from which everything is started.
+    /// From here it's possible to access the currently running world and consequently
+    /// the runtime API of Broilerplate.
     /// </summary>
     public class GameInstance : ScriptableObject {
 
+        /// <summary>
+        /// This is created once when the game boots first-time and remains in memory
+        /// until the game is shut down.
+        /// </summary>
         private static GameInstance gameInstance;
+        
+        /// <summary>
+        /// Currently loaded world object.
+        /// </summary>
         // todo: multi world setup: make dictionary scene => world hand handle that.
         private World world;
 
+        /// <summary>
+        /// The configuration file we source our game modes from.
+        /// </summary>
         public BroilerConfiguration GameInstanceConfiguration { get; private set; }
 
+        /// <summary>
+        /// List of players in the given world.
+        /// Currently this isn't tied into anything. Long-term plan is to
+        /// tie it into the input management to automate that.
+        /// </summary>
         // Will probably be used for multiplayer concept, right now its gonna be only 1.
         private List<PlayerInfo> localPlayers = new List<PlayerInfo>();
         
         public int TotalLocalPlayers => localPlayers.Count;
 
+        /// <summary>
+        /// This is the entry-point for broilerplate.
+        /// It creates the game instance and handles first time boot after the first scene was loaded.
+        /// </summary>
         [RuntimeInitializeOnLoadMethod]
         public static void OnGameLoad() 
         {
@@ -37,6 +59,10 @@ namespace Broilerplate.Core {
             gameInstance.InitiateGame(broilerConfigFile);
         }
 
+        /// <summary>
+        /// Static to get the game instance.
+        /// </summary>
+        /// <returns></returns>
         public static GameInstance GetInstance() {
             return gameInstance;
         }
@@ -86,6 +112,10 @@ namespace Broilerplate.Core {
             return p;
         }
 
+        /// <summary>
+        /// Retrieves the PlayerInfo with ID 0.
+        /// </summary>
+        /// <returns></returns>
         private PlayerInfo GetPlayerOne() {
             for (int i = 0; i < localPlayers.Count; i++) {
                 if (localPlayers[i].PlayerId == 0) {
@@ -95,7 +125,12 @@ namespace Broilerplate.Core {
             return null;
         }
 
-        private void OnLevelUnloading(string unloadingScene) {
+        /// <summary>
+        /// Callback when a level is unloaded.
+        /// Calls ShutdownWorld and cleans up.
+        /// </summary>
+        /// <param name="unloadingScene"></param>
+        private void OnLevelUnloading(Scene unloadingScene) {
             // get world for scene, call some handling, destroy world.
             // unity does not do this because world isn't under the scene root.
             if (world) {
@@ -104,6 +139,11 @@ namespace Broilerplate.Core {
             }
         }
 
+        /// <summary>
+        /// Callback when a level is loaded.
+        /// Calls BootstrapWorld when auto-bootstrapping is enabled.
+        /// </summary>
+        /// <param name="scene"></param>
         private void OnLevelLoaded(Scene scene) {
             if (scene.path == GameInstanceConfiguration.LoadingScene?.ScenePath) {
                 return;
@@ -117,6 +157,12 @@ namespace Broilerplate.Core {
             
         }
 
+        /// <summary>
+        /// Handles the process of bootstrapping the world and therefore
+        /// the whole broilerplate runtime API.
+        /// That's actors, subsystems, game modes, player pawn spawning.
+        /// </summary>
+        /// <param name="scene"></param>
         public void BootstrapWorldForLevel(Scene scene) {
             var gmPrefab = GameInstanceConfiguration.GetGameModeFor(scene);
 
@@ -130,6 +176,10 @@ namespace Broilerplate.Core {
             world.BeginPlay();
         }
 
+        /// <summary>
+        /// Get the currently loaded world.
+        /// </summary>
+        /// <returns></returns>
         public World GetWorld() {
             return world;
         }

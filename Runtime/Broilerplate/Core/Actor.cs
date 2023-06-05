@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Broilerplate.Core.Components;
 using Broilerplate.Ticking;
 using UnityEngine;
@@ -8,13 +7,28 @@ using Debug = UnityEngine.Debug;
 namespace Broilerplate.Core {
     /// <summary>
     /// Base class for all gameplay relevant things that are in the world.
-    /// Every prefab needs to have an actor on its root object.
+    /// Making use of an Actor will sort you into the life cycle of the broilerplate framework.
+    /// You will use BeginPlay instead of Awake, LateBeginPlay instead of Start and ProcessTick() instead of any
+    /// of the Unity update callbacks.
+    /// <br/><br/>
+    /// Awake can still be used (it's virtual) for logic that needs to happen even before BeginPlay.
+    /// Define the tick loop in the TickFunc that comes with every actor.
+    /// You can define one or more at once.
+    /// <br/><br/>
+    /// Actors can be hierarchical. Meaning you can have actors within actors.
+    /// Parent actors can be Accessed via the ParentActor property.
+    /// <see cref="ActorComponent"/>s will assume the closest parent actor as their owner automatically.
+    /// <br/><br/>
+    /// Actors are <see cref="IInitialise"/>, meaning they will receive BeginPlay and LateBeginPlay calls.
     /// </summary>
     [DisallowMultipleComponent]
     public class Actor : MonoBehaviour, ITickable, IThing, IInitialise {
         protected World world;
 
 
+        /// <summary>
+        /// TickFunc that is being registered with the world in this Actor LateBeginPlay.
+        /// </summary>
         [SerializeField] protected TickFunc actorTick = new TickFunc();
 
         public int NumComponents => registeredComponents.Count;
@@ -122,6 +136,13 @@ namespace Broilerplate.Core {
             }
         }
 
+        /// <summary>
+        /// Retrieves the first-found actor component of type T on this Actor.
+        /// Since actor components can be detached, a normal GetComponentInChildren call
+        /// is not sufficient. That's why this exists.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public T GetGameComponent<T>() where T : ActorComponent {
             for (int i = 0; i < registeredComponents.Count; ++i) {
                 if (registeredComponents[i] is T) {
@@ -132,6 +153,12 @@ namespace Broilerplate.Core {
             return null;
         }
 
+        /// <summary>
+        /// Same as GetGameComponent but for all of the components of given type.
+        /// </summary>
+        /// <param name="cache"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public int GetGameComponents<T>(T[] cache) where T : ActorComponent {
             int hits = 0;
             for (int i = 0; i < cache.Length; ++i) {
@@ -144,6 +171,11 @@ namespace Broilerplate.Core {
             return hits;
         }
 
+        /// <summary>
+        /// Add an actor component of the given type dynamically.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public T AddGameComponent<T>() where T : ActorComponent {
             var comp = gameObject.AddComponent<T>();
             if (!Application.isPlaying) {
@@ -162,10 +194,18 @@ namespace Broilerplate.Core {
             return GetInstanceID();
         }
 
+        /// <summary>
+        /// Check if this actor is of the given type T
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public bool Is<T>() {
             return typeof(T).IsAssignableFrom(GetType());
         }
         
+        /// <summary>
+        /// The proper way of destroying this actor.
+        /// </summary>
         public void Kill() {
             for (int i = 0; i < registeredComponents.Count; ++i) {
                 // First thing, get rid of the tick funcs to avoid shenanigans in the tickloop.
@@ -175,6 +215,10 @@ namespace Broilerplate.Core {
             Destroy(this);
         }
 
+        /// <summary>
+        /// Encapsulates the logic of cleaning up this actor from the runtime data.
+        /// Removes tickfuncs, destroys actor components and removes their tickfuncs as well.
+        /// </summary>
         protected virtual void DestroyActor() {
             if (world) {
                 for (int i = 0; i < registeredComponents.Count; ++i) {
@@ -262,7 +306,7 @@ namespace Broilerplate.Core {
         }
         
         public T GetGameMode<T>() where T : GameMode {
-            return (T)GetWorld().GetGameMode();
+            return GetWorld().GetGameMode<T>();
         }
     }
 }

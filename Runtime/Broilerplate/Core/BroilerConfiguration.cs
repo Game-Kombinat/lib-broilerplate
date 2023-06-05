@@ -19,6 +19,9 @@ namespace Broilerplate.Core {
     
     /// <summary>
     /// Configures the Broiler!
+    /// Very tasty.
+    /// This is the configuration from which the whole framework is being constructed.
+    /// It will be auto-generated into the Resources folder if not present.
     /// </summary>
     public class BroilerConfiguration : ScriptableObject {
         [Tooltip("When false you will have to call GameInstance.BootstrapWorldForLevel manually. Otherwise it gets called as soon as level is ready.")]

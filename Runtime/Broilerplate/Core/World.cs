@@ -18,7 +18,6 @@ namespace Broilerplate.Core {
     /// And we gain lots of control.
     /// </summary>
     public class World : ScriptableObject {
-        public WorldTime timeData;
 
         private UnityTicker unityTickerInstance;
         private TickManager tickManager;
@@ -33,15 +32,6 @@ namespace Broilerplate.Core {
         /// <summary>
         /// Called first thing on a new tick.
         /// </summary>
-        /// <exception cref="ArgumentOutOfRangeException"></exception>
-        public void OnNewTick() {
-            timeData.lastTick = timeData.thisTick;
-            timeData.thisTick = DateTime.Now;
-            timeData.deltaTime = (float)(timeData.thisTick - timeData.lastTick).TotalSeconds * timeData.timeDilation;
-            timeData.timeSinceWorldBooted += timeData.deltaTime;
-            HandleTickChanges();
-        }
-
         public void HandleTickChanges() {
             // before ticks are called, process any new adds that have been made.
             tickManager.HandleScheduledTickAdds();
@@ -49,23 +39,27 @@ namespace Broilerplate.Core {
             tickManager.HandleScheduledTickRemovals();
         }
 
+        /// <summary>
+        /// Called when a level is about to get unloaded.
+        /// Cleans up all actors and subsystems to give them a chance to process the situation.
+        /// </summary>
         public virtual void ShutdownWorld() {
             for (int i = 0; i < liveActors.Count; i++) {
                 UnregisterActor(liveActors[i--]);
             }
-            Destroy(unityTickerInstance.gameObject);
-            
             ClearSubSystems();
+            Destroy(unityTickerInstance.gameObject);
         }
 
+        /// <summary>
+        /// Called when a new level is being loaded or the game is loaded the first time.
+        /// Sets up the world for the loaded level and spawns the game mode and subsystems.
+        /// </summary>
+        /// <param name="gameModePrefab"></param>
+        /// <param name="worldSubsystems"></param>
         public virtual void BootWorld(GameMode gameModePrefab, List<WorldSubsystem> worldSubsystems) {
-            timeData.timeDilation = 1;
-            timeData.lastTick = timeData.thisTick = DateTime.Now;
-            timeData.timeSinceWorldBooted = 0;
-            timeData.deltaTime = 0;
             tickManager = new TickManager(this);
 
-            
             var unityTicker = new GameObject("Unity Ticker");
             unityTickerInstance = unityTicker.AddComponent<UnityTicker>();
             unityTickerInstance.SetTickManager(tickManager);
@@ -85,6 +79,10 @@ namespace Broilerplate.Core {
             unityTicker.transform.SetParent(gameMode.transform);
         }
 
+        /// <summary>
+        /// Register a Subsytem to the world. Spawns it and handles the BeginPlay routines.
+        /// </summary>
+        /// <param name="system"></param>
         public virtual void RegisterSubsystem(WorldSubsystem system) {
             var newSystem = Instantiate(system);
             subsystems.Add(newSystem);
@@ -92,12 +90,19 @@ namespace Broilerplate.Core {
             ScheduleBeginPlay(newSystem);
         }
 
-        public virtual void RegisterActor(Actor actor) {
+        /// <summary>
+        /// Register an actor with the world.
+        /// </summary>
+        /// <param name="actor"></param>
+        protected virtual void RegisterActor(Actor actor) {
             liveActors.Add(actor);
             actor.SetWorld(this);
             ScheduleBeginPlay(actor);
         }
 
+        /// <summary>
+        /// Worlds BeginPlay will call BeginPlay on actors and schedule their LateBeginPlay calls for the end of frame.
+        /// </summary>
         public virtual void BeginPlay() {
             for (int i = 0; i < liveActors.Count; i++) {
                 if (liveActors[i].GetWorld() == this) {
@@ -109,6 +114,9 @@ namespace Broilerplate.Core {
             }
         }
 
+        /// <summary>
+        /// Clear out all currently registered subsystems.
+        /// </summary>
         private void ClearSubSystems() {
             for (int i = 0; i < subsystems.Count; i++) {
                 Destroy(subsystems[i]);
@@ -226,24 +234,48 @@ namespace Broilerplate.Core {
             return (T)a;
         }
 
+        /// <summary>
+        /// Unregister an actor from the world.
+        /// Will also unregister their tickfuncs.
+        /// It is usually called when an actor dies / is destroyed.
+        /// Doing it during the actors lifetime will effectively turn it into a normal MonoBehaviour.
+        /// </summary>
+        /// <param name="actor"></param>
         public void UnregisterActor(Actor actor) {
             UnregisterTickFunc(actor.ActorTick);
             liveActors.Remove(actor);
 
         }
 
+        /// <summary>
+        /// Unregister the given tickfunc from the tick manager of this world.
+        /// </summary>
+        /// <param name="tickFunc"></param>
         public void UnregisterTickFunc(TickFunc tickFunc) {
             tickManager.UnregisterTickFunc(tickFunc);
         }
 
+        /// <summary>
+        /// Register the given tickfunc to the tick manager of this world.
+        /// </summary>
+        /// <param name="tickFunc"></param>
         public void RegisterTickFunc(TickFunc tickFunc) {
             tickManager.RegisterTickFunc(tickFunc);
         }
         
+        /// <summary>
+        /// Calls BeginPlay on the given IInitialise and schedules it for
+        /// LateBeginPlay at the end of the frame.
+        /// </summary>
+        /// <param name="i"></param>
         public void ScheduleBeginPlay(IInitialise i) {
             tickManager.ScheduleBeginPlay(i);
         }
 
+        /// <summary>
+        /// Spawns the players pawn as defined in the GameMode.
+        /// </summary>
+        /// <param name="playerInfo"></param>
         public void SpawnPlayer(PlayerInfo playerInfo) {
             var ps = FindActorOfType<PlayerStart>();
             if (ps) {
@@ -255,6 +287,13 @@ namespace Broilerplate.Core {
             
         }
 
+        /// <summary>
+        /// Finds an actor by the given type.
+        /// This is a bit like Object.FindObjectsOfType but faster since
+        /// the pool of objects it needs to scan is a whooooooole lot smaller. 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public T FindActorOfType<T>() where T : Actor {
             for (int i = 0; i < liveActors.Count; i++) {
                 var a = liveActors[i];
@@ -266,10 +305,30 @@ namespace Broilerplate.Core {
             return null;
         }
 
+        /// <summary>
+        /// Get a reference to the GameMode that is running in this world.
+        /// </summary>
+        /// <returns></returns>
         public GameMode GetGameMode() {
             return gameMode;
         }
+        
+        /// <summary>
+        /// Generic version of GetGameMode. Will attempt to direct-cast the gameMode to T.
+        /// Throws InvalidCastException if and when that fails.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public T GetGameMode<T>() where T : GameMode {
+            return (T)gameMode;
+        }
 
+        /// <summary>
+        /// Returns the first found subsystem of the given type T.
+        /// Returns null if there is no such subsystem registered.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public T GetSubsystem<T>() where T : WorldSubsystem {
             for (int i = 0; i < subsystems.Count; i++) {
                 var s = subsystems[i];

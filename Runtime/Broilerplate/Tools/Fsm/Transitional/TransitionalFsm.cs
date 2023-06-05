@@ -48,7 +48,7 @@ namespace Broilerplate.Tools.Fsm.Transitional {
         public void AddState(TStateId state, StateFunc enter, StateFunc tick, StateFunc exit) {
             stateList.Add(state, new FsmState<TStateId>(state, enter, tick, null, exit));
         }
-
+        
         public void AddState(TStateId state, StateFunc enter, StateFunc tick, StateFunc lateTick, StateFunc exit) {
             stateList.Add(state, new FsmState<TStateId>(state, enter, tick, lateTick, exit));
         }

@@ -2,6 +2,11 @@
 using UnityEngine;
 
 namespace Broilerplate.Tools {
+    
+    /// <summary>
+    /// Generic object pool specific for Unity component types.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public abstract class UnityObjectPool<T> : MonoBehaviour where T : UnityEngine.Component {
         public T poolingObject;
         public PoolingPostProcessor postProcessor;

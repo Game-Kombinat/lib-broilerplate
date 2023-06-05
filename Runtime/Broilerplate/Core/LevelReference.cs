@@ -5,7 +5,10 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace Broilerplate.Core {
-    // https://github.com/JohannesMP/unity-scene-reference
+    /// <summary>
+    /// Modified and adjusted version of https://github.com/JohannesMP/unity-scene-reference.
+    /// Helps with doing the game mode scene overrides.
+    /// </summary>
     [Serializable]
     public class LevelReference : ISerializationCallbackReceiver {
 #if UNITY_EDITOR

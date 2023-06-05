@@ -8,31 +8,61 @@ using Object = System.Object;
 namespace Broilerplate.Core {
     /// <summary>
     /// Wraps around the Unity SceneManager and exposes a couple
-    /// things that give you more control on scene handling.
-    ///
+    /// extra callbacks throughout the scene loading / unloading process,
+    /// for greater control over said process
     /// </summary>
-    public class LevelManager {
-        /// Bunch of actions that expose hooks in the scene loading process.
-        /// These are not called for the loading scene.
-        /// Loading scene is not invoked for additive level load requests.
+    public static class LevelManager {
+        /// <summary>
+        /// Callback before a new level is loaded.
+        /// This has a string as parameter (the level name) as the unity
+        /// scene cannot be retrieved at this point as it is not loaded yet.
+        /// </summary>
         public static event Action<string> BeforeLevelLoad;
         
-        // this has a scene object because loaded level may require more meta information
-        // and of course because we can.
+        /// <summary>
+        /// Callback for when a level is done loading and the world can be instantiated into it.
+        /// At this point the loaded level has been set as active.
+        /// </summary>
         public static event Action<Scene> OnLevelLoaded;
+        
+        /// <summary>
+        /// Callback for when a level has been unloaded.
+        /// It has a string as parameter (the name of the unloaded level) because at this point,
+        /// we cannot retrieve the scene object from scene manager anymore.
+        /// </summary>
         public static event Action<string> OnLevelUnloaded;
-        public static event Action<string> BeforeLevelUnload;
+        
+        /// <summary>
+        /// Callback that's called right before a new level is about to be loaded.
+        /// </summary>
+        public static event Action<Scene> BeforeLevelUnload;
 
+        /// <summary>
+        /// Name of the loading scene if there is one
+        /// </summary>
         private static string loadingScene;
+        
+        /// <summary>
+        /// Shortcut to get the active scene.
+        /// </summary>
         public static Scene ActiveScene => SceneManager.GetActiveScene();
 
+        /// <summary>
+        /// Flag to indicate whether we're currently loading a scene or not.
+        /// </summary>
         private static bool loadingInProgress;
 
-        private static string currentTargetLevel;
 
+        /// <summary>
+        /// The public API of this. Handles everything that needs handling when loading a new level.
+        /// That includes putting the loading scene in, cleaning garbage out of memory and things of that nature.
+        /// </summary>
+        /// <param name="levelName"></param>
+        /// <param name="progress"></param>
+        /// <param name="minimumLoadingTime"></param>
         public static void LoadLevelAsync(string levelName, Action<float> progress = null, float minimumLoadingTime = -1) {
             if (loadingInProgress) {
-                Debug.LogWarning($"Attempting to load level {levelName} while {currentTargetLevel} is currently being loaded. Aborting this.");
+                Debug.LogWarning($"Attempting to load level {levelName} while another is currently being loaded. Aborting this.");
                 return;
             }
             if (minimumLoadingTime < 0) {
@@ -41,11 +71,17 @@ namespace Broilerplate.Core {
             CoroutineJobs.StartJob(DoLoadLevelAsync(levelName, minimumLoadingTime, progress), true);
         }
         
+        /// <summary>
+        /// Handles the loading of a new level. This contains the actual logic described in LoadLevelAsync.
+        /// </summary>
+        /// <param name="targetLevelName"></param>
+        /// <param name="fakeLoadingTime"></param>
+        /// <param name="progress"></param>
+        /// <returns></returns>
         private static IEnumerator DoLoadLevelAsync(string targetLevelName, float fakeLoadingTime, Action<float> progress) {
             loadingInProgress = true;
             var currentSceneObject = SceneManager.GetActiveScene();
             string currentSceneName = currentSceneObject.name;
-            currentTargetLevel = targetLevelName;
             
             if (!string.IsNullOrEmpty(loadingScene)) {
                 bool currentIsLoadingScene = true;
@@ -57,7 +93,7 @@ namespace Broilerplate.Core {
 
                 if (!currentIsLoadingScene) {
                     // unload currently loaded level if we didn't start from the loading scene
-                    yield return UnloadLevelRoutine(currentSceneName);
+                    yield return UnloadLevelRoutine(currentSceneObject);
                 }
                 // Now load the new scene and get rid of the loading scene if necessary
                 yield return LoadLevelRoutine(targetLevelName, fakeLoadingTime, progress, !currentIsLoadingScene);
@@ -66,9 +102,16 @@ namespace Broilerplate.Core {
                 yield return LoadLevelRoutine(targetLevelName, fakeLoadingTime, progress, false);
             }
             loadingInProgress = false;
-            currentTargetLevel = null;
         }
 
+        /// <summary>
+        /// The standard routine to load a level.
+        /// </summary>
+        /// <param name="targetLevelName"></param>
+        /// <param name="fakeLoadingTime"></param>
+        /// <param name="progress"></param>
+        /// <param name="unloadLoadingScene"></param>
+        /// <returns></returns>
         private static IEnumerator LoadLevelRoutine(string targetLevelName, float fakeLoadingTime, Action<float> progress, bool unloadLoadingScene) {
             // if we have a loading scene, we need to load target on top. If we have none, just load as is
             var loadMode = unloadLoadingScene ? LoadSceneMode.Additive : LoadSceneMode.Single;
@@ -85,12 +128,22 @@ namespace Broilerplate.Core {
             OnLevelLoaded?.Invoke(activeScene);
         }
         
-        private static IEnumerator UnloadLevelRoutine(string currentSceneName) {
-            BeforeLevelUnload?.Invoke(currentSceneName);
-            yield return SceneManager.UnloadSceneAsync(currentSceneName);
-            OnLevelUnloaded?.Invoke(currentSceneName);
+        /// <summary>
+        /// The standard routine to unload a level
+        /// </summary>
+        /// <param name="currentScene"></param>
+        /// <returns></returns>
+        private static IEnumerator UnloadLevelRoutine(Scene currentScene) {
+            string sceneName = currentScene.name;
+            BeforeLevelUnload?.Invoke(currentScene);
+            yield return SceneManager.UnloadSceneAsync(currentScene);
+            OnLevelUnloaded?.Invoke(sceneName);
         }
         
+        /// <summary>
+        /// The standard routine to load the loading scene.
+        /// </summary>
+        /// <returns></returns>
         private static IEnumerator LoadLoadingScene() {
             yield return SceneManager.LoadSceneAsync(loadingScene, LoadSceneMode.Additive);
             var loadingSceneObject = SceneManager.GetSceneByName(loadingScene);
@@ -98,6 +151,15 @@ namespace Broilerplate.Core {
             yield return new WaitUntil(() => loadingSceneObject.isLoaded);
         }
 
+        /// <summary>
+        /// The loop that waits for the loading of a level to finish.
+        /// This can put in a fake loading time as well.
+        /// It sounds counter-intuitive to do this but trust me. There are use cases for that.
+        /// </summary>
+        /// <param name="fakeLoadingTime"></param>
+        /// <param name="progress"></param>
+        /// <param name="loadNewScene"></param>
+        /// <returns></returns>
         private static IEnumerator LoadingLoop(float fakeLoadingTime, Action<float> progress, AsyncOperation loadNewScene) {
             float loadingProgress = 0;
             float fakeProgress = 0;
@@ -116,10 +178,21 @@ namespace Broilerplate.Core {
         }
 
 
+        /// <summary>
+        /// Sets the loading scene name from broiler configuration.
+        /// 
+        /// </summary>
+        /// <param name="ls"></param>
         public static void SetLoadingScene(string ls) {
             loadingScene = ls;
         }
 
+        /// <summary>
+        /// Shortcut to reload the active scene. This will also re-bootstrap the world and
+        /// everything that comes with it.
+        /// </summary>
+        /// <param name="progress"></param>
+        /// <param name="minLoadingTime"></param>
         public static void ReloadActiveScene(Action<float> progress = null, float minLoadingTime = -1) {
             LoadLevelAsync(ActiveScene.name, progress, minLoadingTime);
         }

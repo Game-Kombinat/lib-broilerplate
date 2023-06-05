@@ -4,6 +4,11 @@ using ColorUtility = UnityEngine.ColorUtility;
 
 namespace Broilerplate.Tools {
     
+    /// <summary>
+    /// Quick and dirty display debug text on screen.
+    /// Warning: Does not scale with resolution.
+    /// Yet.
+    /// </summary>
     public class DebugGui : MonoBehaviour {
         private readonly struct DisplayInfo {
             public readonly float timeToRemove;

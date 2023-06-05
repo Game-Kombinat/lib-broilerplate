@@ -1,6 +1,9 @@
 ﻿using UnityEngine;
 
 namespace Broilerplate.Tools {
+    /// <summary>
+    /// Just some helpie helpers to deal with directionality in vectors.
+    /// </summary>
     public static class VectorTools {
         public static float Dot(Vector3 direction, Vector3 targetDirection) {
             return Vector3.Dot(direction, targetDirection);

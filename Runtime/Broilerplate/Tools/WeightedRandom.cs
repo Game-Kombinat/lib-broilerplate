@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace Broilerplate.Tools {
+    /// <summary>
+    /// Generic typed weighted random function.
+    /// </summary>
     public static class WeightedRandom {
         private static readonly Random Random = new Random();
         public static T Get<T>(IEnumerable<T> itemsEnumerable, Func<T, int> weightKey) {

@@ -3,33 +3,63 @@ using Broilerplate.Core;
 using UnityEngine;
 
 namespace Broilerplate.Ticking {
+    /// <summary>
+    /// Provides an API into broilerplates tickable system.
+    /// This is driven by Unitys update loops in the <see cref="TickManager"/>
+    /// </summary>
     public class TickManager {
+        /// <summary>
+        /// The world this tickmanager is ticking for
+        /// </summary>
         private readonly World world;
+        
+        /// <summary>
+        /// List of tickables for the pre-physics update loop
+        /// </summary>
         private readonly TickList ticks = new TickList();
+        
+        /// <summary>
+        /// List of tickables for the during-physics update loop
+        /// </summary>
         private readonly TickList physicsTicks = new TickList();
+        
+        /// <summary>
+        /// List of tickables for the late-tick (post-physics) update loop
+        /// </summary>
         private readonly TickList lateTicks = new TickList();
+        
+        /// <summary>
+        /// List of tickables that want to be added for the next frame's tick
+        /// </summary>
         private readonly List<TickFunc> scheduledAdds = new List<TickFunc>();
+        
+        /// <summary>
+        /// List of tickables that need to be removed before the next frame's tick
+        /// </summary>
         private readonly List<TickFunc> scheduledRemovals = new List<TickFunc>();
 
+        /// <summary>
+        /// List of IInitialise interfaces that are awaiting their LateBeginPlay call.
+        /// </summary>
         private readonly Queue<IInitialise> scheduledLateBeginPlays = new Queue<IInitialise>();
 
         public bool IsPaused { get; private set; }
 
-        private float unityTimescaleAtPause;
+        private float timeScaleAtPause;
         
-        public void Pause(bool stopUnityTime = false) {
+        public void Pause(bool zeroTimescale = false) {
             IsPaused = true;
-            if (stopUnityTime) {
-                unityTimescaleAtPause = Time.timeScale;
+            if (zeroTimescale) {
+                timeScaleAtPause = Time.timeScale;
                 Time.timeScale = 0;
             }
         }
 
         public void Resume() {
             IsPaused = false;
-            if (unityTimescaleAtPause > 0) {
-                Time.timeScale = unityTimescaleAtPause;
-                unityTimescaleAtPause = 0;
+            if (timeScaleAtPause > 0) {
+                Time.timeScale = timeScaleAtPause;
+                timeScaleAtPause = 0;
             }
         }
 
@@ -41,22 +71,22 @@ namespace Broilerplate.Ticking {
             if (IsPaused) {
                 return;
             }
-            world.OnNewTick();
-            ticks.Tick(world.timeData.deltaTime, world.timeData.timeSinceWorldBooted, TickGroup.Tick);
+            world.HandleTickChanges();
+            ticks.Tick(Time.deltaTime, Time.timeSinceLevelLoad, TickGroup.Tick);
         }
 
         public virtual void PhysicsTick() {
             if (IsPaused) {
                 return;
             }
-            physicsTicks.Tick(world.timeData.deltaTime, world.timeData.timeSinceWorldBooted, TickGroup.Physics);
+            physicsTicks.Tick(Time.fixedDeltaTime, Time.timeSinceLevelLoad, TickGroup.Physics);
         }
 
         public virtual void LateTick() {
             if (IsPaused) {
                 return;
             }
-            lateTicks.Tick(world.timeData.deltaTime, world.timeData.timeSinceWorldBooted, TickGroup.LateTick);
+            lateTicks.Tick(Time.deltaTime, Time.timeSinceLevelLoad, TickGroup.LateTick);
             HandleScheduledLateBeginPlays();
         }
 

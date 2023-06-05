@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Broilerplate.Ticking {
     /// <summary>
-    /// Every actor can be ticked.
+    /// Every actor and actor component can be ticked.
     /// This TickFunc class calls tick functions on tickable types
     /// according to its configuration.
     /// </summary>

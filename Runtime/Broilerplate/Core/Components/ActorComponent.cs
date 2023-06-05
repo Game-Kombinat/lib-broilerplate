@@ -5,9 +5,10 @@ using UnityEngine;
 
 namespace Broilerplate.Core.Components {
     /// <summary>
-    /// This actor component requires an actor somewhere in its immediate parent hierarchy.
-    /// Its lifecycle is controlled by the actors lifecycle, giving you exact knowledge
-    /// when and how this component will be initialised and destroyed.
+    /// This is a special MonoBehaviour that requires an Actor in its parent or immediate hierarchy to attach to.
+    /// It's guaranteed to get its IInitialise bound callbacks after its actor respectively.
+    /// It can be hierarchically detached from its actor during runtime and remain available to the actor regardless.
+    /// 
     /// </summary>
     public class ActorComponent : MonoBehaviour, ITickable, IThing, IInitialise {
         [SerializeField]
