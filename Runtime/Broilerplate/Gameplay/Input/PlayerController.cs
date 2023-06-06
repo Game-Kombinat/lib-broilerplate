@@ -2,9 +2,6 @@
 using Broilerplate.Gameplay.View;
 using Broilerplate.Ticking;
 using UnityEngine;
-#if NEW_INPUT_SYSTEM_ENABLED
-using UnityEngine.InputSystem;
-#endif
 
 namespace Broilerplate.Gameplay.Input {
     /// <summary>
@@ -14,9 +11,6 @@ namespace Broilerplate.Gameplay.Input {
     /// Consequently this will possess a pawn and take control of it.
     /// One possessable pawn per player controller.
     /// </summary>
-#if NEW_INPUT_SYSTEM_ENABLED
-    [RequireComponent(typeof(PlayerInput))]
-#endif
     public class PlayerController : ControllerBase {
         
         [Header("Control Behaviour")]
@@ -26,14 +20,13 @@ namespace Broilerplate.Gameplay.Input {
         [Header("References")]
         [SerializeField]
         private CameraManager cameraManagerType;
-#if NEW_INPUT_SYSTEM_ENABLED
-        [SerializeField]
-        private PlayerInput playerInput;
-#endif
-
+        
+        [SerializeReference, SubclassSelector]
+        private IInputHandler inputHandler;
+        
         private CameraManager cameraManagerInstance;
 
-        private IInputHandler inputHandler;
+        
         private PlayerInfo playerInfo;
 
         public PlayerInfo PlayerInfo => playerInfo;
@@ -61,10 +54,6 @@ namespace Broilerplate.Gameplay.Input {
         protected override void Reset() {
             base.Reset();
             actorTick.SetTickGroup(TickGroup.LateTick);
-            #if NEW_INPUT_SYSTEM_ENABLED
-            playerInput = GetComponent<PlayerInput>();
-            playerInput.notificationBehavior = PlayerNotifications.InvokeCSharpEvents;
-            #endif
         }
 
         public void ShowMouseCursor() {
@@ -79,19 +68,6 @@ namespace Broilerplate.Gameplay.Input {
 
         public override void ControlPawn(Pawn pawn) {
             LeaveControlledPawn();
-#if NEW_INPUT_SYSTEM_ENABLED
-            if (!playerInput) {
-                // Since it's not a broilerplate type we get it via vanilla unity api
-                playerInput = gameObject.GetComponent<PlayerInput>();
-            }
-            
-            inputHandler = new UnityInputHandler(playerInput, this);
-#elif ENABLE_REWIRED
-            inputHandler = new RewiredInputHandler(this);
-            
-#else
-            inputHandler = new DefaultUnityInputHandler(this);
-#endif
 
             controlledPawn = pawn;
             if (cameraManagerInstance.AutoViewTargeting) {

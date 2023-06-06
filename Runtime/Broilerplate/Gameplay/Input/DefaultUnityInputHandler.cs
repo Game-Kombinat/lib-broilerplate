@@ -70,8 +70,6 @@ namespace Broilerplate.Gameplay.Input {
     }
 
     public class DefaultUnityInputHandler : IInputHandler {
-        private readonly PlayerController playerController;
-
         private readonly Dictionary<string, ButtonPress> pressEvents = new();
         private readonly Dictionary<string, DoublePressHandler> doublePressEvents = new();
         private readonly Dictionary<string, TapPressHandler> tapEvents = new();
@@ -80,15 +78,16 @@ namespace Broilerplate.Gameplay.Input {
         private readonly Dictionary<string, AxisInputData<float>> singleAxisEvents = new();
         private event Action<Vector2> PointerPositionUpdates;
 
-        private readonly TickFunc tickFunc;
+        private PlayerController playerController;
+        private TickFunc tickFunc;
 
-        public DefaultUnityInputHandler(PlayerController controller) {
-            playerController = controller;
+        public void Setup(PlayerController pc) {
+            playerController = pc;
             tickFunc = new TickFunc();
             tickFunc.SetStartWithTickEnabled(true);
             tickFunc.SetTickTarget(this);
             tickFunc.SetTickGroup(TickGroup.Tick);
-            controller.GetWorld().RegisterTickFunc(tickFunc);
+            playerController.GetWorld().RegisterTickFunc(tickFunc);
         }
 
         public void ProcessTick(float deltaTime, TickGroup tickGroup) {

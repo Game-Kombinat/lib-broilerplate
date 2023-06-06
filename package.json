@@ -7,7 +7,8 @@
     "dependencies": {
         "com.unity.cinemachine": "2.8.4",
         "com.dbrizov.naughtyattributes": "2.0.4",
-        "com.github.siccity.xnode": "1.8.0"
+        "com.github.siccity.xnode": "1.8.0",
+        "com.mackysoft.serializereference-extensions": "1.1.7"
     },
     "keywords": [
         "game framework",

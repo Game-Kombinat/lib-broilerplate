@@ -4,6 +4,8 @@ using UnityEngine;
 
 namespace Broilerplate.Gameplay.Input {
     public interface IInputHandler : ITickable {
+
+        void Setup(PlayerController pc);
         /// <summary>
         /// Clears the list of bound button and value mappings.
         /// </summary>

@@ -6,13 +6,11 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 namespace Broilerplate.Gameplay.Input {
-
-    
-    
+    [Serializable]
     public class UnityInputHandler : IInputHandler {
 
+        [SerializeField]
         protected PlayerInput inputs;
-        protected PlayerController playerController;
 
         private readonly Dictionary<string, ButtonPress> pressEvents = new Dictionary<string, ButtonPress>();
         private readonly Dictionary<string, ButtonPress> holdEvents = new Dictionary<string, ButtonPress>();
@@ -20,18 +18,17 @@ namespace Broilerplate.Gameplay.Input {
         private readonly Dictionary<string, AxisInputData<float>> singleAxisEvents = new Dictionary<string, AxisInputData<float>>();
         private readonly Dictionary<string, AxisInputData<Vector2>> doubleAxisEvents = new Dictionary<string, AxisInputData<Vector2>>();
         
-        private readonly TickFunc inputTick;
+        protected PlayerController playerController;
+        private TickFunc inputTick;
         
-        public UnityInputHandler(PlayerInput playerInput, PlayerController controller) {
-            inputs = playerInput;
-            inputs.onActionTriggered += InputActionReceived;
-            playerController = controller;
-            
+        public void Setup(PlayerController pc) {
+            playerController = pc;
+            inputs.notificationBehavior = PlayerNotifications.InvokeCSharpEvents;
             inputTick = new TickFunc();
-            inputTick.SetTickGroup(TickGroup.LateTick);
+            inputTick.SetStartWithTickEnabled(true);
             inputTick.SetTickTarget(this);
-            inputTick.SetEnableTick(false);
-            controller.GetWorld().RegisterTickFunc(inputTick);
+            inputTick.SetTickGroup(TickGroup.Tick);
+            playerController.GetWorld().RegisterTickFunc(inputTick);
         }
 
         /// <summary>

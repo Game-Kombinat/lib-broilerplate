@@ -26,7 +26,8 @@ namespace Broilerplate.Gameplay.Input {
     public class RewiredInputHandler : IInputHandler {
 
         private Player reInput;
-        protected PlayerController playerController;
+        private PlayerController playerController;
+        private TickFunc tf;
         
         private readonly Dictionary<string, ButtonPress> pressEvents = new Dictionary<string, ButtonPress>();
         private readonly Dictionary<string, ButtonPress> doublePressEvents = new Dictionary<string, ButtonPress>();
@@ -58,9 +59,32 @@ namespace Broilerplate.Gameplay.Input {
             
         }
 
+        public void Setup(PlayerController pc) {
+            playerController = pc;
+            reInput = ReInput.players.GetPlayer("System");
+            
+            // note: because rewired works more predictable than unitys stuff, we don't need any ticking in here but 
+            // the IInputHandler makes us implement all the tickable stuff.
+            reInput.AddInputEventDelegate(OnReceiveAxisInput, UpdateLoopType.Update, InputActionEventType.AxisActive);
+            reInput.AddInputEventDelegate(OnReceiveAxisInput, UpdateLoopType.Update, InputActionEventType.AxisInactive);
+            
+            reInput.AddInputEventDelegate(OnReceiveButtonInput, UpdateLoopType.Update, InputActionEventType.ButtonPressed);
+            reInput.AddInputEventDelegate(OnReceiveButtonInput, UpdateLoopType.Update, InputActionEventType.ButtonJustPressed);
+            reInput.AddInputEventDelegate(OnReceiveButtonInput, UpdateLoopType.Update, InputActionEventType.ButtonJustReleased);
+            reInput.AddInputEventDelegate(OnReceiveAnyUpdate, UpdateLoopType.Update, InputActionEventType.Update);
+            
+            tf = new TickFunc();
+            tf.SetTickTarget(this);
+            tf.SetCanEverTick(true);
+            tf.SetTickGroup(TickGroup.Tick);
+            tf.SetStartWithTickEnabled(true);
+            
+            pc.GetWorld().RegisterTickFunc(tf);
+        }
+
         #region Tick
 
-        private readonly TickFunc tf;
+        
         public void ProcessTick(float deltaTime) {
             // note: due to a bug (?) in Rewired, we can only poll for double presses. so we do that
             foreach (var kvp in doublePressEvents) {
