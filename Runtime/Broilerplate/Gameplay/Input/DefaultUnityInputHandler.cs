@@ -69,6 +69,7 @@ namespace Broilerplate.Gameplay.Input {
         }
     }
 
+    [Serializable]
     public class DefaultUnityInputHandler : IInputHandler {
         private readonly Dictionary<string, ButtonPress> pressEvents = new();
         private readonly Dictionary<string, DoublePressHandler> doublePressEvents = new();

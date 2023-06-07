@@ -23,6 +23,7 @@ namespace Broilerplate.Gameplay.Input {
         // This event will be called every frame the "Move Horizontal" axis is non-zero and once more when it returns to zero.
         player.AddInputEventDelegate(OnMoveHorizontal, UpdateLoopType.Update, InputActionEventType.AxisActiveOrJustInactive, "Move Horizontal");
      */
+    [Serializable]
     public class RewiredInputHandler : IInputHandler {
 
         private Player reInput;
