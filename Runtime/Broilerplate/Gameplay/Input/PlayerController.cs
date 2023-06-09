@@ -73,16 +73,15 @@ namespace Broilerplate.Gameplay.Input {
             if (cameraManagerInstance.AutoViewTargeting) {
                 cameraManagerInstance.SetViewTarget(pawn);
             }
-            
+            inputHandler.Setup(this);
             pawn.OnControlTaken(this);
         }
 
         public override void LeaveControlledPawn() {
             if (controlledPawn) {
                 controlledPawn.OnControlLeft();
+                inputHandler?.ClearInputs();
             }
-
-            inputHandler?.ClearInputs();
         }
 
         public IInputHandler GetInputHandler() {
