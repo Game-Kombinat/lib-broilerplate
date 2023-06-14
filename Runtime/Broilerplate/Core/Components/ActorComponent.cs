@@ -118,7 +118,7 @@ namespace Broilerplate.Core.Components {
         }
 
         public virtual void EnsureIntegrity(bool autoRegister = false, bool ignoreMissingActor = false) {
-            var actor = transform.gameObject.GetComponentInParent<Actor>();
+            var actor = transform.gameObject.GetComponentInParent<Actor>(true);
             if (!actor) {
                 if (ignoreMissingActor) {
                     Debug.LogWarning("You added a GameComponent to a GameObject without an Actor in the parent hierarchy. Beware!");
