@@ -189,7 +189,7 @@ namespace Broilerplate.Core {
         /// <exception cref="ActorSpawnException"></exception>
         public GameObject SpawnActor(GameObject prefab, Vector3 position, Quaternion rotation) {
             var a = Instantiate(prefab, position, rotation);
-            var actors = a.GetComponentsInChildren<Actor>();
+            var actors = a.GetComponentsInChildren<Actor>(true);
             if (actors == null || actors.Length == 0)
             {
                 return a;
@@ -212,7 +212,7 @@ namespace Broilerplate.Core {
             a.transform.localPosition = position;
             a.transform.localRotation = rotation;
             
-            var actors = a.GetComponentsInChildren<Actor>();
+            var actors = a.GetComponentsInChildren<Actor>(true);
             if (actors == null || actors.Length == 0)
             {
                 return a;
