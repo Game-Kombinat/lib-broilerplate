@@ -131,6 +131,11 @@ namespace Broilerplate.Ticking {
             // we want fi-fo. We get fi-fo.
             while (scheduledLateBeginPlays.Count > 0) {
                 var begin = scheduledLateBeginPlays.Dequeue();
+                if (begin == null) {
+                    // todo: figure out when and why this is happening.
+                    Debug.LogWarning("Found a null ref for a scheduled late begin play. Skipping.");
+                    continue;
+                }
                 if (!begin.HadLateBeginPlay) {
                     begin.LateBeginPlay();
                 }

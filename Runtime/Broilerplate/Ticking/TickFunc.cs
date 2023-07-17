@@ -92,6 +92,8 @@ namespace Broilerplate.Ticking {
         /// </summary>
         public ITickable TickTarget => tickTarget;
 
+        public bool HasTickTarget => tickTarget != null;
+
         public override bool Equals(object obj) {
             if (!(obj is TickFunc otherFunc)) {
                 return false;
