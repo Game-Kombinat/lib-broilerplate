@@ -10,7 +10,7 @@ namespace Broilerplate.Tools {
         private static readonly Random Random = new Random();
         public static T Get<T>(IEnumerable<T> itemsEnumerable, Func<T, int> weightKey) {
             // save on new list allocation as, very likely, we're already passing a list
-            var items = itemsEnumerable as IList<T> ?? itemsEnumerable.ToArray();
+            var items = itemsEnumerable as IList<T> ?? itemsEnumerable.ToList();
             
             var totalWeight = items.Sum(weightKey);
             var targetWeight = Random.Next(totalWeight);
