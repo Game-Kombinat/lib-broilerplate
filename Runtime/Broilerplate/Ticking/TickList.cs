@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Broilerplate.Ticking {
@@ -30,7 +31,12 @@ namespace Broilerplate.Ticking {
                 }
                 
                 if (tick.CanTickNow(timeSinceWorldBoot)) {
-                    tick.Tick(deltaTime, timeSinceWorldBoot, currentGroup);
+                    try {
+                        tick.Tick(deltaTime, timeSinceWorldBoot, currentGroup);
+                    }
+                    catch (Exception e) {
+                        Debug.LogError($"{e.Message}\n{e.StackTrace}");
+                    }
                 }
             }
         }
