@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Broilerplate.Core.Exceptions;
 using Broilerplate.Tools;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -165,14 +166,25 @@ namespace Broilerplate.Core {
         /// <param name="scene"></param>
         public void BootstrapWorldForLevel(Scene scene) {
             var gmPrefab = GameInstanceConfiguration.GetGameModeFor(scene);
-
+            
+            if (!gmPrefab) {
+                // This seems VERY unlikely but we saw some exceptions hinting at this being a possibility.
+                // But if that happens there is no way to recover.
+                throw new GameException($"Unable to find a game mode for scene '{scene.name}' and fallback game mode is null.");
+            }
+            
             world = Instantiate(GameInstanceConfiguration.WorldType);
             world.name = $"{world.GetType().Name} for {scene.name}";
             world.BootWorld(gmPrefab, GameInstanceConfiguration.WorldSubsystems);
             world.SpawnPlayer(GetInitialLocalPlayer());
             // Finalise bootstrapping game mode with player controller having been initialised.
             // BeginPlay for GameMode has been called way before this point when the game world has spawned it.
-            world.GetGameMode().LateBeginPlay(); // Manually invoke this before end of frame so GameMode is fully there before actors get their BeginPlay routines called
+            var gm = world.GetGameMode();
+            if (!gm) {
+                throw new GameException($"Spawned world is null. Prefab we tried to spawn from is {gmPrefab.name}");
+            }
+            
+            gm.LateBeginPlay(); // Manually invoke this before end of frame so GameMode is fully there before actors get their BeginPlay routines called
             world.BeginPlay();
         }
 
