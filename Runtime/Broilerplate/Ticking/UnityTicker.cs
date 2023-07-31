@@ -15,15 +15,24 @@ namespace Broilerplate.Ticking {
         }
 
         private void Update() {
-            tickManager.Tick();
+            // tick manager can become null for reasons that are currently not known.
+            // Possibly when the host hardware had suspended the application and is un-suspending it.
+            // Seems unlikely though.
+            if (tickManager == null) {
+                Debug.LogError("TickManager has become null. Disabling ticking");
+                enabled = false;
+                return;
+            }
+            
+            tickManager?.Tick();
         }
 
         private void LateUpdate() {
-            tickManager.LateTick();
+            tickManager?.LateTick();
         }
 
         private void FixedUpdate() {
-            tickManager.PhysicsTick();
+            tickManager?.PhysicsTick();
         }
     }
 }
