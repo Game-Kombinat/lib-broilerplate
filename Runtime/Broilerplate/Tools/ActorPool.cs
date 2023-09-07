@@ -12,6 +12,9 @@ namespace Broilerplate.Tools {
         [SerializeField]
         private T poolingObject;
         
+        [SerializeField]
+        protected Transform targetParent;
+        
         [SerializeReference, SubclassSelector]
         private IActorPoolPostProcessor postProcessor;
         
@@ -20,8 +23,6 @@ namespace Broilerplate.Tools {
         
         [SerializeField]
         protected bool loadPoolInBeginPlay = false;
-        [SerializeField]
-        protected bool instantiateInParent;
         
         private List<T> pooledObjects;
 
@@ -36,8 +37,8 @@ namespace Broilerplate.Tools {
             pooledObjects = new List<T>(poolSize);
             for (int i = 0; i < poolSize; ++i) {
                 T instantiatedActor;
-                if (instantiateInParent) {
-                    instantiatedActor = GetWorld().SpawnActor(poolingObject, poolingObject.transform.parent);
+                if (targetParent) {
+                    instantiatedActor = GetWorld().SpawnActor(poolingObject, targetParent);
                 }
                 else {
                     instantiatedActor = GetWorld().SpawnActor(poolingObject);
