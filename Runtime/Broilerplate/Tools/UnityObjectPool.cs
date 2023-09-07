@@ -9,13 +9,16 @@ namespace Broilerplate.Tools {
     /// <typeparam name="T"></typeparam>
     public abstract class UnityObjectPool<T> : MonoBehaviour where T : UnityEngine.Component {
         public T poolingObject;
-        public PoolingPostProcessor postProcessor;
+        [SerializeReference, SubclassSelector]
+        public IComponentPoolPostProcessor postProcessor;
         public int poolSize;
-        private List<T> pooledObjects;
+        
         [SerializeField]
-        private bool loadPoolInAwake = false;
+        protected bool loadPoolInAwake = false;
         [SerializeField]
-        private bool instantiateInParent;
+        protected bool instantiateInParent;
+        
+        protected List<T> pooledObjects;
 
         protected virtual void Awake() {
             if (loadPoolInAwake) {
@@ -23,7 +26,7 @@ namespace Broilerplate.Tools {
             }
         }
 
-        public void LoadPool() {
+        public virtual void LoadPool() {
             pooledObjects = new List<T>(poolSize);
             for (int i = 0; i < poolSize; ++i) {
                 T instantiatedObject;
@@ -33,10 +36,8 @@ namespace Broilerplate.Tools {
                 else {
                     instantiatedObject = Instantiate(poolingObject);
                 }
-                
-                if (postProcessor != null) {
-                    postProcessor.PostProcessOnSpawn(instantiatedObject.gameObject);
-                }
+
+                postProcessor?.PostProcessOnSpawn(instantiatedObject);
 
                 instantiatedObject.gameObject.SetActive(false);
                 pooledObjects.Add(instantiatedObject);
@@ -47,9 +48,7 @@ namespace Broilerplate.Tools {
             for (int i = 0; i < pooledObjects.Count; ++i) {
                 var component = pooledObjects[i];
                 if (!component.gameObject.activeInHierarchy) {
-                    if (postProcessor != null) {
-                        postProcessor.PostProcessOnGet(component.gameObject);
-                    }
+                    postProcessor?.PostProcessOnGet(component);
                     return component;
                 }
             }
@@ -64,7 +63,7 @@ namespace Broilerplate.Tools {
                 var component = pooledObjects[i];
                 if (!component.gameObject.activeInHierarchy) {
                     if (postProcessor != null) {
-                        postProcessor.PostProcessOnGet(component.gameObject);
+                        postProcessor.PostProcessOnGet(component);
                     }
                     geddit = component;
                     return true;
