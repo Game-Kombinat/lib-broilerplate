@@ -91,6 +91,10 @@ namespace Broilerplate.Ticking {
         }
 
         public void RegisterTickFunc(TickFunc tickFunc) {
+            if (tickFunc.IsRegistered) {
+                Debug.LogWarning("TickFunc already registered.");
+                return;
+            }
             tickFunc.OnReset();
             scheduledAdds.Add(tickFunc);
         }
@@ -163,6 +167,8 @@ namespace Broilerplate.Ticking {
                     physicsTicks.Add(tickFunc);
                     sortPhysTicks = true;
                 }
+
+                tickFunc.MarkRegistered();
             }
 
             scheduledAdds.Clear();

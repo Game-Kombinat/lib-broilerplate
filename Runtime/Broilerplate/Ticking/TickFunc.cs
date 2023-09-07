@@ -53,6 +53,8 @@ namespace Broilerplate.Ticking {
 
         private int tickTargetHash;
 
+        private bool isRegistered;
+
         /// <summary>
         /// If false, this tick function will never tick at all.
         /// It will not be registered with the Tick Loop
@@ -93,6 +95,7 @@ namespace Broilerplate.Ticking {
         public ITickable TickTarget => tickTarget;
 
         public bool HasTickTarget => tickTarget != null;
+        public bool IsRegistered => isRegistered;
 
         public override bool Equals(object obj) {
             if (!(obj is TickFunc otherFunc)) {
@@ -102,6 +105,7 @@ namespace Broilerplate.Ticking {
         }
 
         public override int GetHashCode() {
+            // ReSharper disable once NonReadonlyMemberInGetHashCode
             return tickTargetHash;
         }
 
@@ -121,6 +125,7 @@ namespace Broilerplate.Ticking {
         public void OnReset() {
             tickEnabled = startTickEnabled;
             lastTick = 0;
+            isRegistered = false;
         }
 
         public void SetEnableTick(bool shouldTick) {
@@ -139,7 +144,7 @@ namespace Broilerplate.Ticking {
                 return;
             }
             tickTarget = tickable;
-            tickTargetHash = tickable.GetHashCode();
+            tickTargetHash = tickable.GetHashCode() + priority.GetHashCode() + tickGroup.GetHashCode();
         }
 
         public void ClearTickTarget() {
@@ -155,6 +160,14 @@ namespace Broilerplate.Ticking {
         public void SetStartWithTickEnabled(bool startEnabled)
         {
             startTickEnabled = startEnabled;
+        }
+
+        public void SetTickInterval(float interval) {
+            tickInterval = interval;
+        }
+
+        public void MarkRegistered() {
+            isRegistered = true;
         }
     }
 }
