@@ -33,10 +33,11 @@ namespace Broilerplate.Core {
         /// Called first thing on a new tick.
         /// </summary>
         public void HandleTickChanges() {
+            // Handle ticks that want removing.
+            // handle removes first because of possible re-registers.
+            tickManager.HandleScheduledTickRemovals();
             // before ticks are called, process any new adds that have been made.
             tickManager.HandleScheduledTickAdds();
-            // Handle ticks that want removing.
-            tickManager.HandleScheduledTickRemovals();
         }
 
         /// <summary>

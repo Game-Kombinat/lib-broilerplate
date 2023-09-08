@@ -91,11 +91,6 @@ namespace Broilerplate.Ticking {
         }
 
         public void RegisterTickFunc(TickFunc tickFunc) {
-            if (tickFunc.IsRegistered) {
-                Debug.LogWarning("TickFunc already registered.");
-                return;
-            }
-            tickFunc.OnReset();
             scheduledAdds.Add(tickFunc);
         }
 
@@ -117,6 +112,8 @@ namespace Broilerplate.Ticking {
                 if (tickFunc.IsInTickGroup(TickGroup.Physics)) {
                     physicsTicks.Remove(tickFunc);
                 }
+
+                tickFunc.MarkUnregistered();
             }
             
             scheduledRemovals.Clear();
@@ -152,6 +149,11 @@ namespace Broilerplate.Ticking {
             bool sortPhysTicks = false;
             for (int i = 0; i < scheduledAdds.Count; ++i) {
                 var tickFunc = scheduledAdds[i];
+                if (tickFunc.IsRegistered) {
+                    Debug.LogWarning("TickFunc already registered.");
+                    continue;
+                }
+                tickFunc.OnReset();
                 
                 if (tickFunc.IsInTickGroup(TickGroup.Tick)) {
                     ticks.Add(tickFunc);

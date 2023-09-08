@@ -169,5 +169,9 @@ namespace Broilerplate.Ticking {
         public void MarkRegistered() {
             isRegistered = true;
         }
+
+        public void MarkUnregistered() {
+            isRegistered = false;
+        }
     }
 }
