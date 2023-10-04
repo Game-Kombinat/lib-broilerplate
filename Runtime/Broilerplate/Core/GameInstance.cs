@@ -175,7 +175,7 @@ namespace Broilerplate.Core {
             // BeginPlay for GameMode has been called way before this point when the game world has spawned it.
             var gm = world.GetGameMode();
             if (!gm) {
-                throw new GameException($"Spawned world is null. Prefab we tried to spawn from is {gmPrefab.name}");
+                throw new GameException($"Spawned world is null. Prefab we tried to spawn from is {(gmPrefab != null ? gmPrefab.name : "null")}");
             }
             
             gm.LateBeginPlay(); // Manually invoke this before end of frame so GameMode is fully there before actors get their BeginPlay routines called
