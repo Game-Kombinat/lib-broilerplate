@@ -167,12 +167,6 @@ namespace Broilerplate.Core {
         public void BootstrapWorldForLevel(Scene scene) {
             var gmPrefab = GameInstanceConfiguration.GetGameModeFor(scene);
             
-            if (!gmPrefab) {
-                // This seems VERY unlikely but we saw some exceptions hinting at this being a possibility.
-                // But if that happens there is no way to recover.
-                throw new GameException($"Unable to find a game mode for scene '{scene.name}' and fallback game mode is null.");
-            }
-            
             world = Instantiate(GameInstanceConfiguration.WorldType);
             world.name = $"{world.GetType().Name} for {scene.name}";
             world.BootWorld(gmPrefab, GameInstanceConfiguration.WorldSubsystems);
