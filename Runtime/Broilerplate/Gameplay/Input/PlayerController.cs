@@ -73,7 +73,15 @@ namespace Broilerplate.Gameplay.Input {
             if (cameraManagerInstance.AutoViewTargeting) {
                 cameraManagerInstance.SetViewTarget(pawn);
             }
-            inputHandler.Setup(this);
+
+            // This can be null in a default setup scenario
+            if (inputHandler != null) {
+                inputHandler.Setup(this);
+            }
+            else {
+                Debug.LogWarning("No input handler was set. You should most definitely set one on your PlayerController type!");
+            }
+            
             pawn.OnControlTaken(this);
         }
 
