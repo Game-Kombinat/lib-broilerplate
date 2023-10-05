@@ -79,33 +79,46 @@ namespace Broilerplate.Core {
         /// Does not need to be called again after level switch etc
         /// </summary>
         /// <param name="broilerConfiguration"></param>
-        public void InitiateGame(BroilerConfiguration broilerConfiguration) 
-        {
+        public void InitiateGame(BroilerConfiguration broilerConfiguration) {
             DontDestroyOnLoad(this);
             LevelManager.SetLoadingScene(broilerConfiguration.LoadingScene);
             LevelManager.OnLevelLoaded += OnLevelLoaded;
             LevelManager.BeforeLevelUnload += OnLevelUnloading;
-            
+
             GameInstanceConfiguration = broilerConfiguration;
 
             RegisterGameSubsystems();
             // we have to manually init the world at this point because when GameInstance awakes first time, 
             // the scene was already loaded.
             var scene = SceneManager.GetActiveScene();
-            
-            if (scene.path == GameInstanceConfiguration.LoadingScene?.ScenePath)
-            {
+
+            if (scene.path == GameInstanceConfiguration.LoadingScene?.ScenePath) {
                 LevelManager.LoadLevelAsync(GameInstanceConfiguration.StartupScene, LevelLoadProgress.OnProgress);
             }
-            else
-            {
+            else {
                 OnLevelLoaded(scene);
             }
-            
         }
 
         private void OnDestroy() {
             UnregisterGameSubsystems();
+        }
+
+        private void HandleSubsystemsWorldBooted(World w) {
+            for (int i = 0; i < gameSubsystemInstances.Count; i++) {
+                var sys = gameSubsystemInstances[i];
+                sys.OnWorldSpawned(w);
+            }
+        }
+
+        private void HandleSubsystemsWorldQuit(World w) {
+            for (int i = 0; i < gameSubsystemInstances.Count; i++) {
+                var sys = gameSubsystemInstances[i];
+                // Check for null in case Unity already cleaned up the backrooms
+                if (sys) {
+                    sys.OnWorldDespawning(w);
+                }
+            }
         }
 
         private void RegisterGameSubsystems() {
@@ -175,6 +188,7 @@ namespace Broilerplate.Core {
         private void OnLevelUnloading(Scene unloadingScene) {
             // get world for scene, call some handling, destroy world.
             // unity does not do this because world isn't under the scene root.
+            HandleSubsystemsWorldQuit(world);
             if (world) {
                 world.ShutdownWorld();
                 world = null;
@@ -196,7 +210,7 @@ namespace Broilerplate.Core {
             if (GameInstanceConfiguration.AutoBootstrapWorld) {
                 BootstrapWorldForLevel(scene);
             }
-            
+            HandleSubsystemsWorldBooted(world);
         }
 
         /// <summary>

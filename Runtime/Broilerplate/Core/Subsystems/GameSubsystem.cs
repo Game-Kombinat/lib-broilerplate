@@ -4,9 +4,29 @@
     ///
     /// In other words: This is live for the entire lifecycle of the game.
     /// </summary>
-    public class GameSubsystem : SubsystemBase {
-        public void OnGameEnds() {
+    public class GameSubsystem : SubsystemBase, IThing {
+        protected World loadedWorld;
+        
+        public virtual void OnGameEnds() {
             
+        }
+
+        public virtual void OnWorldSpawned(World world) {
+            loadedWorld = world;
+        }
+
+        public virtual void OnWorldDespawning(World world) {
+            if (loadedWorld == world) {
+                loadedWorld = null;
+            }
+        }
+        
+        public World GetWorld() {
+            return loadedWorld;
+        }
+
+        public int GetRuntimeId() {
+            return GetInstanceID();
         }
     }
 }
