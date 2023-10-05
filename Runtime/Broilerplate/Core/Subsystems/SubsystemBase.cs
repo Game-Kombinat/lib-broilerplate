@@ -6,6 +6,11 @@ namespace Broilerplate.Core.Subsystems {
     /// Represents a subsystem. Depending on implementation they exist in different places.
     /// </summary>
     public abstract class SubsystemBase : ScriptableObject, IInitialise {
+        [SerializeField]
+        private int initPriority;
+
+        public int InitialisationPriority => initPriority;
+        
         public bool HasBegunPlaying { get; private set; } = false;
         public bool HadLateBeginPlay { get; private set; } = false;
 

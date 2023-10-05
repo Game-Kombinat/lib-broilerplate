@@ -41,7 +41,7 @@ namespace Broilerplate.Ticking {
         /// <summary>
         /// List of IInitialise interfaces that are awaiting their LateBeginPlay call.
         /// </summary>
-        private readonly Queue<IInitialise> scheduledLateBeginPlays = new Queue<IInitialise>();
+        private readonly List<IInitialise> scheduledLateBeginPlays = new ();
 
         public bool IsPaused { get; private set; }
 
@@ -124,14 +124,25 @@ namespace Broilerplate.Ticking {
                 i.BeginPlay();
             }
             
-            scheduledLateBeginPlays.Enqueue(i);
+            scheduledLateBeginPlays.Add(i);
         }
 
         public void HandleScheduledLateBeginPlays() {
-            // order is important, this is why this is a queue.
-            // we want fi-fo. We get fi-fo.
-            while (scheduledLateBeginPlays.Count > 0) {
-                var begin = scheduledLateBeginPlays.Dequeue();
+            if (scheduledLateBeginPlays.Count == 0) {
+                return;
+            }
+            
+            // see if we need to re-order the list elements if they demand higher sort order.
+            // This is a mechanic to resolve initialisation order issues.
+            scheduledLateBeginPlays.Sort((a, b) => {
+                return a == null || b == null
+                    ? 0
+                    : a.InitialisationPriority.CompareTo(b.InitialisationPriority);
+            });
+
+            // since we start at zero, assuming nobody has overridden the initialisation priority, we get fi-fo behaviour.
+            for (int i = 0; i < scheduledLateBeginPlays.Count; i++) {
+                var begin = scheduledLateBeginPlays[i];
                 if (begin == null) {
                     // todo: figure out when and why this is happening.
                     Debug.LogWarning("Found a null ref for a scheduled late begin play. Skipping.");
@@ -141,6 +152,8 @@ namespace Broilerplate.Ticking {
                     begin.LateBeginPlay();
                 }
             }
+            
+            scheduledLateBeginPlays.Clear();
         }
         
         public void HandleScheduledTickAdds() {

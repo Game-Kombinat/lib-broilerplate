@@ -37,6 +37,7 @@ namespace Broilerplate.Core {
 
         public bool HasTickFunc => actorTick != null;
 
+        public int InitialisationPriority => actorTick?.Priority ?? 0;
         public bool HasBegunPlaying { get; private set; } = false;
         
         public bool HadLateBeginPlay { get; private set; } = false;

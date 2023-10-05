@@ -24,7 +24,8 @@ namespace Broilerplate.Core.Components {
         public Actor Owner => owner;
 
         public bool IsBeingDestroyed { get; private set; } = false;
-        
+
+        public int InitialisationPriority => componentTick?.Priority ?? 0;
         public bool HasBegunPlaying { get; private set; } = false;
         
         public bool HadLateBeginPlay { get; private set; } = false;
