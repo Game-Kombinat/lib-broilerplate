@@ -3,7 +3,7 @@
 namespace Broilerplate.Core.Subsystems {
     /// <summary>
     /// Just a base class in case I'll make more sub systems.
-    /// Represents a subsystem. Depending on implementation they exist in different places.
+    /// Represents a subsystem. Depending on implementation they exist in different places and for different lifecycles.
     /// </summary>
     public abstract class SubsystemBase : ScriptableObject, IInitialise {
         [SerializeField]

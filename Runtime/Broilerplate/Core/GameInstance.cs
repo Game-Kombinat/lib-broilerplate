@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Broilerplate.Core.Exceptions;
+using Broilerplate.Core.Subsystems;
 using Broilerplate.Tools;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -11,13 +12,18 @@ namespace Broilerplate.Core {
     /// From here it's possible to access the currently running world and consequently
     /// the runtime API of Broilerplate.
     /// </summary>
+    [CreateAssetMenu(menuName = "Broilerplate/New Game Instance", fileName = "Game Instance")]
     public class GameInstance : ScriptableObject {
-
         /// <summary>
         /// This is created once when the game boots first-time and remains in memory
         /// until the game is shut down.
         /// </summary>
         private static GameInstance gameInstance;
+        
+        [SerializeField]
+        private List<GameSubsystem> gameSubsystems;
+
+        private List<GameSubsystem> gameSubsystemInstances = new();
         
         /// <summary>
         /// Currently loaded world object.
@@ -81,6 +87,8 @@ namespace Broilerplate.Core {
             LevelManager.BeforeLevelUnload += OnLevelUnloading;
             
             GameInstanceConfiguration = broilerConfiguration;
+
+            RegisterGameSubsystems();
             // we have to manually init the world at this point because when GameInstance awakes first time, 
             // the scene was already loaded.
             var scene = SceneManager.GetActiveScene();
@@ -94,6 +102,39 @@ namespace Broilerplate.Core {
                 OnLevelLoaded(scene);
             }
             
+        }
+
+        private void OnDestroy() {
+            UnregisterGameSubsystems();
+        }
+
+        private void RegisterGameSubsystems() {
+            UnregisterGameSubsystems();
+            for (int i = 0; i < gameSubsystems.Count; i++) {
+                var sys = Instantiate(gameSubsystems[i]);
+                sys.BeginPlay();
+                gameSubsystemInstances.Add(sys);
+            }
+            
+            // Sort for LateBeginPlay, then go.
+            gameSubsystemInstances.Sort((a, b) => a.InitialisationPriority.CompareTo(b.InitialisationPriority));
+            for (int i = 0; i < gameSubsystemInstances.Count; i++) {
+                var sys = gameSubsystemInstances[i];
+                sys.LateBeginPlay();
+            }
+        }
+
+        private void UnregisterGameSubsystems() {
+            for (int i = 0; i < gameSubsystemInstances.Count; i++) {
+                var sys = gameSubsystemInstances[i];
+                if (sys) {
+                    // They might be null already because Unity was faster.
+                    // In which case ignore them.
+                    sys.OnGameEnds();
+                }
+            }
+            
+            gameSubsystemInstances.Clear();
         }
 
         /// <summary>
@@ -189,5 +230,16 @@ namespace Broilerplate.Core {
         public World GetWorld() {
             return world;
         }
+
+        public T GetSubsystem<T>() where T : GameSubsystem {
+            for (int i = 0; i < gameSubsystemInstances.Count; i++) {
+                var sys = gameSubsystemInstances[i];
+                if (sys is T subsystem) {
+                    return subsystem;
+                }
+            }
+
+            return null;
+        } 
     }
 }
