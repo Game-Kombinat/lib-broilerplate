@@ -103,7 +103,7 @@ namespace Broilerplate.Core {
             }
         }
 
-        private void OnDestroy() {
+        protected virtual void OnDestroy() {
             UnregisterGameSubsystems();
         }
 
