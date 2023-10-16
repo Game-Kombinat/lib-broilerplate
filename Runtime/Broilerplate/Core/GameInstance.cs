@@ -63,8 +63,11 @@ namespace Broilerplate.Core {
                 return;
             }
             gameInstance = Instantiate(broilerConfigFile.GameInstanceType);
+            gameInstance.OnInitiate();
             gameInstance.InitiateGame(broilerConfigFile);
         }
+
+        protected virtual void OnInitiate() { }
 
         /// <summary>
         /// Static to get the game instance.
