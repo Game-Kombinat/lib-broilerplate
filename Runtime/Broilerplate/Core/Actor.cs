@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Broilerplate.Core.Components;
 using Broilerplate.Ticking;
 using UnityEngine;
@@ -170,6 +171,10 @@ namespace Broilerplate.Core {
             }
 
             return hits;
+        }
+
+        public List<T> GetGameComponents<T>() where T : ActorComponent {
+            return registeredComponents.OfType<T>().ToList();
         }
 
         /// <summary>

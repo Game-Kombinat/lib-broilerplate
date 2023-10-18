@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Broilerplate.Core.Components;
 using Broilerplate.Core.Exceptions;
 using Broilerplate.Core.Subsystems;
@@ -304,6 +305,10 @@ namespace Broilerplate.Core {
             }
 
             return null;
+        }
+
+        public List<T> FindActorsOfType<T>() where T : Actor {
+            return liveActors.OfType<T>().ToList(); // :O
         }
 
         /// <summary>
