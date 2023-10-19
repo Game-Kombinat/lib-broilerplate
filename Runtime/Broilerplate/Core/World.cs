@@ -46,6 +46,7 @@ namespace Broilerplate.Core {
         /// Cleans up all actors and subsystems to give them a chance to process the situation.
         /// </summary>
         public virtual void ShutdownWorld() {
+            Application.quitting -= ShutdownWorld;
             for (int i = 0; i < liveActors.Count; i++) {
                 UnregisterActor(liveActors[i--]);
             }
@@ -106,6 +107,7 @@ namespace Broilerplate.Core {
         /// Worlds BeginPlay will call BeginPlay on actors and schedule their LateBeginPlay calls for the end of frame.
         /// </summary>
         public virtual void BeginPlay() {
+            Application.quitting += ShutdownWorld;
             for (int i = 0; i < liveActors.Count; i++) {
                 if (liveActors[i].GetWorld() == this) {
                     // this was already registered, like a game mode for instance.
