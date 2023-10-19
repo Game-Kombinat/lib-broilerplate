@@ -35,7 +35,7 @@ namespace Broilerplate.Ticking {
                         tick.Tick(deltaTime, timeSinceWorldBoot, currentGroup);
                     }
                     catch (Exception e) {
-                        Debug.LogError($"{e.Message}\n{e.StackTrace}");
+                        Debug.LogException(e);
                     }
                 }
             }
