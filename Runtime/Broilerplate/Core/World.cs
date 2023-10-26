@@ -51,7 +51,9 @@ namespace Broilerplate.Core {
                 UnregisterActor(liveActors[i--]);
             }
             ClearSubSystems();
-            Destroy(unityTickerInstance.gameObject);
+            if (unityTickerInstance) {
+                Destroy(unityTickerInstance.gameObject);
+            }
         }
 
         /// <summary>
