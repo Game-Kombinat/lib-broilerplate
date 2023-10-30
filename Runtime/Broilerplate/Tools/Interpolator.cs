@@ -8,10 +8,6 @@ namespace Broilerplate.Tools {
     /// It's interpolating between 0 and 1 over a given duration.
     /// </summary>
     public class Interpolator {
-        public Interpolator(float duration = 2f) {
-            this.duration = duration;
-        }
-
         private float startTime = float.NegativeInfinity;
         private readonly float duration;
         private float stateA = 1f;
@@ -25,6 +21,10 @@ namespace Broilerplate.Tools {
         public bool DirectionIsZeroOne => stateA == 0;
         public float Duration => duration;
         public bool IsPaused { get; private set; }
+        
+        public Interpolator(float duration = 2f) {
+            this.duration = duration;
+        }
 
         public void Pause() {
             if(timeOfPause != 0f) {
