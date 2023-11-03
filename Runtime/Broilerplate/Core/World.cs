@@ -76,7 +76,7 @@ namespace Broilerplate.Core {
             }
             
             liveActors.Clear();
-            liveActors.AddRange(FindObjectsOfType<Actor>());
+            liveActors.AddRange(FindObjectsOfType<Actor>(true));
             // A world implementation might have overridden the creation of the game mode, so check if it's already there.
             if (!gameMode) {
                 gameMode = gameModePrefab ? SpawnActor(gameModePrefab, Vector3.zero,Quaternion.identity) : SpawnActorOn<GameMode>(new GameObject("Default Game Mode"));
