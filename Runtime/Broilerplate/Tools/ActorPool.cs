@@ -10,7 +10,7 @@ namespace Broilerplate.Tools {
     /// </summary>
     public class ActorPool<T> : ActorComponent where T : Actor {
         [SerializeField]
-        private T poolingObject;
+        protected T poolingObject;
         
         [SerializeField]
         protected Transform targetParent;
