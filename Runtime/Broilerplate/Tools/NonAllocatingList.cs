@@ -36,6 +36,17 @@ namespace Broilerplate.Tools {
 
             Clear();
         }
+        
+        public NonAllocatingList(int size, int initialAmount, T defaultElement = default) {
+            MaxSize = size;
+            internalList = new List<T>(size);
+            // Pre-fill with defaults because capacity doesn't cut it
+            for (int i = 0; i < MaxSize; i++) {
+                internalList.Add(defaultElement);
+            }
+
+            Count = initialAmount;
+        }
 
         /// <summary>
         /// Call this when re-populating this list.
