@@ -79,6 +79,7 @@ namespace Broilerplate.Ticking {
             if (IsPaused) {
                 return;
             }
+            world.HandleTickChanges();
             physicsTicks.Tick(Time.fixedDeltaTime, Time.timeSinceLevelLoad, TickGroup.Physics);
         }
 
