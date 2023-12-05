@@ -12,12 +12,6 @@ namespace Broilerplate.Ticking {
     public class TickFunc {
 
         /// <summary>
-        /// Determines if we start with ticking enabled by default.
-        /// </summary>
-        [SerializeField]
-        private bool startTickEnabled = false;
-
-        /// <summary>
         /// Determines if we're currently ticking.
         /// </summary>
         [SerializeField]
@@ -60,11 +54,6 @@ namespace Broilerplate.Ticking {
         /// It will not be registered with the Tick Loop
         /// </summary>
         public bool CanEverTick => tickGroup != TickGroup.None;
-
-        /// <summary>
-        /// Determines if we start with ticking enabled by default.
-        /// </summary>
-        public bool StartTickEnabled => startTickEnabled;
 
         /// <summary>
         /// Determines if we're currently ticking.
@@ -123,7 +112,6 @@ namespace Broilerplate.Ticking {
         }
 
         public void OnReset() {
-            tickEnabled = startTickEnabled;
             lastTick = 0;
             isRegistered = false;
         }
@@ -155,11 +143,6 @@ namespace Broilerplate.Ticking {
 
         public void SetTickGroup(TickGroup inTickGroup) {
             tickGroup = inTickGroup;
-        }
-
-        public void SetStartWithTickEnabled(bool startEnabled)
-        {
-            startTickEnabled = startEnabled;
         }
 
         public void SetTickInterval(float interval) {
