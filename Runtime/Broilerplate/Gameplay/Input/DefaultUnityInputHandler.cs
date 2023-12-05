@@ -85,7 +85,7 @@ namespace Broilerplate.Gameplay.Input {
         public void Setup(PlayerController pc) {
             playerController = pc;
             tickFunc = new TickFunc();
-            tickFunc.SetStartWithTickEnabled(true);
+            tickFunc.SetEnableTick(true);
             tickFunc.SetTickTarget(this);
             tickFunc.SetTickGroup(TickGroup.Tick);
             playerController.GetWorld().RegisterTickFunc(tickFunc);
