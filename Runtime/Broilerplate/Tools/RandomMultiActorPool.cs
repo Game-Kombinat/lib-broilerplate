@@ -20,7 +20,7 @@ namespace Broilerplate.Tools {
         private IActorPoolPostProcessor postProcessor;
         
         [SerializeField]
-        private int poolSize;
+        protected int poolSize;
         
         [SerializeField]
         protected bool loadPoolInBeginPlay = false;
