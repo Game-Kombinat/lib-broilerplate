@@ -9,6 +9,7 @@ namespace Broilerplate.Tools {
             public T prefab;
             public int weight;
         }
+        
         [SerializeField]
         protected WeightedEntry[] poolingObject;
         
@@ -27,12 +28,12 @@ namespace Broilerplate.Tools {
         /// <summary>
         /// List of objects that are not live and can be retrieved from the pool.
         /// </summary>
-        private List<T> pooledObjects;
+        protected List<T> pooledObjects;
 
         /// <summary>
         /// List of objects we know were live the last time we checked
         /// </summary>
-        private List<T> liveObjects;
+        protected readonly List<T> liveObjects = new List<T>();
 
         public override void BeginPlay() {
             base.BeginPlay();
@@ -81,6 +82,7 @@ namespace Broilerplate.Tools {
 
             if (geddit) {
                 pooledObjects.Remove(geddit);
+                liveObjects.Add(geddit);
                 return true;
             }
             Debug.Log("No inactive actors in pool.");
@@ -110,15 +112,32 @@ namespace Broilerplate.Tools {
                 }
             }
         }
+        
+        public void ClearPool() {
+            if (pooledObjects != null) {
+                for (int i = 0; i < pooledObjects.Count; ++i) {
+                    if (pooledObjects[i] != null) {
+                        pooledObjects[i].Kill();
+                    }
+                }
+
+                pooledObjects.Clear();
+            }
+
+            if (liveObjects != null) {
+                for (int i = 0; i < liveObjects.Count; i++) {
+                    liveObjects[i].Kill();
+                }
+
+                liveObjects.Clear();
+            }
+        }
 
         protected override void OnDestroy() {
-            for (int i = 0; i < pooledObjects.Count; ++i) {
-                if (pooledObjects[i] != null) {
-                    pooledObjects[i].Kill();
-                }
-            }
-            pooledObjects.Clear();
+            ClearPool();
             base.OnDestroy();
         }
+
+        
     }
 }
