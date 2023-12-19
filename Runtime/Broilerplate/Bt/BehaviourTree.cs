@@ -4,6 +4,7 @@ using System.Linq;
 using Broilerplate.Bt.Data;
 using Broilerplate.Bt.Nodes;
 using Broilerplate.Core;
+using Broilerplate.Data;
 using UnityEngine;
 using XNode;
 

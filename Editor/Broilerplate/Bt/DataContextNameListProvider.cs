@@ -1,6 +1,7 @@
 ﻿using System;
 using Broilerplate.Bt.Data;
 using Broilerplate.Bt.Nodes.Data.Graph;
+using Broilerplate.Data;
 using UnityEngine.SceneManagement;
 
 namespace Broilerplate.Editor.Broilerplate.Bt {

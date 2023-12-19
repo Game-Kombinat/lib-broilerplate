@@ -2,7 +2,7 @@
 using GameKombinat.Fnbt;
 using UnityEngine;
 
-namespace Broilerplate.Bt.Data {
+namespace Broilerplate.Data {
     [CreateAssetMenu(menuName = "Game Kombinat/Create Data Context Asset", fileName = "New Data Context")]
     public class DataContext : ScriptableObject, ISerializationCallbackReceiver {
         // runtime data
@@ -14,8 +14,8 @@ namespace Broilerplate.Bt.Data {
         [HideInInspector]
         private byte[] serializedNbt;
 
-        public int GetInt(string name) {
-            NbtTag tag = Find(name);
+        public int GetInt(string varName) {
+            NbtTag tag = Find(varName);
             if (tag == null) {
                 return 0;
             }
@@ -24,11 +24,11 @@ namespace Broilerplate.Bt.Data {
                 return tag["value"].IntValue;
             }
             catch (NullReferenceException) {
-                Debug.LogWarning($"Trying to use tag {name} which has no value assigned to it yet");
+                Debug.LogWarning($"Trying to use tag {varName} which has no value assigned to it yet");
                 return 0;
             }
             catch {
-                Debug.LogError($"{name} is not attached to an int value. Tag is {tag["value"].GetType()}");
+                Debug.LogError($"{varName} is not attached to an int value. Tag is {tag["value"].GetType()}");
                 return 0;
             }
         }
@@ -52,8 +52,8 @@ namespace Broilerplate.Bt.Data {
             }
         }
         
-        public bool GetBool(string name) {
-            NbtTag tag = Find(name);
+        public bool GetBool(string varName) {
+            NbtTag tag = Find(varName);
             if (tag == null) {
                 return false;
             }
@@ -61,17 +61,17 @@ namespace Broilerplate.Bt.Data {
                 return tag["value"].ByteValue > 0;
             }
             catch (NullReferenceException) {
-                Debug.LogWarning($"Trying to use tag {name} which has no value assigned to it yet");
+                Debug.LogWarning($"Trying to use tag {varName} which has no value assigned to it yet");
                 return false;
             }
             catch {
-                Debug.LogError($"{name} is not attached to a byte value that can be converted to bool. Tag is {tag["value"].GetType()}");
+                Debug.LogError($"{varName} is not attached to a byte value that can be converted to bool. Tag is {tag["value"].GetType()}");
                 return false;
             }
         }
         
-        public string GetString(string name) {
-            NbtTag tag = Find(name);
+        public string GetString(string varName) {
+            NbtTag tag = Find(varName);
             if (tag == null) {
                 return string.Empty;
             }
@@ -79,28 +79,27 @@ namespace Broilerplate.Bt.Data {
                 return tag["value"].StringValue;
             }
             catch (NullReferenceException) {
-                Debug.LogWarning($"Trying to use tag {name} which has no value assigned to it yet");
+                Debug.LogWarning($"Trying to use tag {varName} which has no value assigned to it yet");
                 return string.Empty;
             }
             catch {
-                Debug.LogError($"{name} is not attached to a string value. Tag is {tag["value"].GetType()}");
+                Debug.LogError($"{varName} is not attached to a string value. Tag is {tag["value"].GetType()}");
                 return string.Empty;
             }
         }
 
-        public void Set(string name, int val) {
-            NbtTag tag = FindOrCreate(name, out bool wasCreated);
+        public void Set(string varName, int val) {
+            NbtTag tag = FindOrCreate(varName, out bool wasCreated);
             if (wasCreated || tag["value"] == null) {
                 tag["value"] = new NbtInt("value", val);
             }
             else {
-                
                 ((NbtInt)tag["value"]).Value = val;
             }
         }
         
-        public void Set(string name, float val) {
-            NbtTag tag = FindOrCreate(name, out bool wasCreated);
+        public void Set(string varName, float val) {
+            NbtTag tag = FindOrCreate(varName, out bool wasCreated);
             if (wasCreated || tag["value"] == null) {
                 tag["value"] = new NbtFloat("value", val);
             }
@@ -109,8 +108,8 @@ namespace Broilerplate.Bt.Data {
             }
         }
         
-        public void Set(string name, string val) {
-            NbtTag tag = FindOrCreate(name, out bool wasCreated);
+        public void Set(string varName, string val) {
+            NbtTag tag = FindOrCreate(varName, out bool wasCreated);
             if (wasCreated || tag["value"] == null) {
                 tag["value"] = new NbtString("value", val);
             }
@@ -119,8 +118,8 @@ namespace Broilerplate.Bt.Data {
             }
         }
         
-        public void Set(string name, bool val) {
-            NbtTag tag = FindOrCreate(name, out bool wasCreated);
+        public void Set(string varName, bool val) {
+            NbtTag tag = FindOrCreate(varName, out bool wasCreated);
             byte byteVal = (byte)(val ? 1 : 0);
             if (wasCreated || tag["value"] == null) {
                 tag["value"] = new NbtByte("value", byteVal);
@@ -130,8 +129,8 @@ namespace Broilerplate.Bt.Data {
             }
         }
 
-        public bool HasAnyTagByName(string name) {
-            return Find(name) != null;
+        public bool HasAnyTagByName(string varName) {
+            return Find(varName) != null;
         }
 
         private NbtTag FindOrCreate(string tagName, out bool wasCreated) {
