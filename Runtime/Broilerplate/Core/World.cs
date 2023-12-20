@@ -314,6 +314,48 @@ namespace Broilerplate.Core {
         public List<T> FindActorsOfType<T>() where T : Actor {
             return liveActors.OfType<T>().ToList(); // :O
         }
+        
+        /// <summary>
+        /// Looks for the type T in all registered actors components.
+        /// Can be a vanilla Unity component as well.
+        /// Returns first occurence found.
+        ///
+        /// This is a bit of an expensive operation so be careful. 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public T FindTypeInActors<T>() {
+            for (int i = 0; i < liveActors.Count; i++) {
+                var a = liveActors[i];
+                T type = a.GetComponentInChildren<T>();
+                
+                if (type != null) {
+                    return type;
+                }
+            }
+
+            return default;
+        }
+        
+        /// <summary>
+        /// Same as the other but this time you get all the occurrences of the given type.
+        /// This is also a comparatively heavy operation. Be careful!
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public List<T> FindTypesInActors<T>() {
+            List<T> list = new List<T>();
+            for (int i = 0; i < liveActors.Count; i++) {
+                var a = liveActors[i];
+                T type = a.GetComponentInChildren<T>();
+                
+                if (type != null) {
+                    list.Add(type);
+                }
+            }
+
+            return list;
+        }
 
         /// <summary>
         /// Get a reference to the GameMode that is running in this world.
