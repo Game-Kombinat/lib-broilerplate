@@ -9,7 +9,7 @@ namespace Broilerplate.Tools {
     /// </summary>
     public class Interpolator {
         private float startTime = float.NegativeInfinity;
-        private readonly float duration;
+        private float duration;
         private float stateA = 1f;
         private float stateB;
         private float currentValue;
@@ -24,6 +24,10 @@ namespace Broilerplate.Tools {
         
         public Interpolator(float duration = 2f) {
             this.duration = duration;
+        }
+
+        public void SetDuration(float newDuration) {
+            duration = newDuration;
         }
 
         public void Pause() {
@@ -120,6 +124,18 @@ namespace Broilerplate.Tools {
         public static Coroutine Anim8(Coroutine previous, float duration, bool directionIs01, Action<float> onSample, Action onFinish) {
             CoroutineJobs.StopJob(previous);
             return Anim8(duration, directionIs01, onSample, onFinish);
+        }
+        
+        public static Coroutine SetTimer(float duration, Action onFinish) {
+            return Anim8(duration, true, null, onFinish);
+        }
+        
+        public static Coroutine SetTimer(Coroutine previous, float duration, Action onFinish) {
+            CoroutineJobs.StopJob(previous);
+            return Anim8(duration, true, null, onFinish);
+        }
+        public static void StopTimer(Coroutine timer) {
+            CoroutineJobs.StopJob(timer);
         }
 
         public static Coroutine Anim8(float duration,bool directionIs01,Action<float> onSample, Action onFinish) {
