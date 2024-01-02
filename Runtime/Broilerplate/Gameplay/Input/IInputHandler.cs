@@ -11,6 +11,10 @@ namespace Broilerplate.Gameplay.Input {
         /// </summary>
         void ClearInputs();
 
+        void EnableInputs();
+
+        void DisableInputs();
+
         void BindAction(string action, ButtonActivatorType type, ButtonPress callback);
         void BindAxis(string action, AxisInputData<float>.AxisInput callback);
         void BindAxis(string action, AxisInputData<Vector2>.AxisInput callback);

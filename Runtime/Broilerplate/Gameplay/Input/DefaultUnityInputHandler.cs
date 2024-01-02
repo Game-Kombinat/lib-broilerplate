@@ -81,7 +81,7 @@ namespace Broilerplate.Gameplay.Input {
 
         private PlayerController playerController;
         private TickFunc tickFunc;
-
+        
         public void Setup(PlayerController pc) {
             playerController = pc;
             tickFunc = new TickFunc();
@@ -165,6 +165,14 @@ namespace Broilerplate.Gameplay.Input {
 
             PointerPositionUpdates = null;
             UnregisterTickFunc();
+        }
+
+        public void EnableInputs() {
+            SetEnableTick(true);
+        }
+
+        public void DisableInputs() {
+            SetEnableTick(false);
         }
 
         public void BindAction(string action, ButtonActivatorType type, ButtonPress callback) {
