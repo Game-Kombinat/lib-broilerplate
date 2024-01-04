@@ -20,7 +20,9 @@ namespace Broilerplate.Tools {
         [SerializeField]
         private bool loadOnBeginPlay;
 
-        private Queue<T> instances;
+        private Queue<T> instances = new();
+
+        private List<T> dispensedObjects = new();
         
         public bool IsDepleted => instances.Count == 0;
 
@@ -40,8 +42,13 @@ namespace Broilerplate.Tools {
         }
 
         public void Clear() {
+            // take out all objects from queue
             while (!IsDepleted) {
-                Destroy(Get().gameObject);
+                Get();
+            }
+
+            for (int i = 0; i < dispensedObjects.Count; i++) {
+                Destroy(dispensedObjects[i].gameObject);
             }
         }
 
@@ -57,7 +64,15 @@ namespace Broilerplate.Tools {
             if (IsDepleted) {
                 return default;
             }
-            return instances.Dequeue();
+
+            var i = instances.Dequeue();
+            dispensedObjects.Add(i);
+            return i;
+        }
+
+        protected override void OnDestroy() {
+            Clear();
+            base.OnDestroy();
         }
     }
 }
