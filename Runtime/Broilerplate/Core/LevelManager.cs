@@ -3,7 +3,6 @@ using System.Collections;
 using Broilerplate.Tools;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using Object = System.Object;
 
 namespace Broilerplate.Core {
     /// <summary>
@@ -99,7 +98,13 @@ namespace Broilerplate.Core {
                 yield return LoadLevelRoutine(targetLevelName, fakeLoadingTime, progress, !currentIsLoadingScene);
             }
             else {
+                // we have to manually call the unload callback for the current scene here because
+                // on this code path we don't explicitly unload it. and we can't because unity doesn't
+                // allow no scene to be loaded. (Which I think is fine)
+                BeforeLevelUnload?.Invoke(ActiveScene);
+                string unloadedLevel = ActiveScene.name;
                 yield return LoadLevelRoutine(targetLevelName, fakeLoadingTime, progress, false);
+                OnLevelUnloaded?.Invoke(unloadedLevel); // This is not necessarily the correct location but it's the best we can get
             }
             loadingInProgress = false;
         }
