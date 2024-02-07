@@ -175,6 +175,10 @@ namespace Broilerplate.Gameplay.Input {
             SetEnableTick(false);
         }
 
+        public void SetInputMap(string mapId) {
+            throw new NotImplementedException("Default Input Module does not provide input maps");
+        }
+
         public void BindAction(string action, ButtonActivatorType type, ButtonPress callback) {
             switch (type) {
                 case ButtonActivatorType.Press:
