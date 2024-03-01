@@ -58,7 +58,7 @@ namespace Broilerplate.Gameplay {
         }
 #endif
         public virtual void SetControlRotation(Quaternion controlRotation) {
-            transform.rotation = controlRotation;
+            GetControlTransform().rotation = controlRotation;
         }
 
         /// <summary>

@@ -52,8 +52,8 @@ namespace Broilerplate.Gameplay {
             frameRotation.x = ClampAngle(frameRotation.x, rotationLimitMin.x, rotationLimitMax.x);
             frameRotation.y = ClampAngle(frameRotation.y, rotationLimitMin.y, rotationLimitMax.y);
             
-            var x = Quaternion.AngleAxis(frameRotation.y, Vector3.up);
-            var y = Quaternion.AngleAxis(frameRotation.x, Vector3.left);
+            var x = Quaternion.AngleAxis(frameRotation.x, Vector3.up);
+            var y = Quaternion.AngleAxis(frameRotation.y, Vector3.left);
             var z = ignoreRollRotation ? Quaternion.AngleAxis(controlRotation.eulerAngles.z, Vector3.forward) : Quaternion.AngleAxis(frameRotation.z, Vector3.forward);
             controlRotation = x * y * z;
         }
