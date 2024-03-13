@@ -54,7 +54,7 @@ namespace Broilerplate.Tools {
         public T Get() {
             for (int i = 0; i < pooledObjects.Count; ++i) {
                 var actor = pooledObjects[i];
-                if (!actor.gameObject.activeInHierarchy) {
+                if (!actor.gameObject.activeSelf) {
                     postProcessor?.PostProcessOnGet(actor);
                     return actor;
                 }
@@ -68,7 +68,7 @@ namespace Broilerplate.Tools {
             geddit = null;
             for (int i = 0; i < pooledObjects.Count; ++i) {
                 var actor = pooledObjects[i];
-                if (!actor.gameObject.activeInHierarchy) {
+                if (!actor.gameObject.activeSelf) {
                     if (postProcessor != null) {
                         postProcessor.PostProcessOnGet(actor);
                     }
