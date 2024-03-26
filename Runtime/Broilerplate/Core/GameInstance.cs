@@ -128,7 +128,6 @@ namespace Broilerplate.Core {
             UnregisterGameSubsystems();
             for (int i = 0; i < gameSubsystems.Count; i++) {
                 var sys = Instantiate(gameSubsystems[i]);
-                sys.BeginPlay();
                 gameSubsystemInstances.Add(sys);
             }
             
@@ -136,6 +135,7 @@ namespace Broilerplate.Core {
             gameSubsystemInstances.Sort((a, b) => a.InitialisationPriority.CompareTo(b.InitialisationPriority));
             for (int i = 0; i < gameSubsystemInstances.Count; i++) {
                 var sys = gameSubsystemInstances[i];
+                sys.BeginPlay();
                 sys.LateBeginPlay();
             }
         }
