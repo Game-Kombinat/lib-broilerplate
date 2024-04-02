@@ -43,7 +43,7 @@ namespace Broilerplate.Ticking {
         /// </summary>
         private ITickable tickTarget = null;
 
-        private float lastTick;
+        private float nextTick;
 
         private int tickTargetHash;
 
@@ -103,16 +103,16 @@ namespace Broilerplate.Ticking {
         }
 
         public bool CanTickNow(float currentTime) {
-            return tickEnabled && lastTick + tickInterval <= currentTime;
+            return tickEnabled && nextTick <= currentTime;
         }
 
         public void Tick(float deltaTime, float currentTime, TickGroup currentGroup) {
-            lastTick = currentTime;
+            nextTick = currentTime + tickInterval;
             tickTarget.ProcessTick(deltaTime, currentGroup);
         }
 
         public void OnReset() {
-            lastTick = 0;
+            nextTick = tickInterval;
             isRegistered = false;
         }
 
