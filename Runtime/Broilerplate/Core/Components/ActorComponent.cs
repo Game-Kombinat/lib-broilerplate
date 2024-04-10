@@ -48,7 +48,9 @@ namespace Broilerplate.Core.Components {
         protected virtual void Awake() {
             // Have to have this for components added during runtime.
             // Editor-time authored components will be handled from actors Awake()
-            EnsureIntegrity(true);
+            if (!HasBegunPlaying) {
+                EnsureIntegrity(true);
+            }
         }
 
         /// <summary>
