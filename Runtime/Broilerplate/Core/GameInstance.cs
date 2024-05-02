@@ -257,6 +257,20 @@ namespace Broilerplate.Core {
             }
 
             return null;
-        } 
+        }
+        
+        public List<T> GetSubsystems<T>() {
+            List<T> result = new();
+            
+            for (int i = 0; i < gameSubsystemInstances.Count; i++) {
+                var sys = gameSubsystemInstances[i];
+                
+                if (sys is T t) {
+                    result.Add(t);
+                }
+            }
+            
+            return result;
+        }
     }
 }
