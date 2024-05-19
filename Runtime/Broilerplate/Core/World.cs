@@ -247,7 +247,7 @@ namespace Broilerplate.Core {
         /// Doing it during the actors lifetime will effectively turn it into a normal MonoBehaviour.
         /// </summary>
         /// <param name="actor"></param>
-        public void UnregisterActor(Actor actor) {
+        public virtual void UnregisterActor(Actor actor) {
             UnregisterTickFunc(actor.ActorTick);
             liveActors.Remove(actor);
 
