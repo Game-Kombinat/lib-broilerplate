@@ -21,7 +21,7 @@ namespace Broilerplate.Ticking {
         /// When this tick is executed.
         /// </summary>
         [SerializeField]
-        private TickGroup tickGroup = TickGroup.Tick;
+        private TickGroup tickGroup = TickGroup.None;
 
         /// <summary>
         /// Interval in seconds in which the tick is executed.
