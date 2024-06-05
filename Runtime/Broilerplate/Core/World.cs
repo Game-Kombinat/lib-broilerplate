@@ -26,6 +26,7 @@ namespace Broilerplate.Core {
         protected readonly List<Actor> liveActors = new List<Actor>();
         protected readonly List<WorldSubsystem> subsystems = new List<WorldSubsystem>();
 
+        public string LevelName { get; private set; }
         public TickManager TickManager => tickManager;
         public bool HasActors => liveActors.Count > 0;
         public int NumActors => liveActors.Count;
@@ -62,7 +63,8 @@ namespace Broilerplate.Core {
         /// </summary>
         /// <param name="gameModePrefab"></param>
         /// <param name="worldSubsystems"></param>
-        public virtual void BootWorld(GameMode gameModePrefab, List<WorldSubsystem> worldSubsystems) {
+        public virtual void BootWorld(GameMode gameModePrefab, List<WorldSubsystem> worldSubsystems, string levelName) {
+            LevelName = levelName;
             tickManager = new TickManager(this);
 
             var unityTicker = new GameObject("Unity Ticker");

@@ -227,7 +227,7 @@ namespace Broilerplate.Core {
             
             world = Instantiate(GameInstanceConfiguration.WorldType);
             world.name = $"{world.GetType().Name} for {scene.name}";
-            world.BootWorld(gmPrefab, GameInstanceConfiguration.WorldSubsystems);
+            world.BootWorld(gmPrefab, GameInstanceConfiguration.WorldSubsystems, scene.name);
             world.SpawnPlayer(GetInitialLocalPlayer());
             // Finalise bootstrapping game mode with player controller having been initialised.
             // BeginPlay for GameMode has been called way before this point when the game world has spawned it.
