@@ -191,11 +191,11 @@ namespace Broilerplate.Core {
         private void OnLevelUnloading(Scene unloadingScene) {
             // get world for scene, call some handling, destroy world.
             // unity does not do this because world isn't under the scene root.
-            HandleSubsystemsWorldQuit(world);
             if (world) {
                 world.ShutdownWorld();
-                world = null;
             }
+            HandleSubsystemsWorldQuit(world);
+            world = null;
         }
 
         /// <summary>
