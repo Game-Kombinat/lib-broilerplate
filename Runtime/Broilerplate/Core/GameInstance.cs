@@ -117,7 +117,8 @@ namespace Broilerplate.Core {
         private void HandleSubsystemsWorldQuit(World w) {
             for (int i = 0; i < gameSubsystemInstances.Count; i++) {
                 var sys = gameSubsystemInstances[i];
-                // Check for null in case Unity already cleaned up the backrooms
+                // Check for null in case Unity already cleaned up the backrooms. Shouldn't happen right here though.
+                // But just to be sure. Doesn't hurt anybody at this point.
                 if (sys) {
                     sys.OnWorldDespawning(w);
                 }
@@ -189,12 +190,13 @@ namespace Broilerplate.Core {
         /// </summary>
         /// <param name="unloadingScene"></param>
         private void OnLevelUnloading(Scene unloadingScene) {
+            HandleSubsystemsWorldQuit(world);
+            
             // get world for scene, call some handling, destroy world.
             // unity does not do this because world isn't under the scene root.
             if (world) {
                 world.ShutdownWorld();
             }
-            HandleSubsystemsWorldQuit(world);
             Destroy(world);
             world = null;
         }
