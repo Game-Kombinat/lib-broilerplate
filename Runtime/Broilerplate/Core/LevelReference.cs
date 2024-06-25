@@ -42,11 +42,13 @@ namespace Broilerplate.Core {
         public static implicit operator string(LevelReference levelReference) {
             string name = Path.GetFileName(levelReference.ScenePath);
             if (string.IsNullOrEmpty(name)) {
-                return default;
+                return string.IsNullOrEmpty(levelReference.ScenePath) ? null : levelReference.ScenePath;
             }
 
             int unity = name.LastIndexOf(".unity", StringComparison.Ordinal);
-            name = name.Substring(0, unity);
+            if (unity >= 0) {
+                name = name.Substring(0, unity);
+            }
             return name;
         }
 

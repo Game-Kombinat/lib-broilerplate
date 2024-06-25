@@ -69,9 +69,32 @@ namespace Broilerplate.Core {
 
         public bool AutoBootstrapWorld => autoBootstrapWorld;
 
+        /// <summary>
+        /// Get a game mode for a given loaded scene.
+        /// This is save as it compares the scenes native handles.
+        /// </summary>
+        /// <param name="scene"></param>
+        /// <returns></returns>
         public GameMode GetGameModeFor(Scene scene) {
             for (int i = 0; i < gameModeOverrides.Count; ++i) {
                 if (gameModeOverrides[i].scene == scene) {
+                    return gameModeOverrides[i].gameModeOverridePrefab;
+                }
+            }
+            
+            return defaultGameModePrefab;
+        }
+        
+        /// <summary>
+        /// Get a game mode for the given scene by scene name.
+        /// This may be unreliable as we have to compare substrings and those
+        /// are not necessarily unique. Beware of that!
+        /// </summary>
+        /// <param name="sceneName"></param>
+        /// <returns></returns>
+        public GameMode GetGameModeFor(string sceneName) {
+            for (int i = 0; i < gameModeOverrides.Count; ++i) {
+                if (gameModeOverrides[i].scene.SceneName.Contains(sceneName)) {
                     return gameModeOverrides[i].gameModeOverridePrefab;
                 }
             }

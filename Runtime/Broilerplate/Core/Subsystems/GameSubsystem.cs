@@ -15,7 +15,7 @@
             loadedWorld = world;
         }
 
-        public virtual void OnWorldDespawning(World world) {
+        public virtual void OnWorldDespawning(World world, string nextLevel) {
             if (loadedWorld == world) {
                 loadedWorld = null;
             }

@@ -33,8 +33,9 @@ namespace Broilerplate.Core {
         
         /// <summary>
         /// Callback that's called right before a new level is about to be loaded.
+        /// Secind parameter is the name of the next level.
         /// </summary>
-        public static event Action<Scene> BeforeLevelUnload;
+        public static event Action<Scene, string> BeforeLevelUnload;
 
         /// <summary>
         /// Name of the loading scene if there is one
@@ -92,7 +93,7 @@ namespace Broilerplate.Core {
 
                 if (!currentIsLoadingScene) {
                     // unload currently loaded level if we didn't start from the loading scene
-                    yield return UnloadLevelRoutine(currentSceneObject);
+                    yield return UnloadLevelRoutine(currentSceneObject, targetLevelName);
                 }
                 // Now load the new scene and get rid of the loading scene if necessary
                 yield return LoadLevelRoutine(targetLevelName, fakeLoadingTime, progress, !currentIsLoadingScene);
@@ -101,7 +102,7 @@ namespace Broilerplate.Core {
                 // we have to manually call the unload callback for the current scene here because
                 // on this code path we don't explicitly unload it. and we can't because unity doesn't
                 // allow no scene to be loaded. (Which I think is fine)
-                BeforeLevelUnload?.Invoke(ActiveScene);
+                BeforeLevelUnload?.Invoke(ActiveScene, targetLevelName);
                 string unloadedLevel = ActiveScene.name;
                 yield return LoadLevelRoutine(targetLevelName, fakeLoadingTime, progress, false);
                 OnLevelUnloaded?.Invoke(unloadedLevel); // This is not necessarily the correct location but it's the best we can get
@@ -132,15 +133,16 @@ namespace Broilerplate.Core {
             SceneManager.SetActiveScene(activeScene);
             OnLevelLoaded?.Invoke(activeScene);
         }
-        
+
         /// <summary>
         /// The standard routine to unload a level
         /// </summary>
         /// <param name="currentScene"></param>
+        /// <param name="nextLevel">Name of next level. This is to pass on this information as meta into the game code.</param>
         /// <returns></returns>
-        private static IEnumerator UnloadLevelRoutine(Scene currentScene) {
+        private static IEnumerator UnloadLevelRoutine(Scene currentScene, string nextLevel) {
             string sceneName = currentScene.name;
-            BeforeLevelUnload?.Invoke(currentScene);
+            BeforeLevelUnload?.Invoke(currentScene, nextLevel);
             yield return SceneManager.UnloadSceneAsync(currentScene);
             OnLevelUnloaded?.Invoke(sceneName);
         }
