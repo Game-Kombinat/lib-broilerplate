@@ -34,5 +34,9 @@ namespace Broilerplate.Ticking {
         private void FixedUpdate() {
             tickManager?.PhysicsTick();
         }
+
+        private void OnDestroy() {
+            tickManager?.HandleScheduledTickRemovals();
+        }
     }
 }
