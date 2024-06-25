@@ -195,6 +195,7 @@ namespace Broilerplate.Core {
                 world.ShutdownWorld();
             }
             HandleSubsystemsWorldQuit(world);
+            Destroy(world);
             world = null;
         }
 
