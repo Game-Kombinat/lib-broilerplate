@@ -83,10 +83,8 @@ namespace Broilerplate.Tools {
         
         public void ProcessTick(float deltaTime, TickGroup tickGroup) {
             OnTick?.Invoke();
-            if (IsDone) {
-                OnFinish?.Invoke();
-                Clear();
-            }
+            
+            TryFinish();
         }
         
         public void SetEnableTick(bool shouldTick) {
@@ -128,6 +126,14 @@ namespace Broilerplate.Tools {
         
         public void ForceDone() {
             start = DateTime.Now - duration;
+            TryFinish();
+        }
+
+        private void TryFinish() {
+            if (IsDone) {
+                OnFinish?.Invoke();
+                Clear();
+            }
         }
     }
 }
