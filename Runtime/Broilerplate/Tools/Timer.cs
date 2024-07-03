@@ -135,5 +135,15 @@ namespace Broilerplate.Tools {
                 Clear();
             }
         }
+
+        public void ShortenDuration(TimeSpan withTime) {
+            var durationToSet = TimeLeft - withTime;
+            if (durationToSet > TimeSpan.Zero) {
+                StartTimer(durationToSet);
+            }
+            else {
+                ForceDone();
+            }
+        }
     }
 }
