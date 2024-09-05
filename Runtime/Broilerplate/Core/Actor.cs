@@ -225,7 +225,7 @@ namespace Broilerplate.Core {
         /// Encapsulates the logic of cleaning up this actor from the runtime data.
         /// Removes tickfuncs, destroys actor components and removes their tickfuncs as well.
         /// </summary>
-        protected virtual void DestroyActor() {
+        protected virtual void DestroyActor(bool callDestroy) {
             if (world) {
                 for (int i = 0; i < registeredComponents.Count; ++i) {
                     // Destroy components manually because they might be detached and will not be
@@ -239,11 +239,13 @@ namespace Broilerplate.Core {
                 world.UnregisterActor(this);
             }
 
-            Destroy(gameObject);
+            if (callDestroy) {
+                Destroy(gameObject);
+            }
         }
 
         protected virtual void OnDestroy() {
-            DestroyActor();
+            DestroyActor(false);
         }
 
         protected virtual void Reset() {

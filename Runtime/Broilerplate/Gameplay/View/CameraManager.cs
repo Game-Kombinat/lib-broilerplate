@@ -56,8 +56,8 @@ namespace Broilerplate.Gameplay.View {
             }
         }
 
-        protected override void DestroyActor() {
-            base.DestroyActor();
+        protected override void DestroyActor(bool callDestroy) {
+            base.DestroyActor(callDestroy);
             if (mainCamera) {
                 Destroy(mainCamera.gameObject);
             }
