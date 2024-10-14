@@ -145,8 +145,8 @@ namespace Broilerplate.Ticking {
             for (int i = 0; i < scheduledLateBeginPlays.Count; i++) {
                 var begin = scheduledLateBeginPlays[i];
                 if (begin == null) {
-                    // todo: figure out when and why this is happening.
-                    Debug.LogWarning("Found a null ref for a scheduled late begin play. Skipping.");
+                    // This happens when we spawn an actor and destroy it right away in the same frame.
+                    // Which we just might.
                     continue;
                 }
                 if (!begin.HadLateBeginPlay) {

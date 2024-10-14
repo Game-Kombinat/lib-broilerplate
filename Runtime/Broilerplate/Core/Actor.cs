@@ -233,9 +233,6 @@ namespace Broilerplate.Core {
                     var comp = registeredComponents[i];
                     Destroy(comp);
                 }
-
-                world.UnregisterTickFunc(actorTick);
-
                 world.UnregisterActor(this);
             }
 
