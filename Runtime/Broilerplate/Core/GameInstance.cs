@@ -211,13 +211,14 @@ namespace Broilerplate.Core {
             if (scene.path == GameInstanceConfiguration.LoadingScene?.ScenePath) {
                 return;
             }
+            CreateWorld(scene);
+            HandleSubsystemsWorldBooted(world);
             // create a new world from project config
             // create a mapping scene => world.
             // call RegisterActors() on world to kick off managed BeginPlay() callbacks.
             if (GameInstanceConfiguration.AutoBootstrapWorld) {
                 BootstrapWorldForLevel(scene);
             }
-            HandleSubsystemsWorldBooted(world);
         }
 
         /// <summary>
@@ -229,8 +230,6 @@ namespace Broilerplate.Core {
         public void BootstrapWorldForLevel(Scene scene) {
             var gmPrefab = GameInstanceConfiguration.GetGameModeFor(scene);
             
-            world = Instantiate(GameInstanceConfiguration.WorldType);
-            world.name = $"{world.GetType().Name} for {scene.name}";
             world.BootWorld(gmPrefab, GameInstanceConfiguration.WorldSubsystems, scene.name);
             world.SpawnPlayer(GetInitialLocalPlayer());
             // Finalise bootstrapping game mode with player controller having been initialised.
@@ -242,6 +241,11 @@ namespace Broilerplate.Core {
             
             gm.LateBeginPlay(); // Manually invoke this before end of frame so GameMode is fully there before actors get their BeginPlay routines called
             world.BeginPlay();
+        }
+
+        private void CreateWorld(Scene scene) {
+            world = Instantiate(GameInstanceConfiguration.WorldType);
+            world.name = $"{world.GetType().Name} for {scene.name}";
         }
 
         /// <summary>
