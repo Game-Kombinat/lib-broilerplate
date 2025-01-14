@@ -81,7 +81,14 @@ namespace Broilerplate.Core {
             liveActors.AddRange(FindObjectsByType<Actor>(FindObjectsInactive.Include, FindObjectsSortMode.None));
             // A world implementation might have overridden the creation of the game mode, so check if it's already there.
             if (!gameMode) {
-                gameMode = gameModePrefab ? SpawnActor(gameModePrefab, Vector3.zero,Quaternion.identity) : SpawnActorOn<GameMode>(new GameObject("Default Game Mode"));
+                if (gameModePrefab) {
+                    // If there are other actors on the gamemode prefab, this will help getting them set up correctly.
+                    var go = SpawnActor(gameModePrefab.gameObject, Vector3.zero, Quaternion.identity);
+                    gameMode = go.GetComponent<GameMode>();
+                }
+                else {
+                    gameMode = SpawnActorOn<GameMode>(new GameObject("Default Game Mode"));
+                }
             }
             unityTicker.transform.SetParent(gameMode.transform);
         }
