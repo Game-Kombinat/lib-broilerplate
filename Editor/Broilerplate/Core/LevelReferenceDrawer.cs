@@ -58,10 +58,8 @@ namespace Broilerplate.Editor.Broilerplate.Core {
 
                     var sceneControlID = GUIUtility.GetControlID(FocusType.Passive);
                     EditorGUI.BeginChangeCheck();
-                    {
-                        // removed the label here since we already have it in the foldout before
-                        sceneAssetProperty.objectReferenceValue = EditorGUI.ObjectField(position, sceneAssetProperty.objectReferenceValue, typeof(SceneAsset), false);
-                    }
+                    // removed the label here since we already have it in the foldout before
+                    sceneAssetProperty.objectReferenceValue = EditorGUI.ObjectField(position, sceneAssetProperty.objectReferenceValue, typeof(SceneAsset), false);
                     var buildScene = BuildUtils.GetBuildScene(sceneAssetProperty.objectReferenceValue);
                     if (EditorGUI.EndChangeCheck()) {
                         // If no valid scene asset was selected, reset the stored path accordingly
@@ -111,19 +109,19 @@ namespace Broilerplate.Editor.Broilerplate.Core {
 
             // Missing from build scenes
             if (buildScene.buildIndex == -1) {
-                iconContent = EditorGUIUtility.IconContent("d_winbtn_mac_close");
+                iconContent = EditorGUIUtility.IconContent("Error");
                 labelContent.text = "NOT In Build";
                 labelContent.tooltip = "This scene is NOT in build settings.\nIt will be NOT included in builds.";
             }
             // In build scenes and enabled
             else if (buildScene.scene.enabled) {
-                iconContent = EditorGUIUtility.IconContent("d_winbtn_mac_max");
+                iconContent = EditorGUIUtility.IconContent("d_CircleCollider2D Icon");
                 labelContent.text = "BuildIndex: " + buildScene.buildIndex;
                 labelContent.tooltip = "This scene is in build settings and ENABLED.\nIt will be included in builds." + readOnlyWarning;
             }
             // In build scenes and disabled
             else {
-                iconContent = EditorGUIUtility.IconContent("d_winbtn_mac_min");
+                iconContent = EditorGUIUtility.IconContent("d_DataMode.Runtime");
                 labelContent.text = "BuildIndex: " + buildScene.buildIndex;
                 labelContent.tooltip = "This scene is in build settings and DISABLED.\nIt will be NOT included in builds.";
             }
