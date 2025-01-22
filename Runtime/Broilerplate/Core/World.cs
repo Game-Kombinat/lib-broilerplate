@@ -167,11 +167,20 @@ namespace Broilerplate.Core {
         
         public T SpawnActor<T>(GameObject prefab, Vector3 position, Quaternion rotation) where T : Actor {
             var a = Instantiate(prefab, position, rotation);
+            var actors = a.GetComponentsInChildren<Actor>(true);
+            if (actors == null || actors.Length == 0) {
+                throw new ActorSpawnException($"Could not spawn actor of type {typeof(T)} from Prefab called {prefab.name}");
+            }
+
+            for (int i = 0; i < actors.Length; ++i) {
+                RegisterActor(actors[i]);
+            }
+            
             var t = a.GetComponent<T>();
             if (!t) {
                 throw new ActorSpawnException($"Could not spawn actor of type {typeof(T)} from Prefab called {prefab.name}");
             }
-            RegisterActor(t);
+            
             return t;
         }
         
@@ -180,14 +189,20 @@ namespace Broilerplate.Core {
         }
         
         public T SpawnActor<T>(GameObject prefab, Transform parent, Vector3 position, Quaternion rotation) where T : Actor {
-            var a = Instantiate(prefab, parent);
-            a.transform.localPosition = position;
-            a.transform.localRotation = rotation;
+            var a = Instantiate(prefab, position, rotation, parent);
+            var actors = a.GetComponentsInChildren<Actor>(true);
+            if (actors == null || actors.Length == 0) {
+                throw new ActorSpawnException($"Could not spawn actor of type {typeof(T)} from Prefab called {prefab.name}");
+            }
+
+            for (int i = 0; i < actors.Length; ++i) {
+                RegisterActor(actors[i]);
+            }
+            
             var t = a.GetComponent<T>();
             if (!t) {
                 throw new ActorSpawnException($"Could not spawn actor of type {typeof(T)} from Prefab called {prefab.name}");
             }
-            RegisterActor(t);
             return t;
         }
         
@@ -205,16 +220,14 @@ namespace Broilerplate.Core {
         public GameObject SpawnActor(GameObject prefab, Vector3 position, Quaternion rotation) {
             var a = Instantiate(prefab, position, rotation);
             var actors = a.GetComponentsInChildren<Actor>(true);
-            if (actors == null || actors.Length == 0)
-            {
+            if (actors == null || actors.Length == 0) {
                 return a;
             }
 
-            for (int i = 0; i < actors.Length; ++i)
-            {
+            for (int i = 0; i < actors.Length; ++i) {
                 RegisterActor(actors[i]);
             }
-            
+
             return a;
         }
         
