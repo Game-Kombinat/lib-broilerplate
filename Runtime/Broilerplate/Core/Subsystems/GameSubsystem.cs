@@ -28,5 +28,9 @@
         public int GetRuntimeId() {
             return GetInstanceID();
         }
+
+        public static T GetSubsystem<T>() where T : GameSubsystem {
+            return GameInstance.GetInstance().GetSubsystem<T>();
+        }
     }
 }
