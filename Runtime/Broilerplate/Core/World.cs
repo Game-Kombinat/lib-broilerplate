@@ -32,6 +32,14 @@ namespace Broilerplate.Core {
         public int NumActors => liveActors.Count;
 
         /// <summary>
+        /// Early initialization.
+        /// This happens straight after World is instantiated.
+        /// </summary>
+        public void Initialize() {
+            tickManager = new TickManager(this);
+        }
+        
+        /// <summary>
         /// Called first thing on a new tick.
         /// </summary>
         public void HandleTickChanges() {
@@ -63,9 +71,9 @@ namespace Broilerplate.Core {
         /// </summary>
         /// <param name="gameModePrefab"></param>
         /// <param name="worldSubsystems"></param>
+        /// <param name="levelName"></param>
         public virtual void BootWorld(GameMode gameModePrefab, List<WorldSubsystem> worldSubsystems, string levelName) {
             LevelName = levelName;
-            tickManager = new TickManager(this);
 
             var unityTicker = new GameObject("Unity Ticker");
             unityTickerInstance = unityTicker.AddComponent<UnityTicker>();

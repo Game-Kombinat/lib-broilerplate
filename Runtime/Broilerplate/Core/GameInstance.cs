@@ -252,6 +252,7 @@ namespace Broilerplate.Core {
         private void CreateWorld(Scene scene) {
             world = Instantiate(GameInstanceConfiguration.WorldType);
             world.name = $"{world.GetType().Name} for {scene.name}";
+            world.Initialize();
         }
 
         /// <summary>
