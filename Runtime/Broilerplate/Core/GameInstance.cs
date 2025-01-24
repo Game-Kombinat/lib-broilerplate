@@ -133,10 +133,16 @@ namespace Broilerplate.Core {
             }
             
             // Sort for LateBeginPlay, then go.
+            // This is extra loop so all subsystems are accessible for each other
             gameSubsystemInstances.Sort((a, b) => a.InitialisationPriority.CompareTo(b.InitialisationPriority));
             for (int i = 0; i < gameSubsystemInstances.Count; i++) {
                 var sys = gameSubsystemInstances[i];
                 sys.BeginPlay();
+            }
+            
+            // and this is extra loop so all subsystems had beginplay when latebeginplay is invoked.
+            for (int i = 0; i < gameSubsystemInstances.Count; i++) {
+                var sys = gameSubsystemInstances[i];
                 sys.LateBeginPlay();
             }
         }
