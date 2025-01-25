@@ -21,5 +21,7 @@ namespace Broilerplate.Core.Subsystems {
         public virtual void LateBeginPlay() {
             HadLateBeginPlay = true;
         }
+
+        public virtual bool ShouldLoad() => true;
     }
 }

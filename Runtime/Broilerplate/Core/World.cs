@@ -81,7 +81,10 @@ namespace Broilerplate.Core {
             
             if (worldSubsystems != null) {
                 for (int i = 0; i < worldSubsystems.Count; i++) {
-                    RegisterSubsystem(worldSubsystems[i]);
+                    var sys = worldSubsystems[i];
+                    if (sys.ShouldLoad()) {
+                        RegisterSubsystem(sys);
+                    }
                 }
             }
             

@@ -128,8 +128,11 @@ namespace Broilerplate.Core {
         private void RegisterGameSubsystems() {
             UnregisterGameSubsystems();
             for (int i = 0; i < gameSubsystems.Count; i++) {
-                var sys = Instantiate(gameSubsystems[i]);
-                gameSubsystemInstances.Add(sys);
+                var sysp = gameSubsystems[i];
+                if (sysp.ShouldLoad()) {
+                    var sys = Instantiate(sysp);
+                    gameSubsystemInstances.Add(sys);
+                }
             }
             
             // Sort for LateBeginPlay, then go.
