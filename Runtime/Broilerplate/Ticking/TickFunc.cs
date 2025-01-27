@@ -102,8 +102,10 @@ namespace Broilerplate.Ticking {
             return (tickGroup & other) != TickGroup.None;
         }
 
-        public bool CanTickNow(float currentTime) {
-            return tickEnabled && nextTick <= currentTime;
+        public bool CanTickNow(float currentTime, bool isPaused) {
+            bool canIgnorePause = tickGroup.MatchesAny(TickGroup.IgnorePause);
+            bool pauseConditionMet = !isPaused || canIgnorePause;
+            return pauseConditionMet && tickEnabled && nextTick <= currentTime;
         }
 
         public void Tick(float deltaTime, float currentTime, TickGroup currentGroup) {

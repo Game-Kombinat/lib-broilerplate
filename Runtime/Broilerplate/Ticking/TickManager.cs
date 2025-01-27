@@ -16,17 +16,17 @@ namespace Broilerplate.Ticking {
         /// <summary>
         /// List of tickables for the pre-physics update loop
         /// </summary>
-        private readonly TickList ticks = new TickList();
+        private readonly TickList ticks;
         
         /// <summary>
         /// List of tickables for the during-physics update loop
         /// </summary>
-        private readonly TickList physicsTicks = new TickList();
+        private readonly TickList physicsTicks;
         
         /// <summary>
         /// List of tickables for the late-tick (post-physics) update loop
         /// </summary>
-        private readonly TickList lateTicks = new TickList();
+        private readonly TickList lateTicks;
         
         /// <summary>
         /// List of tickables that want to be added for the next frame's tick
@@ -47,6 +47,13 @@ namespace Broilerplate.Ticking {
 
         private float timeScaleAtPause;
         
+        public TickManager(World world) {
+            this.world = world;
+            ticks = new TickList(this);
+            physicsTicks = new TickList(this);
+            lateTicks = new TickList(this);
+        }
+
         public void Pause(bool zeroTimescale = false) {
             IsPaused = true;
             if (zeroTimescale) {
@@ -63,30 +70,17 @@ namespace Broilerplate.Ticking {
             }
         }
 
-        public TickManager(World world) {
-            this.world = world;
-        }
-
         public virtual void Tick() {
-            if (IsPaused) {
-                return;
-            }
             world.HandleTickChanges();
             ticks.Tick(Time.deltaTime, Time.timeSinceLevelLoad, TickGroup.Tick);
         }
 
         public virtual void PhysicsTick() {
-            if (IsPaused) {
-                return;
-            }
             world.HandleTickChanges();
             physicsTicks.Tick(Time.fixedDeltaTime, Time.timeSinceLevelLoad, TickGroup.Physics);
         }
 
         public virtual void LateTick() {
-            if (IsPaused) {
-                return;
-            }
             lateTicks.Tick(Time.deltaTime, Time.timeSinceLevelLoad, TickGroup.LateTick);
             HandleScheduledLateBeginPlays();
         }

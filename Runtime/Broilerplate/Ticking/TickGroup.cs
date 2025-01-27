@@ -11,6 +11,17 @@ namespace Broilerplate.Ticking {
         None = 0,
         Tick = 1 << 0,
         LateTick = 1 << 1,
-        Physics = 1 << 2
+        Physics = 1 << 2,
+        IgnorePause = 1 << 3 // special flag to make the tickfunc ignore if the game is paused.
+    }
+
+    public static class TickGroupExtensions {
+        public static bool MatchesAny(this TickGroup g, TickGroup other) {
+            return (g & other) != TickGroup.None;
+        }
+        
+        public static bool Matches(this TickGroup g, TickGroup other) {
+            return (g & other) == other;
+        }
     }
 }

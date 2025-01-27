@@ -10,6 +10,12 @@ namespace Broilerplate.Ticking {
     public class TickList {
         public readonly List<TickFunc> subjects = new List<TickFunc>();
 
+        private TickManager tickManager;
+
+        public TickList(TickManager manager) {
+            tickManager = manager;
+        }
+
         public void Add(TickFunc tickFunc) {
             subjects.Add(tickFunc);
         }
@@ -29,7 +35,7 @@ namespace Broilerplate.Ticking {
                     continue;
                 }
                 
-                if (tick.CanTickNow(timeSinceWorldBoot)) {
+                if (tick.CanTickNow(timeSinceWorldBoot, tickManager.IsPaused)) {
                     try {
                         tick.Tick(deltaTime, timeSinceWorldBoot, currentGroup);
                     }
