@@ -57,6 +57,7 @@ namespace Broilerplate.Tools {
         }
         
         public void Add(T item) {
+            RangeCheck(Count);
             internalList[Count] = item; // this will throw out of range if Count is wrong
             Count++; // only increment after add because if exception is thrown we don't overshoot max limit
         }
@@ -108,11 +109,11 @@ namespace Broilerplate.Tools {
         }
 
         private void RangeCheck(int index) {
-            if (index < Count && index >= 0) {
+            if (index < MaxSize && index >= 0) {
                 return;
             }
 
-            throw new IndexOutOfRangeException($"{index} is out of range on list from 0 to {Count} (internal list size {internalList.Count})");
+            throw new IndexOutOfRangeException($"{index} is out of range on list from 0 to {MaxSize} (internal list size {internalList.Count})");
         }
         
         private bool RangeCheckNoThrow(int index) {
