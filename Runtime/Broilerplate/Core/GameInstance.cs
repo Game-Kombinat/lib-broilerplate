@@ -107,12 +107,14 @@ namespace Broilerplate.Core {
             UnregisterGameSubsystems();
         }
 
-        private void HandleSubsystemsWorldBooted(World w) {
+        private void GameSubsystemEarlyWorldSpawn(World w) {
             for (int i = 0; i < gameSubsystemInstances.Count; i++) {
                 var sys = gameSubsystemInstances[i];
                 sys.OnWorldSpawned(w);
             }
-            
+        }
+
+        private void GameSubsystemLateWorldSpawn() {
             for (int i = 0; i < gameSubsystemInstances.Count; i++) {
                 var sys = gameSubsystemInstances[i];
                 sys.OnLateWorldSpawned();
@@ -148,15 +150,20 @@ namespace Broilerplate.Core {
                     gameSubsystemInstances.Add(sys);
                 }
             }
-            
-            // Sort for LateBeginPlay, then go.
-            // This is extra loop so all subsystems are accessible for each other
             gameSubsystemInstances.Sort((a, b) => a.InitialisationPriority.CompareTo(b.InitialisationPriority));
+            GameSubsystemsBeginPlay();
+            
+            GameSubsystemsLateBeginPlay();
+        }
+
+        private void GameSubsystemsBeginPlay() {
             for (int i = 0; i < gameSubsystemInstances.Count; i++) {
                 var sys = gameSubsystemInstances[i];
                 sys.BeginPlay();
             }
-            
+        }
+
+        private void GameSubsystemsLateBeginPlay() {
             // and this is extra loop so all subsystems had beginplay when latebeginplay is invoked.
             for (int i = 0; i < gameSubsystemInstances.Count; i++) {
                 var sys = gameSubsystemInstances[i];
@@ -235,13 +242,18 @@ namespace Broilerplate.Core {
                 return;
             }
             CreateWorld(scene);
-            HandleSubsystemsWorldBooted(world);
+            GameSubsystemEarlyWorldSpawn(world);
             // create a new world from project config
             // create a mapping scene => world.
             // call RegisterActors() on world to kick off managed BeginPlay() callbacks.
             if (GameInstanceConfiguration.AutoBootstrapWorld) {
-                BootstrapWorldForLevel(scene);
+                var gm = BootstrapWorldForLevel(scene);
+                gm.LateBeginPlay(); // Manually invoke this before end of frame so GameMode is fully there before actors get their BeginPlay routines called
             }
+            // runs before world and actors beginplay/latebeginplay so this is ready.
+            // game mode is ready at this point.
+            GameSubsystemLateWorldSpawn();
+            world.BeginPlay();
         }
 
         /// <summary>
@@ -250,7 +262,7 @@ namespace Broilerplate.Core {
         /// That's actors, subsystems, game modes, player pawn spawning.
         /// </summary>
         /// <param name="scene"></param>
-        public void BootstrapWorldForLevel(Scene scene) {
+        public GameMode BootstrapWorldForLevel(Scene scene) {
             var gmPrefab = GameInstanceConfiguration.GetGameModeFor(scene);
             
             world.BootWorld(gmPrefab, GameInstanceConfiguration.WorldSubsystems, scene.name);
@@ -261,9 +273,8 @@ namespace Broilerplate.Core {
             if (!gm) {
                 throw new GameException($"Spawned world is null. Prefab we tried to spawn from is {(gmPrefab != null ? gmPrefab.name : "null")}");
             }
-            
-            gm.LateBeginPlay(); // Manually invoke this before end of frame so GameMode is fully there before actors get their BeginPlay routines called
-            world.BeginPlay();
+
+            return gm;
         }
 
         private void CreateWorld(Scene scene) {

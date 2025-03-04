@@ -15,6 +15,10 @@
             loadedWorld = world;
         }
         
+        /// <summary>
+        /// Called after GameMode LateBeginPlay.
+        /// Called Before world.BeginPlay and before actors BeginPlay / LateBeginPlay.
+        /// </summary>
         public virtual void OnLateWorldSpawned() {
         }
 
