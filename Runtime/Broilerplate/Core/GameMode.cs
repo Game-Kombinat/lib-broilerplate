@@ -60,8 +60,11 @@ namespace Broilerplate.Core {
             pc.transform.SetPositionAndRotation(spawnPosition, spawnRotation);
             p.transform.SetPositionAndRotation(spawnPosition, spawnRotation);
             pc.ControlPawn(p);
+            OnPlayerSpawned(p);
             return pc;
         }
+        
+        protected virtual void OnPlayerSpawned(Pawn pawn) {}
 
         /// <summary>
         /// Handles the logic of spawning the player controller as defined by the game mode
