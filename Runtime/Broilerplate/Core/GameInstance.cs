@@ -112,6 +112,11 @@ namespace Broilerplate.Core {
                 var sys = gameSubsystemInstances[i];
                 sys.OnWorldSpawned(w);
             }
+            
+            for (int i = 0; i < gameSubsystemInstances.Count; i++) {
+                var sys = gameSubsystemInstances[i];
+                sys.OnLateWorldSpawned();
+            }
         }
 
         private void HandleSubsystemsWorldQuit(World w, string nextLevel) {
@@ -121,6 +126,15 @@ namespace Broilerplate.Core {
                 // But just to be sure. Doesn't hurt anybody at this point.
                 if (sys) {
                     sys.OnWorldDespawning(w, nextLevel);
+                }
+            }
+            
+            for (int i = 0; i < gameSubsystemInstances.Count; i++) {
+                var sys = gameSubsystemInstances[i];
+                // Check for null in case Unity already cleaned up the backrooms. Shouldn't happen right here though.
+                // But just to be sure. Doesn't hurt anybody at this point.
+                if (sys) {
+                    sys.OnLateWorldDespawning(w, nextLevel);
                 }
             }
         }

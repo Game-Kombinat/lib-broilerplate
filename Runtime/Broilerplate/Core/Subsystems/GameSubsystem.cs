@@ -14,8 +14,14 @@
         public virtual void OnWorldSpawned(World world) {
             loadedWorld = world;
         }
+        
+        public virtual void OnLateWorldSpawned() {
+        }
 
         public virtual void OnWorldDespawning(World world, string nextLevel) {
+        }
+        
+        public virtual void OnLateWorldDespawning(World world, string nextLevel) {
             if (loadedWorld == world) {
                 loadedWorld = null;
             }
