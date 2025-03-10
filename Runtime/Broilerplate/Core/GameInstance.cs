@@ -84,6 +84,7 @@ namespace Broilerplate.Core {
         /// <param name="broilerConfiguration"></param>
         public void InitiateGame(BroilerConfiguration broilerConfiguration) {
             DontDestroyOnLoad(this);
+            Application.quitting += OnApplicationQuitting;
             LevelManager.SetLoadingScene(broilerConfiguration.LoadingScene);
             LevelManager.OnLevelLoaded += OnLevelLoaded;
             LevelManager.BeforeLevelUnload += OnLevelUnloading;
@@ -103,7 +104,7 @@ namespace Broilerplate.Core {
             }
         }
 
-        protected virtual void OnDestroy() {
+        protected virtual void OnApplicationQuitting() {
             UnregisterGameSubsystems();
         }
 
@@ -172,6 +173,8 @@ namespace Broilerplate.Core {
         }
 
         private void UnregisterGameSubsystems() {
+            // reverse for disposal. Because that's the logically right thing to do.
+            gameSubsystemInstances.Reverse();
             for (int i = 0; i < gameSubsystemInstances.Count; i++) {
                 var sys = gameSubsystemInstances[i];
                 if (sys) {
