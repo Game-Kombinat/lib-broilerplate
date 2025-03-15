@@ -45,10 +45,28 @@ namespace Broilerplate.Tools {
                 return instance;
             }
         }
+
+        private GUIStyle style;
+
+        private Matrix4x4 scaleMatrix;
+        
         private List<DisplayInfo> displayList = new List<DisplayInfo>();
 
+        private void Awake() {
+            style = new GUIStyle() {
+                richText = true
+            };
+            UpdateScaleMatrix();
+        }
+
+        private void UpdateScaleMatrix() {
+            Vector2 nativeSize = new Vector2(1024, 576);
+            Vector3 scale = new Vector3 (Screen.width / nativeSize.x, Screen.height / nativeSize.y, 1.0f);
+            scaleMatrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, scale);
+        }
+
         public static void Print(string contents, float duration = 0) {
-            Print(contents, Color.gray, duration);
+            Print(contents, Color.cyan, duration);
         }
         
         public static void Print(string contents, Color displayColor) {
@@ -56,8 +74,10 @@ namespace Broilerplate.Tools {
         }
         
         public static void Print(string contents, Color displayColor, float duration) {
+            #if UNITY_EDITOR
             var di = new DisplayInfo(contents, Time.time + duration , displayColor);
             Instance.displayList.Add(di);
+            #endif
             // if (!Instance.displayList.Contains(di)) {
             //     Instance.displayList.Add(di);
             // }
@@ -69,17 +89,17 @@ namespace Broilerplate.Tools {
                 return;
             }
 
+            UpdateScaleMatrix();
+            GUI.matrix = scaleMatrix;
             int num = 1;
             for (var i = 0; i < displayList.Count; i++) {
                 var key = displayList[i];
-                GUIStyle s = new GUIStyle {
-                    richText = true
-                };
+                
                 var actualText = new GUIContent($"<color=#{ColorUtility.ToHtmlStringRGB(key.color)}>{key.contents}</color>");
                 var shadowText = new GUIContent($"<color=#444>{key.contents}</color>");
                 float y = num++;
-                GUI.Label(new Rect(10.5f, (20 * y) + .5f, 350f, 50f), shadowText, s);
-                GUI.Label(new Rect(10f, (20 * y), 350f, 50f), actualText, s);
+                GUI.Label(new Rect(10.5f, (20 * y) + .5f, 350f, 50f), shadowText, style);
+                GUI.Label(new Rect(10f, (20 * y), 350f, 50f), actualText, style);
                 if (Time.time > key.timeToRemove) {
                     displayList.Remove(key);
                     i--;
