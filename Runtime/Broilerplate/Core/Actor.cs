@@ -282,6 +282,12 @@ namespace Broilerplate.Core {
             }
 
             registeredComponents.Add(component);
+            // this scenario could include components that are not actually in the actor hierarchy.
+            // But since that isn't a hard requirement either way, we must make sure the actor is assigned manually.
+            // calling EnsureIntegrity would be needless and too expensive as well.
+            component.OnOwnerActorChanged(this);
+            // if actor has begun playing, the original components are already registered, so we do it manually here.
+            // otherwise we must wait it out for the actors BeginPlay
             if (HasBegunPlaying) {
                 world.ScheduleBeginPlay(component);
             }

@@ -274,6 +274,67 @@ namespace Broilerplate.Core {
         }
 
         /// <summary>
+        /// Spawn a component from a prefab on a given actor.
+        /// Put the component as child of the given transform.
+        /// If transform is null, component will be child of the actor directly.
+        /// </summary>
+        /// <param name="componentObject"></param>
+        /// <param name="targetActor"></param>
+        /// <param name="targetTransform"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public T SpawnActorComponent<T>(GameObject componentObject, Actor targetActor, Transform targetTransform = null) where T : ActorComponent {
+            var comp = Instantiate(componentObject, targetTransform ?? targetActor.transform).GetComponent<T>();
+            if (!comp) {
+                Debug.LogError($"Component {typeof(T)} was not found on prefab {componentObject.name}");
+                return null;
+            }
+            targetActor.RegisterComponent(comp);
+            return comp;
+        }
+
+        /// <summary>
+        /// Spawn a component from a prefab on a given actor.
+        /// Optionally make this component a child of the given actors hierarchy.
+        /// Location and rotation are always in world space.
+        /// </summary>
+        /// <param name="componentObject"></param>
+        /// <param name="targetActor"></param>
+        /// <param name="location"></param>
+        /// <param name="rotation"></param>
+        /// <param name="attachToActor"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public T SpawnActorComponent<T>(GameObject componentObject, Actor targetActor, Vector3 location, Quaternion rotation, bool attachToActor = true) where T : ActorComponent {
+            var comp = Instantiate(componentObject, targetActor.transform).GetComponent<T>();
+            if (!comp) {
+                Debug.LogError($"Component {typeof(T)} was not found on prefab {componentObject.name}");
+                return null;
+            }
+            comp.transform.SetPositionAndRotation(location, rotation);
+
+            if (attachToActor) {
+                comp.transform.SetParent(targetActor.transform, true);
+            }
+            
+            targetActor.RegisterComponent(comp);
+            return comp;
+        }
+
+        /// <summary>
+        /// Spawn a component from a prefab on a given actor.
+        /// Optionally make this component a child of the given actors hierarchy.
+        /// </summary>
+        /// <param name="componentObject"></param>
+        /// <param name="targetActor"></param>
+        /// <param name="attachToActor"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public T SpawnActorComponent<T>(GameObject componentObject, Actor targetActor, bool attachToActor = true) where T : ActorComponent {
+            return SpawnActorComponent<T>(componentObject, targetActor, Vector3.zero, Quaternion.identity, attachToActor);
+        }
+
+        /// <summary>
         /// Unregister an actor from the world.
         /// Will also unregister their tickfuncs.
         /// It is usually called when an actor dies / is destroyed.

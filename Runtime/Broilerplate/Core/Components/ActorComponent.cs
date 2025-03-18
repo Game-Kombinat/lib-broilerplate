@@ -103,7 +103,7 @@ namespace Broilerplate.Core.Components {
         }
 
         protected virtual void Reset() {
-            EnsureIntegrity(false, true);
+            EnsureIntegrity();
         }
         
         public void SetEnableTick(bool shouldTick) {
@@ -119,20 +119,11 @@ namespace Broilerplate.Core.Components {
             
         }
 
-        public virtual void EnsureIntegrity(bool autoRegister = false, bool ignoreMissingActor = false) {
+        public virtual void EnsureIntegrity(bool autoRegister = false) {
             var actor = transform.gameObject.GetComponentInParent<Actor>(true);
             if (!actor) {
-                if (ignoreMissingActor) {
-                    Debug.LogWarning("You added a GameComponent to a GameObject without an Actor in the parent hierarchy. Beware!");
-                    return;
-                }
-                if (!Application.isPlaying) {
-                    DestroyImmediate(this);
-                }
-                else {
-                    Destroy(this);
-                }
-                throw new InvalidOperationException($"Component {GetType().Name} requires an Actor component on the same or a parent object!");
+                Debug.LogWarning("You added a GameComponent to a GameObject without an Actor in the parent hierarchy. Beware!");
+                return;
             }
             
             if (!owner || owner != actor) {
@@ -181,7 +172,7 @@ namespace Broilerplate.Core.Components {
         
         // Change of owning actor if an actor has been injected into the hierarchy after the fact.
         public virtual void OnOwnerActorChanged(Actor newActor) {
-            // owner = newActor;
+            owner = newActor;
         }
         
         public T GetGameMode<T>() where T : GameMode {
