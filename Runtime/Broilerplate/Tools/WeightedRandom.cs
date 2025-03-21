@@ -35,5 +35,12 @@ namespace Broilerplate.Tools {
                 // and in here we don't create a new list since this already is a list.
                 Get(enumerable, weightKey, rng);
         }
+        
+        public static T RandomWithWeight<T>(this IEnumerable<T> itemsEnumerable, Func<T, int> weightKey) {
+            var enumerable = itemsEnumerable as IList<T> ?? itemsEnumerable.ToList();
+            return enumerable.Count == 0 ? default :
+                // and in here we don't create a new list since this already is a list.
+                Get(enumerable, weightKey);
+        }
     }
 }
