@@ -242,14 +242,13 @@ namespace Broilerplate.Core {
             return a;
         }
         
-        public GameObject SpawnActor(GameObject prefab, Transform parent) {
-            return SpawnActor(prefab, parent, Vector3.zero, Quaternion.identity);
-        }
         
-        public GameObject SpawnActor(GameObject prefab, Transform parent, Vector3 position, Quaternion rotation) {
-            var a = Instantiate(prefab, parent);
-            a.transform.localPosition = position;
-            a.transform.localRotation = rotation;
+        public GameObject SpawnActor(GameObject prefab, Transform parent, bool worldPositionStays = false, Vector3 position = default, Quaternion rotation = default) {
+            var a = Instantiate(prefab, parent, worldPositionStays);
+            if (!worldPositionStays) {
+                a.transform.localPosition = position;
+                a.transform.localRotation = rotation;
+            }
             
             var actors = a.GetComponentsInChildren<Actor>(true);
             if (actors == null || actors.Length == 0)
