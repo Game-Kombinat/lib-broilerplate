@@ -167,6 +167,9 @@ namespace Broilerplate.Core {
         }
         
         public T SpawnActor<T>(T prefab, Transform parent) where T : Actor {
+            if (!parent) {
+                return SpawnActor(prefab);
+            }
             var a = Instantiate(prefab, parent);
             RegisterActor(a);
             return a;
@@ -196,10 +199,17 @@ namespace Broilerplate.Core {
         }
         
         public T SpawnActor<T>(GameObject prefab, Transform parent) where T : Actor {
+            if (!parent) {
+                return SpawnActor<T>(prefab, Vector3.zero, Quaternion.identity);
+            }
             return SpawnActor<T>(prefab, parent, Vector3.zero, Quaternion.identity);
         }
         
         public T SpawnActor<T>(GameObject prefab, Transform parent, Vector3 position, Quaternion rotation) where T : Actor {
+            if (!parent) {
+                return SpawnActor<T>(prefab, Vector3.zero, Quaternion.identity);
+            }
+            
             var a = Instantiate(prefab, position, rotation, parent);
             var actors = a.GetComponentsInChildren<Actor>(true);
             if (actors == null || actors.Length == 0) {
