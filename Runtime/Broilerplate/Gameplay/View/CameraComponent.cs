@@ -14,6 +14,8 @@ namespace Broilerplate.Gameplay.View {
 
         public CinemachineVirtualCameraBase CameraHandle => cameraHandle;
 
+        public Camera MainCamera { get; protected set; }
+
         public override void BeginPlay() {
             base.BeginPlay();
             cameraHandle = GetComponent<CinemachineVirtualCameraBase>();
@@ -21,15 +23,18 @@ namespace Broilerplate.Gameplay.View {
                 Debug.LogWarning("No Virtual Camera found on CameraComponents GameObject. Creating default one!");
                 cameraHandle = gameObject.AddComponent<CinemachineVirtualCamera>();
             }
+
+            MainCamera = GetWorld().GetGameMode().GetMainPlayerController().CameraManager.MainCamera;
+            
             DisableCamera();
         }
 
-        public void DisableCamera() {
+        public virtual void DisableCamera() {
             cameraHandle.enabled = false;
             cameraHandle.Priority = -1;
         }
 
-        public void EnableCamera(int priorityMargin = 0) {
+        public virtual void EnableCamera(int priorityMargin = 0) {
             cameraHandle.enabled = true;
             cameraHandle.Priority = priorityMargin + 1;
         }
