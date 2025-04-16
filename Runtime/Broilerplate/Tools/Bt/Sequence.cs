@@ -23,5 +23,10 @@ namespace Broilerplate.Tools.Bt {
             ActiveChild.Spawn();
             return TaskStatus.Running;
         }
+
+        public override void Spawn() {
+            base.Spawn();
+            ActiveChild.Spawn();
+        }
     }
 }

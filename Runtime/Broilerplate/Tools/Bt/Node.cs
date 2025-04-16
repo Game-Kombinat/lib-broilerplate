@@ -42,7 +42,7 @@ namespace Broilerplate.Tools.Bt {
                         break;
                     }
 
-                    current = Parent;
+                    current = current.Parent;
                 }
                 return root;
             }
@@ -52,7 +52,7 @@ namespace Broilerplate.Tools.Bt {
             Name = name;
         }
 
-        public virtual Node AddChild(Node node) {
+        public virtual Node  AddChild(Node node) {
             node.Parent = this;
             children.Add(node);
             return this;
@@ -72,21 +72,21 @@ namespace Broilerplate.Tools.Bt {
             if (HasInterruptor) {
                 if (Interruptor.TestInterrupt()) {
                     Debug.Log($"Node {Name} was interrupted by {Interruptor.Name}.");
-                    Interrupt();
+                    Interrupt(Interruptor.InterruptParent);
                     return;
                 }
             }
 
             var newStatus = Process();
             if (!ValidateInternalTickStatus(newStatus)) {
-                throw new BehaviourTreeException($"{newStatus} cannot be returned by Node.Process()");
+                throw new BehaviourTreeException($"{newStatus} cannot be returned by {Name}.Process()");
             }
 
             if (newStatus != TaskStatus.Running) {
                 Despawn();
             }
             Status = newStatus;
-        }
+        } 
 
         protected abstract TaskStatus Process();
 
@@ -108,11 +108,18 @@ namespace Broilerplate.Tools.Bt {
             Root.RequestDeletion(this);
         }
 
-        public void Interrupt() {
+        public void Interrupt(bool includingParent) {
+            if (includingParent && Parent != null) {
+                // this will call down back here, so bail already
+                Parent.Interrupt(false);
+                return;
+            }
+            
             Despawn();
-
             for (int i = 0; i < Children.Count; i++) {
-                Children[i].Interrupt();
+                // even if we did interrupt including parent, we are the parent at this point.
+                // therefore, false it is.
+                Children[i].Interrupt(false);
             }
         }
         

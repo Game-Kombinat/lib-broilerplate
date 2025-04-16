@@ -34,16 +34,23 @@ namespace Broilerplate.Tools.Bt {
             var status = tickableTasks.Count > 0 ? TaskStatus.Running : TaskStatus.Success;
 
             if (status == TaskStatus.Success && mode == RunMode.Repeat) {
-                PrepareForRun();
+                Despawn();
+                Spawn();
                 status = TaskStatus.Running;
             }
             
             return status;
         }
 
-        public void PrepareForRun() {
-            ActiveChild.Spawn();
+        public override void Spawn() {
+            Reset();
             Status = TaskStatus.Running;
+            ActiveChild.Spawn();
+        }
+
+        public override void Despawn() {
+            Status = TaskStatus.Terminated;
+            ActiveChild.Despawn();
         }
 
         public BehaviourTree UsingBlackboard(Blackboard bb) {

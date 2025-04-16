@@ -12,9 +12,12 @@ namespace Broilerplate.Tools.Bt {
 
         private Node observedNode;
 
-        public Interruptor(string name, Func<Node, bool> condition) {
+        public bool InterruptParent { get; }
+
+        public Interruptor(string name, bool interruptParent, Func<Node, bool> condition) {
             Name = name;
             interruptCondition = condition;
+            InterruptParent = interruptParent;
         }
 
         public void SetNode(Node node) {
