@@ -15,13 +15,17 @@ namespace Broilerplate.Tools.Bt {
 
         public bool IsTerminated => Status == TaskStatus.Terminated;
         
-        public IInterruptor Interruptor { get; protected set; }
+        public Interruptor Interruptor { get; protected set; }
 
         public bool HasInterruptor => Interruptor != null;
 
-        private List<Node> children = new();
+        private readonly List<Node> children = new();
 
         public IReadOnlyList<Node> Children => children;
+
+        protected int currentChild;
+
+        public Node ActiveChild => Children[currentChild];
         
         // technically, root of every BT is the BT node. So there is that
         private BehaviourTree root;
@@ -48,15 +52,15 @@ namespace Broilerplate.Tools.Bt {
             Name = name;
         }
 
-        public Node AddChild(Node node) {
+        public virtual Node AddChild(Node node) {
             node.Parent = this;
             children.Add(node);
             return this;
         }
 
-        public Node WithInterruptor(IInterruptor interruptor) {
+        public Node WithInterruptor(Interruptor interruptor) {
             Interruptor = interruptor;
-
+            interruptor.SetNode(this);
             return this;
         }
 
@@ -68,20 +72,18 @@ namespace Broilerplate.Tools.Bt {
             if (HasInterruptor) {
                 if (Interruptor.TestInterrupt()) {
                     Debug.Log($"Node {Name} was interrupted by {Interruptor.Name}.");
-                    // if we got an interruptor and it returned success, kill this node
-                    Root.RequestDeletion(this);
-                    Status = TaskStatus.Failure;
+                    Interrupt();
                     return;
                 }
             }
 
             var newStatus = Process();
             if (!ValidateInternalTickStatus(newStatus)) {
-                throw new Exception($"{newStatus} cannot be returned by BaseNode.InternalTick()");
+                throw new BehaviourTreeException($"{newStatus} cannot be returned by Node.Process()");
             }
 
             if (newStatus != TaskStatus.Running) {
-                Root.RequestDeletion(this);
+                Despawn();
             }
             Status = newStatus;
         }
@@ -89,17 +91,33 @@ namespace Broilerplate.Tools.Bt {
         protected abstract TaskStatus Process();
 
         public virtual void Reset() {
+            currentChild = 0;
+            Status = TaskStatus.Uninitialised;
         }
 
         public virtual void Spawn() {
+            Reset();
             Status = TaskStatus.Running;
             // Add to the insertion queue. The InternalSpawn process may remove it again
             // If the task does not need ticking.
             Root.RequestInsertion(this);
         }
+
+        public virtual void Despawn() {
+            Status = TaskStatus.Terminated;
+            Root.RequestDeletion(this);
+        }
+
+        public void Interrupt() {
+            Despawn();
+
+            for (int i = 0; i < Children.Count; i++) {
+                Children[i].Interrupt();
+            }
+        }
         
         private static bool ValidateInternalTickStatus(TaskStatus status) {
-            return !(status == TaskStatus.Terminated || status == TaskStatus.Uninitialised);
+            return status is not (TaskStatus.Terminated or TaskStatus.Uninitialised);
         }
     }
 }

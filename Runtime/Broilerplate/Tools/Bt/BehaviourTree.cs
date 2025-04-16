@@ -15,7 +15,6 @@ namespace Broilerplate.Tools.Bt {
 
         public override BehaviourTree Root => this;
 
-        private Node startNode;
         private RunMode mode;
         
         public BehaviourTree(string name) : base(name) {
@@ -24,7 +23,10 @@ namespace Broilerplate.Tools.Bt {
         protected override TaskStatus Process() {
             if (Status is TaskStatus.Running) {
                 ProcessNodeRequests();
-                for (int i = 0; i < tickableTasks.Count; ++i) {
+                // run nodes backwards because the order in which they were added is 
+                // parent, child, child, grandchild, grandgrandchild, you get the idea.
+                // We want to tick the children first.
+                for (int i = tickableTasks.Count - 1; i >= 0 ; --i) {
                     tickableTasks[i].Tick();
                 }
             }
@@ -40,8 +42,7 @@ namespace Broilerplate.Tools.Bt {
         }
 
         public void PrepareForRun() {
-            startNode.Reset();
-            startNode.Spawn();
+            ActiveChild.Spawn();
             Status = TaskStatus.Running;
         }
 
@@ -50,8 +51,9 @@ namespace Broilerplate.Tools.Bt {
             return this;
         }
 
+        // just for semantics
         public BehaviourTree WithStartNode(Node node) {
-            startNode = node;
+            AddChild(node);
             return this;
         }
 
