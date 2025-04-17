@@ -15,9 +15,6 @@ namespace Broilerplate.Tools.Bt {
         }
 
         public override void Spawn() {
-            if (!HasInterruptor) {
-                throw new BehaviourTreeException("Repeater is required to run with interruptor to prevent infinite loops!");
-            }
             base.Spawn();
             ActiveChild.Spawn();
         }

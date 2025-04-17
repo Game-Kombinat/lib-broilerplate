@@ -53,9 +53,13 @@ namespace Broilerplate.Tools.Bt {
         }
 
         public virtual Node  AddChild(Node node) {
-            node.Parent = this;
+            SetParentOn(node);
             children.Add(node);
             return this;
+        }
+
+        protected void SetParentOn(Node node) {
+            node.Parent = this;
         }
 
         public Node WithInterruptor(Interruptor interruptor) {
