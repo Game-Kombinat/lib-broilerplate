@@ -51,6 +51,9 @@ namespace Broilerplate.Tools.Bt {
         public override void Despawn() {
             Status = TaskStatus.Terminated;
             ActiveChild.Despawn();
+            tickableTasks.Clear();
+            insertionRequests.Clear();
+            deletionRequests.Clear();
         }
 
         public BehaviourTree UsingBlackboard(Blackboard bb) {
