@@ -13,6 +13,16 @@ namespace Broilerplate.Tools.Bt {
         
         public Blackboard Blackboard { get; private set; }
 
+        public Node CurrentExecutingNode {
+            get {
+                if (tickableTasks.Count == 0) {
+                    return null;
+                }
+
+                return tickableTasks[^1];
+            }
+        }
+
         public override BehaviourTree Root => this;
 
         private RunMode mode;
