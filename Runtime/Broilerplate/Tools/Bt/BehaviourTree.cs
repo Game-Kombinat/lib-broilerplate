@@ -41,7 +41,7 @@ namespace Broilerplate.Tools.Bt {
                 }
             }
 
-            var status = tickableTasks.Count > 0 ? TaskStatus.Running : TaskStatus.Success;
+            var status = ActiveChild.Status;
 
             if (status == TaskStatus.Success && mode == RunMode.Repeat) {
                 Despawn();
