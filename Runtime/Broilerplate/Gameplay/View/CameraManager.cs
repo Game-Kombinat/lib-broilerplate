@@ -1,6 +1,6 @@
 ﻿using System;
 using Broilerplate.Core;
-using Cinemachine;
+using Unity.Cinemachine;
 using UnityEngine;
 
 namespace Broilerplate.Gameplay.View {
@@ -50,7 +50,7 @@ namespace Broilerplate.Gameplay.View {
                     mainCamera = go.AddComponent<Camera>();
                     mainCamera.tag = "MainCamera";
                     var brain = go.AddComponent<CinemachineBrain>();
-                    brain.m_DefaultBlend = new CinemachineBlendDefinition(CinemachineBlendDefinition.Style.EaseInOut, .3f);
+                    brain.DefaultBlend = new CinemachineBlendDefinition(CinemachineBlendDefinition.Styles.EaseInOut, .3f);
                 }
                 
             }

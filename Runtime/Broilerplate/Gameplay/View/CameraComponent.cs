@@ -1,5 +1,5 @@
 ﻿using Broilerplate.Core.Components;
-using Cinemachine;
+using Unity.Cinemachine;
 using UnityEngine;
 
 namespace Broilerplate.Gameplay.View {
