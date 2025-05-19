@@ -21,7 +21,7 @@ namespace Broilerplate.Gameplay.View {
             cameraHandle = GetComponent<CinemachineVirtualCameraBase>();
             if (!cameraHandle) {
                 Debug.LogWarning("No Virtual Camera found on CameraComponents GameObject. Creating default one!");
-                cameraHandle = gameObject.AddComponent<CinemachineVirtualCamera>();
+                cameraHandle = gameObject.AddComponent<CinemachineCamera>();
             }
 
             MainCamera = GetWorld().GetGameMode().GetMainPlayerController().CameraManager.MainCamera;
