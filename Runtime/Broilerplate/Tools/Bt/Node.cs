@@ -75,7 +75,6 @@ namespace Broilerplate.Tools.Bt {
 
             if (HasInterruptor) {
                 if (Interruptor.TestInterrupt()) {
-                    Debug.Log($"Node {Name} was interrupted by {Interruptor.Name}.");
                     Interrupt(Interruptor.InterruptParent);
                     return;
                 }
