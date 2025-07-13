@@ -61,5 +61,10 @@ namespace Broilerplate.Core.Subsystems {
             world = inWorld;
         }
 
+        public static T GetSubsystem<T>() where T : WorldSubsystem {
+            var world = GameInstance.GetInstance().GetWorld();
+            return world.GetSubsystem<T>();
+        }
+
     }
 }
