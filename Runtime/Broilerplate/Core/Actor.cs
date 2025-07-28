@@ -3,6 +3,7 @@ using System.Linq;
 using Broilerplate.Core.Components;
 using Broilerplate.Ticking;
 using UnityEngine;
+using ZLinq;
 using Debug = UnityEngine.Debug;
 
 namespace Broilerplate.Core {
@@ -145,14 +146,14 @@ namespace Broilerplate.Core {
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public T GetGameComponent<T>() where T : ActorComponent {
+        public T GetGameComponent<T>() {
             for (int i = 0; i < registeredComponents.Count; ++i) {
-                if (registeredComponents[i] is T) {
-                    return (T)registeredComponents[i];
+                if (registeredComponents[i] is T t) {
+                    return t;
                 }
             }
 
-            return null;
+            return default;
         }
 
         /// <summary>
@@ -161,7 +162,7 @@ namespace Broilerplate.Core {
         /// <param name="cache"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public int GetGameComponents<T>(T[] cache) where T : ActorComponent {
+        public int GetGameComponents<T>(T[] cache) {
             int hits = 0;
             for (int i = 0; i < cache.Length; ++i) {
                 if (registeredComponents.Count > i && registeredComponents[i] is T comp) {
@@ -173,8 +174,8 @@ namespace Broilerplate.Core {
             return hits;
         }
 
-        public List<T> GetGameComponents<T>() where T : ActorComponent {
-            return registeredComponents.OfType<T>().ToList();
+        public List<T> GetGameComponents<T>() {
+            return registeredComponents.AsValueEnumerable().OfType<T>().ToList();
         }
 
         /// <summary>
