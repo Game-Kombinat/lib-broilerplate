@@ -1,18 +1,20 @@
-﻿namespace Broilerplate.Tools.Events {
-    public class Event<TImplementor> : IEvent where TImplementor : IEvent {
+﻿using System;
+
+namespace Broilerplate.Tools.Events {
+    public class Event<TImplementor> : IEvent where TImplementor : Event<TImplementor>, IEvent {
         /// <summary>
         /// Raise this this event on the EventDispatcher.
         /// </summary>
         public void Call() {
-            EventDispatcher.Instance.Call<TImplementor>(this);
+            EventDispatcher.Instance.Call((TImplementor)this);
         }
 
-        public static void Register(Callback<TImplementor> handler) {
-            EventDispatcher.Instance.Register(handler);
+        public static void Register(Action<TImplementor> hook) {
+            EventDispatcher.Instance.Register(hook);
         }
 
-        public static void Unregister(Callback<TImplementor> handler) {
-            EventDispatcher.Instance.Unregister(handler);
+        public static void Unregister(Action<TImplementor> hook) {
+            EventDispatcher.Instance.Unregister(hook);
         }
     }
 }

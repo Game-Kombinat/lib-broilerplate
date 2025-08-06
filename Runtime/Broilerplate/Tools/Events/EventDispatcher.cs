@@ -1,30 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Broilerplate.Tools.Events {
     // Defines the callback for events
-    public delegate void Callback<in T>(T hook);
-
-    internal interface IEventContainer {
-        void Call(IEvent e);
-        void Add(Delegate d);
-        void Remove(Delegate d);
-    }
-
-    internal class EventContainer<T> : IEventContainer where T : IEvent{
-        private Callback<T> events;
-        public void Call(IEvent e) {
-            if (events != null) {
-                events((T)e);
-            }
+    internal class EventContainer<T> {
+        private Action<T> events;
+        public void Call(T e) {
+            events?.Invoke(e);
         }
 
-        public void Add(Delegate d) {
-            events += d as Callback<T>;
+        public void Add(Action<T> d) {
+            events += d;
         }
 
-        public void Remove(Delegate d) {
-            events -= d as Callback<T>;
+        public void Remove(Action<T> d) {
+            events -= d;
         }
     }
 
@@ -49,13 +40,10 @@ namespace Broilerplate.Tools.Events {
         /// <summary>
         /// The registrants.
         /// Maps event type to event handlers.
-        /// Max efficiency when calling hooks / events, whatever
+        /// Max efficiency when calling hooks / events, whatever.
+        /// These are actually EventContainer&lt;T&gt;
         /// </summary>
-        private readonly Dictionary<Type, IEventContainer> registrants;
-
-        private EventDispatcher() {
-            registrants = new Dictionary<Type, IEventContainer>();
-        }
+        private readonly Dictionary<Type, object> registrants = new();
 
         #region API
 
@@ -73,13 +61,13 @@ namespace Broilerplate.Tools.Events {
         /// is passed to the Call() method.
         /// </summary>
         /// <param name="handler">Handler.</param>
-        public void Register<T>(Callback<T> handler) where T : IEvent {
+        public void Register<T>(Action<T> handler) {
             var paramType = typeof(T);
 
             if (!registrants.ContainsKey(paramType)) {
                 registrants.Add(paramType, new EventContainer<T>());
             }
-            var handles = registrants[paramType];
+            var handles = (EventContainer<T>)registrants[paramType];
             handles.Add(handler);
         }
 
@@ -87,13 +75,13 @@ namespace Broilerplate.Tools.Events {
         /// Unregister the specified handler from the system
         /// </summary>
         /// <param name="handler">Handler.</param>
-        public void Unregister<T>(Callback<T> handler) where T : IEvent {
+        public void Unregister<T>(Action<T> handler) {
             var paramType = typeof(T);
 
-            if (!registrants.ContainsKey(paramType)) {
+            if (!registrants.TryGetValue(paramType, out var registrant)) {
                 return;
             }
-            var handlers = registrants[paramType];
+            var handlers = (EventContainer<T>)registrant;
             handlers.Remove(handler);
         }
 
@@ -104,9 +92,10 @@ namespace Broilerplate.Tools.Events {
         /// If there is no registrant for the given event then nothing will happen.
         /// </summary>
         /// <param name="e">Event to raise.</param>
-        public void Call<T>(IEvent e) where T : IEvent {
+        public void Call<T>(T e) {
             if (registrants.TryGetValue(typeof(T), out var d)) {
-                d.Call(e);
+                // ReSharper disable once Unity.PerformanceCriticalCodeInvocation
+                ((EventContainer<T>)d).Call(e);
             }
         }
 
