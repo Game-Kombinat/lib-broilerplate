@@ -26,11 +26,23 @@ namespace Broilerplate.Tools.Bt {
         public override BehaviourTree Root => this;
 
         private RunMode mode;
+
+        private bool shouldTerminate;
         
         public BehaviourTree(string name) : base(name) {
         }
+
+        
+        public void Terminate() {
+            shouldTerminate = true;
+        }
         
         protected override TaskStatus Process() {
+            if (shouldTerminate) {
+                Despawn();
+                return Status;
+            }
+            
             if (Status is TaskStatus.Running) {
                 ProcessNodeRequests();
                 // run nodes backwards because the order in which they were added is 
@@ -52,12 +64,21 @@ namespace Broilerplate.Tools.Bt {
             return status;
         }
 
+        public override void Reset() {
+            base.Reset();
+            shouldTerminate = false;
+        }
+
         public override void Spawn() {
             Reset();
             Status = TaskStatus.Running;
             ActiveChild.Spawn();
         }
 
+        /// <summary>
+        /// Do NOT directly call this method on BehaviourTree!
+        /// use Terminate() instead to make the timing work!
+        /// </summary>
         public override void Despawn() {
             Status = TaskStatus.Terminated;
             ActiveChild.Despawn();
