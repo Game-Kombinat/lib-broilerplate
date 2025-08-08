@@ -1,8 +1,7 @@
 using System;
 
 namespace Broilerplate.Data {
-    [Serializable] //  todo: how can this be serializable? lol
-    public class BlackboardEntry<T> {
+    public readonly struct BlackboardEntry<T> {
         public BlackboardKey Key { get; }
         
         public T Value { get; }
