@@ -24,7 +24,17 @@ namespace Broilerplate.Data {
         }
 
         public void Set<T>(BlackboardKey key, T value) {
-            entries[key] = new BlackboardEntry<T>(key, value);
+            if (entries.TryGetValue(key, out var entry)) {
+                if (entry is BlackboardEntry<T> bbt) {
+                    bbt.Value = value;
+                }
+                else {
+                    throw new BlackboardException($"Cannot set value of type {typeof(T)} to key {key} - it's bound to a different type.");
+                }
+            }
+            else {
+                entries[key] = new BlackboardEntry<T>(key, value);
+            }
         }
 
         public bool ContainsKey(BlackboardKey key) => entries.ContainsKey(key);
