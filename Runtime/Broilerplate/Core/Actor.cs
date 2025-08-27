@@ -3,7 +3,6 @@ using System.Linq;
 using Broilerplate.Core.Components;
 using Broilerplate.Ticking;
 using UnityEngine;
-using ZLinq;
 using Debug = UnityEngine.Debug;
 
 namespace Broilerplate.Core {
@@ -175,7 +174,7 @@ namespace Broilerplate.Core {
         }
 
         public List<T> GetGameComponents<T>() {
-            return registeredComponents.AsValueEnumerable().OfType<T>().ToList();
+            return registeredComponents.OfType<T>().ToList();
         }
 
         /// <summary>
