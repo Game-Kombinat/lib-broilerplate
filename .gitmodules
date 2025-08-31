@@ -1,0 +1,3 @@
+[submodule "Runtime/Broilerplate/Binary"]
+	path = Runtime/Broilerplate/Binary
+	url = git@github.com:Game-Kombinat/veb-binary.git
