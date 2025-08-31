@@ -1,5 +1,6 @@
 ﻿using System;
-using GameKombinat.Fnbt;
+using DataKombinat.Binary;
+using DataKombinat.Binary.Tags;
 using UnityEngine;
 
 namespace Broilerplate.Data {

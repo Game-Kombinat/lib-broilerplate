@@ -1,7 +1,7 @@
 ﻿using System;
 using Broilerplate.Core;
 using Broilerplate.Ticking;
-using GameKombinat.Fnbt;
+using DataKombinat.Binary.Tags;
 using UnityEngine;
 
 namespace Broilerplate.Tools {
