@@ -7,6 +7,7 @@ using Broilerplate.Core.Subsystems;
 using Broilerplate.Gameplay;
 using Broilerplate.Ticking;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Broilerplate.Core {
     /// <summary>
@@ -30,6 +31,8 @@ namespace Broilerplate.Core {
         public TickManager TickManager => tickManager;
         public bool HasActors => liveActors.Count > 0;
         public int NumActors => liveActors.Count;
+
+        public Scene WorldScene => unityTickerInstance.gameObject.scene;
 
         /// <summary>
         /// Early initialization.
