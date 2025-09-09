@@ -6,8 +6,8 @@ using UnityEngine;
 
 namespace Broilerplate.Tools {
     public class Timer : ITickable {
-        private DateTime start;
         private TimeSpan duration = TimeSpan.Zero;
+        private TimeSpan currentTimer;
         
         private TickFunc tickFunc = new();
         private World world;
@@ -32,32 +32,31 @@ namespace Broilerplate.Tools {
         /// </summary>
         public event Action OnTick;
         
-        public float Progress => duration == TimeSpan.Zero ? 1 : Mathf.InverseLerp(0, (float)duration.TotalSeconds, (float)TimeElapsed.TotalSeconds);
+        public float Progress => duration == TimeSpan.Zero ? 1 : Mathf.InverseLerp(0, (float)duration.TotalSeconds, (float)currentTimer.TotalSeconds);
         
-        public DateTime Finish => start + duration;
+        public TimeSpan TimeLeft => duration - currentTimer;
         
-        public TimeSpan TimeLeft => Finish - DateTime.Now;
+        public TimeSpan TimeElapsed => currentTimer;
         
-        public TimeSpan TimeElapsed => DateTime.Now - start;
         public bool IsDone => Progress >= 1;
         
-        public void StartTimer(TimeSpan time, float timerInterval = 1f) {
-            start = DateTime.Now;
-            duration = time;
+        public void StartTimer(TimeSpan timerDuration, float timerInterval = 1f) {
+            duration = timerDuration;
+            currentTimer = TimeSpan.Zero;
             SetupTickFunc(timerInterval);
             OnStartTimer?.Invoke();
         }
         
-        public void SetTimer(DateTime from, TimeSpan time, float timerInterval = 1f) {
-            start = from;
-            duration = time;
+        private void SetTimer(TimeSpan current, TimeSpan timerDuration, float timerInterval = 1f) {
+            duration = timerDuration;
+            currentTimer = current;
             SetupTickFunc(timerInterval);
             OnStartTimer?.Invoke();
         }
         
         public void Clear() {
-            start = DateTime.Now;
-            duration = TimeSpan.FromMinutes(0);
+            duration = TimeSpan.Zero;
+            currentTimer = TimeSpan.Zero;
             SetEnableTick(false);
         }
         
@@ -72,7 +71,6 @@ namespace Broilerplate.Tools {
         private void SetupTickFunc(float timerInterval) {
             world = GameInstance.GetInstance().GetWorld();
             UnregisterTickFunc();
-            
             tickFunc = new TickFunc();
             tickFunc.SetTickInterval(timerInterval);
             tickFunc.SetTickGroup(TickGroup.Tick);
@@ -82,6 +80,9 @@ namespace Broilerplate.Tools {
         }
         
         public void ProcessTick(float deltaTime, TickGroup tickGroup) {
+            // deltaTime is accumulative with tick intervals. so this will actually work like that.
+            Debug.Log($"TIMER DELTA: {deltaTime}");
+            currentTimer = currentTimer.Add(TimeSpan.FromSeconds(deltaTime));
             OnTick?.Invoke();
             
             TryFinish();
@@ -92,7 +93,7 @@ namespace Broilerplate.Tools {
         }
         
         public void UnregisterTickFunc() {
-            if (world) {
+            if (world && tickFunc != null) {
                 world.UnregisterTickFunc(tickFunc);
             }
         }
@@ -101,8 +102,8 @@ namespace Broilerplate.Tools {
         
         public NbtCompound GetSaveData() {
             return new NbtCompound() {
-                new NbtDouble("time", duration.TotalMinutes),
-                new NbtLong("from", start.ToBinary()),
+                new NbtLong("duration", duration.Ticks),
+                new NbtLong("current", currentTimer.Ticks),
                 new NbtFloat("interval", tickFunc.TickInterval),
                 new NbtInt("wasTicking", tickFunc.TickEnabled ? 1 : 0)
             };
@@ -113,19 +114,19 @@ namespace Broilerplate.Tools {
                 return;
             }
             
-            var time = TimeSpan.FromMinutes(data["time"]?.DoubleValue ?? 0d);
-            var from = DateTime.FromBinary(data["from"]?.LongValue ?? 0);
+            var duration = TimeSpan.FromMinutes(data["duration"]?.DoubleValue ?? 0d);
+            var current = TimeSpan.FromTicks(data["current"]?.LongValue ?? 0);
             var interval = data["interval"]?.FloatValue ?? 1;
             
             bool wasTicking = (data["wasTicking"]?.IntValue ?? 0) == 1;
             
             if (wasTicking) {
-                SetTimer(from, time, interval);
+                SetTimer(current, duration, interval);
             }
         }
         
         public void ForceDone() {
-            start = DateTime.Now - duration;
+            currentTimer = duration;
             TryFinish();
         }
 
