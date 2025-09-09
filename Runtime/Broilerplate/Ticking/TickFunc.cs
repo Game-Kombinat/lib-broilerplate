@@ -110,7 +110,7 @@ namespace Broilerplate.Ticking {
 
         public void Tick(float deltaTime, float currentTime, TickGroup currentGroup) {
             nextTick = currentTime + tickInterval;
-            tickTarget.ProcessTick(deltaTime, currentGroup);
+            tickTarget.ProcessTick(tickInterval + deltaTime, currentGroup);
         }
 
         public void OnReset() {
