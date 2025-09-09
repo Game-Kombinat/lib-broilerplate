@@ -81,7 +81,6 @@ namespace Broilerplate.Tools {
         
         public void ProcessTick(float deltaTime, TickGroup tickGroup) {
             // deltaTime is accumulative with tick intervals. so this will actually work like that.
-            Debug.Log($"TIMER DELTA: {deltaTime}");
             currentTimer = currentTimer.Add(TimeSpan.FromSeconds(deltaTime));
             OnTick?.Invoke();
             
