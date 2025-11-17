@@ -20,6 +20,10 @@ namespace Broilerplate.Gameplay.Input {
         [Header("References")]
         [SerializeField]
         private CameraManager cameraManagerType;
+
+        [Tooltip("Tick this to avoid the warning that no input handler was set. It tells the system you are aware and want this to be the way that it is.")]
+        [SerializeField]
+        private bool allowNoInputHandler;
         
         [SerializeReference, SubclassSelector]
         private IInputHandler inputHandler;
@@ -78,7 +82,7 @@ namespace Broilerplate.Gameplay.Input {
             if (inputHandler != null) {
                 inputHandler.Setup(this);
             }
-            else {
+            else if (!allowNoInputHandler) {
                 Debug.LogWarning("No input handler was set. You should most definitely set one on your PlayerController type!");
             }
             
