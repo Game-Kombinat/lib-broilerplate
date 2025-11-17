@@ -18,6 +18,14 @@ namespace Broilerplate.Core {
         private PlayerController defaultPlayerControllerType;
         
         /// <summary>
+        /// Detemine if game mode automatically creates a player pawn
+        /// and assigns it to the player controller or not.
+        ///
+        /// If not, you must handle this yourself.
+        /// </summary>
+        [SerializeField]
+        private bool autoPlayerSpawn = true;
+        /// <summary>
         /// The prefab of the player pawn we want to instantiate along with the player controller.
         /// </summary>
         [SerializeField]
@@ -56,14 +64,22 @@ namespace Broilerplate.Core {
             playerControllers.Add(pc);
             
             playerInfo.SetPlayerController(pc);
-            Pawn p = SpawnPlayerPawn(spawnPosition, spawnRotation);
-            pc.transform.SetPositionAndRotation(spawnPosition, spawnRotation);
-            p.transform.SetPositionAndRotation(spawnPosition, spawnRotation);
-            pc.ControlPawn(p);
-            OnPlayerSpawned(p);
+            if (autoPlayerSpawn) {
+                Pawn p = SpawnPlayerPawn(spawnPosition, spawnRotation);
+                pc.transform.SetPositionAndRotation(spawnPosition, spawnRotation);
+                p.transform.SetPositionAndRotation(spawnPosition, spawnRotation);
+                pc.ControlPawn(p);
+                OnPlayerSpawned(p);
+            }
+            
             return pc;
         }
         
+        /// <summary>
+        /// If auto-spawning is enabled, this is called when the player pawn
+        /// has been spawned.
+        /// </summary>
+        /// <param name="pawn"></param>
         protected virtual void OnPlayerSpawned(Pawn pawn) {}
 
         /// <summary>
