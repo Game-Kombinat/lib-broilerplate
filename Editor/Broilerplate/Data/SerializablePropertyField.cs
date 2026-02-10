@@ -75,8 +75,7 @@ namespace Broilerplate.Editor.Broilerplate.Data {
         private static VisualElement BuildPrimitiveField(SerializedProperty prop, string label) {
             VisualElement propertyField;
             if (IsBitField(prop, out var type)) {
-                Debug.Log($"Found a bit field for {prop.name}");
-                var flagsField = new KombinatEnumField(prop, (Enum)Enum.ToObject(type, prop.boxedValue));
+                var flagsField = new KombinatEnumField(prop, (Enum)Enum.ToObject(type, prop.boxedValue), label);
                 propertyField = flagsField;
             }
             else {
@@ -171,10 +170,8 @@ namespace Broilerplate.Editor.Broilerplate.Data {
                 return false;
             }
 
-            Debug.Log($"Seeing an enum. prop name is {prop.name}");
             var fieldInfo = SerializedPropertyHelper.GetFieldInfoFromProperty(prop);
             if (fieldInfo == null) {
-                Debug.Log("Failed to get a field info");
                 return false;
             }
 

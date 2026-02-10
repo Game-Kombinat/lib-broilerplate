@@ -1,72 +1,78 @@
 using System;
 using UnityEditor;
-using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace Broilerplate.Editor.Broilerplate.Data {
     public class KombinatEnumField : VisualElement {
         private readonly Button button;
-        private readonly VisualElement popup;
         private readonly SerializedProperty property;
         private readonly Type enumType;
 
         private Enum memoryValue;
+        private PersistentDropdownMenu menu;
 
-        public KombinatEnumField(SerializedProperty prop, Enum initialValue) {
+        public KombinatEnumField(SerializedProperty prop, Enum initialValue, string label) {
             property = prop;
             enumType = initialValue.GetType();
             memoryValue = initialValue;
 
-            button = new Button(TogglePopup);
-            button.style.flexGrow = 1;
-            Add(button);
+            var root = new VisualElement() {
+                style = {
+                    flexDirection = FlexDirection.Row
+                }
+            };
+            Add(root);
+            
+            button = new Button() {
+                style = {
+                    flexGrow = 1,
+                    flexShrink = 0,
+                    flexBasis = 0,
+                    flexDirection = FlexDirection.Row,
+                    paddingLeft = 10,
+                    paddingRight = 10,
+                }
+            };
+            button.clicked += ToggleDropdownMenu;
 
-            popup = new VisualElement();
-            popup.style.position = Position.Absolute;
-            popup.style.backgroundColor = new Color(0.15f, 0.15f, 0.15f);
-            popup.style.borderBottomLeftRadius = 4;
-            popup.style.borderBottomRightRadius = 4;
-            popup.style.display = DisplayStyle.None;
-            popup.BringToFront();
-            // popup.style.zIndex = 1000;
-
-            Add(popup);
-
-            BuildPopup();
+            root.Add(new Label(label) {
+                style = {
+                    flexGrow = 1,
+                    flexShrink = 0,
+                    flexBasis = 0,
+                    flexDirection = FlexDirection.Row
+                }
+            });
+            root.Add(button);
+            BuildDropdownMenuContents();
             UpdateButtonText();
         }
-
-        void TogglePopup() {
-            popup.style.display =
-                popup.style.display == DisplayStyle.None
-                    ? DisplayStyle.Flex
-                    : DisplayStyle.None;
+        
+        private void ToggleDropdownMenu() {
+            menu.ToggleDropDown(button.worldBound);
         }
 
-        void BuildPopup() {
-            popup.Clear();
-
+        private void BuildDropdownMenuContents() {
+            menu = new PersistentDropdownMenu();
             var values = Enum.GetValues(enumType);
 
             foreach (Enum val in values) {
-                var toggle = new Toggle(val.ToString());
-                toggle.value = HasFlag(val);
+                var flag = val;
+                var isChecked = HasFlag(flag);
 
-                toggle.RegisterValueChangedCallback(evt => {
-                    SetFlag(val, evt.newValue);
+                menu.AddItem(flag.ToString(), isChecked, () => {
+                    SetFlag(flag, !HasFlag(flag));
                     UpdateButtonText();
                     property.serializedObject.ApplyModifiedProperties();
                 });
-
-                popup.Add(toggle);
             }
         }
 
-        bool HasFlag(Enum flag) {
+        private bool HasFlag(Enum flag) {
             return memoryValue.HasFlag(flag);
         }
 
-        void SetFlag(Enum flag, bool enabled) {
+        private void SetFlag(Enum flag, bool enabled) {
             ulong c = Convert.ToUInt64(memoryValue);
             ulong f = Convert.ToUInt64(flag);
 
@@ -75,7 +81,7 @@ namespace Broilerplate.Editor.Broilerplate.Data {
             property.boxedValue = memoryValue;
         }
 
-        void UpdateButtonText() {
+        private void UpdateButtonText() {
             button.text = Enum.Format(enumType, memoryValue, "F");
         }
     }
