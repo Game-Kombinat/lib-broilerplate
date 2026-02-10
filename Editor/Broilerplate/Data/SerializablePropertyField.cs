@@ -1,0 +1,134 @@
+using UnityEditor;
+using UnityEditor.UIElements;
+using UnityEngine;
+using UnityEngine.UIElements;
+
+namespace Broilerplate.Editor.Broilerplate.Data {
+    /// <summary>
+    /// Reflects a visual element that can handle managed references and generic serializable types.
+    /// This is a layout-stable variant for the imguicontainer implementation that unity provides.
+    ///
+    /// It can also understand and render nested complex types.
+    /// </summary>
+    public class SerializablePropertyField : VisualElement {
+        public SerializablePropertyField(SerializedProperty property, string label = null) {
+            var displayLabel = string.IsNullOrEmpty(label) ? property.displayName : label;
+
+            var container = new VisualElement();
+            Add(container);
+            
+            // Check if this is a managed reference (SerializeReference) and render a selector on top
+            if (IsReferenceType(property)) {
+                BuildManagedReferenceUI(property, container, displayLabel);
+            }
+            else if (IsComplexType(property)) {
+                BuildComplexTypeUI(property, container);
+            }
+            else {
+                BuildPrimitiveUI(container, property, displayLabel);
+            }
+        }
+
+        private VisualElement CreateFoldout(string displayLabel) {
+            return new Foldout {
+                text = displayLabel,
+                value = false
+            };
+        }
+
+        private void BuildManagedReferenceUI(SerializedProperty prop, VisualElement container, string displayLabel) {
+            var foldout = CreateFoldout(displayLabel);
+            container.Add(foldout);
+            var selector = new SubclassSelectorElement(prop);
+            foldout.Add(selector);
+            if (prop.managedReferenceValue != null) {
+                var propsContainer = new VisualElement {
+                    style = {
+                        marginLeft = 15,
+                        marginTop = 2,
+                        marginBottom = 2
+                    }
+                };
+                foldout.Add(propsContainer);
+                BuildNestedProperties(propsContainer, prop);
+                // todo: this hinges on the actual value of the subclass selector. Which can change.
+                //  we need to listen for an update call and update
+            }
+        }
+
+        private void BuildPrimitiveUI(VisualElement propsContainer, SerializedProperty prop, string label) {
+            var propertyField = new PropertyField(prop, label);
+            propertyField.BindProperty(prop);
+            propsContainer.Add(propertyField);
+        }
+
+        private void BuildComplexTypeUI(SerializedProperty prop, VisualElement container) {
+            var propsContainer = new VisualElement {
+                style = {
+                    marginLeft = 15,
+                    marginTop = 2,
+                    marginBottom = 2
+                }
+            };
+            container.Add(propsContainer);
+            BuildNestedProperties(propsContainer, prop);
+        }
+
+        private void BuildNestedProperties(VisualElement propsContainer, SerializedProperty prop) {
+            propsContainer.Clear();
+
+            if (prop.isArray && prop.propertyType != SerializedPropertyType.String) {
+                BuildArrayUI(propsContainer, prop);
+            }
+            else {
+                BuildObjectUI(propsContainer, prop);
+            }
+        }
+
+        private void BuildArrayUI(VisualElement propsContainer, SerializedProperty prop) {
+            // Array size field
+            var sizeProperty = prop.FindPropertyRelative("Array.size");
+            if (sizeProperty != null) {
+                var sizeField = new PropertyField(sizeProperty);
+                sizeField.BindProperty(sizeProperty);
+                sizeField.RegisterValueChangeCallback(evt => {
+                    prop.serializedObject.ApplyModifiedProperties();
+                    prop.serializedObject.Update();
+                    EditorApplication.delayCall += () => BuildNestedProperties(propsContainer, prop);
+                });
+                propsContainer.Add(sizeField);
+            }
+
+            // Array elements
+            int arraySize = prop.arraySize;
+            for (int i = 0; i < arraySize; i++) {
+                var element = prop.GetArrayElementAtIndex(i);
+                var elementField = new SerializablePropertyField(element, $"Element {i}");
+                propsContainer.Add(elementField);
+            }
+        }
+
+        private void BuildObjectUI(VisualElement propsContainer, SerializedProperty prop) {
+            var iterator = prop.Copy();
+            var endProperty = iterator.GetEndProperty();
+
+            iterator.NextVisible(true);
+            while (iterator.NextVisible(false) && !SerializedProperty.EqualContents(iterator, endProperty)) {
+                var childProperty = iterator.Copy();
+                var childField = new SerializablePropertyField(childProperty);
+                propsContainer.Add(childField);
+            }
+        }  
+
+        public static bool IsComplexOrReferenceType(SerializedProperty prop) {
+            return prop.propertyType is SerializedPropertyType.Generic or SerializedPropertyType.ManagedReference;
+        }
+        private static bool IsComplexType(SerializedProperty prop) {
+            return prop.propertyType is SerializedPropertyType.Generic;
+        }
+        
+        private static bool IsReferenceType(SerializedProperty prop) {
+            return prop.propertyType is SerializedPropertyType.ManagedReference;
+        }
+    }
+}

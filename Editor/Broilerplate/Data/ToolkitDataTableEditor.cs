@@ -163,7 +163,8 @@ namespace Broilerplate.Editor.Broilerplate.Data {
                     borderBottomWidth = 2,
                     borderBottomColor = new Color(0.2f, 0.2f, 0.2f),
                     paddingBottom = 5,
-                    marginBottom = 5
+                    marginBottom = 5,
+                    marginRight = 5,
                 }
             };
 
@@ -181,9 +182,7 @@ namespace Broilerplate.Editor.Broilerplate.Data {
                     style = {
                         unityFontStyleAndWeight = FontStyle.Bold,
                         flexGrow = 1,
-                        minWidth = 200,
-                        paddingRight = 5,
-                        paddingLeft = 5,
+                        minWidth = 0,
                     }
                 };
                 
@@ -215,6 +214,7 @@ namespace Broilerplate.Editor.Broilerplate.Data {
                 style = {
                     flexDirection = FlexDirection.Row,
                     marginBottom = 5,
+                    marginRight = 5,
                     paddingBottom = 5,
                     borderBottomWidth = 1,
                     borderBottomColor = new Color(0.3f, 0.3f, 0.3f)
@@ -226,7 +226,6 @@ namespace Broilerplate.Editor.Broilerplate.Data {
                 text = "X",
                 style = {
                     width = 30,
-                    // marginRight = 5
                 }
             };
             rowElement.Add(deleteButton);
@@ -237,26 +236,37 @@ namespace Broilerplate.Editor.Broilerplate.Data {
                 VisualElement fieldElement;
 
                 if (prop != null) {
-                    var propertyField = new PropertyField(prop, "") {
-                        style = {
-                            flexGrow = 1,
-                            minWidth = 200,
-                            paddingRight = 5,
-                            paddingLeft = 5,
-                        }
-                    };
-                    propertyField.SetEnabled(!columnInfo.readOnly);
-                    propertyField.Bind(row);
-                    fieldElement = propertyField;
+                    Debug.Log($"{prop.name} is type {prop.propertyType}");
+                    if (SerializablePropertyField.IsComplexOrReferenceType(prop)) {
+                        var propertyField = new SerializablePropertyField(prop, "") {
+                            style = {
+                                flexGrow = 1,
+                                minWidth = 0,
+                            }
+                        };
+                        propertyField.SetEnabled(!columnInfo.readOnly);
+                        propertyField.Bind(row);
+                        fieldElement = propertyField;
+                    }
+                    else {
+                        var propertyField = new PropertyField(prop, "") {
+                            style = {
+                                flexGrow = 1,
+                                minWidth = 0,
+                            }
+                        };
+                        propertyField.SetEnabled(!columnInfo.readOnly);
+                        propertyField.Bind(row);
+                        fieldElement = propertyField;
+                    }
+                    
                 }
                 else {
                     var textField = new TextField("") {
                         value = columnInfo.field.GetValue(row.targetObject)?.ToString() ?? "",
                         style = {
                             flexGrow = 1,
-                            minWidth = 200,
-                            paddingRight = 5,
-                            paddingLeft = 5,
+                            minWidth = 0,
                         }
                     };
                     textField.SetEnabled(false);
