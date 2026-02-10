@@ -15,7 +15,7 @@ namespace Broilerplate.Data {
 
         void Reset();
 
-        List<RowData> GetRows();
+        IReadOnlyList<RowData> GetRows();
 
         RowData GetRow(int index);
 
@@ -73,15 +73,13 @@ namespace Broilerplate.Data {
         }
 
         // non-generic call that will work on the editor window
-        public List<RowData> GetRows() {
-            // returns a copy only because we shall not touch the original list
-            // form the outside in order to keep the data sane.
-            return new List<RowData>(rows);
+        public IReadOnlyList<RowData> GetRows() {
+            return rows;
         }
 
         // generic call to save the casting at runtime.
-        public List<TRowType> GetRowsTyped() {
-            return new List<TRowType>(rows);
+        public IReadOnlyList<TRowType> GetRowsTyped() {
+            return rows;
         }
 
         // non-generic call that will work on the editor window
