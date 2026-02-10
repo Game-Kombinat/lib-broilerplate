@@ -18,6 +18,12 @@ namespace Broilerplate.Editor.Broilerplate.Data {
         private VisualElement container;
         private readonly List<Type> availableTypes;
 
+        /// <summary>
+        /// Event raised when a new type is selected and instantiated.
+        /// Provides the selected type (or null if cleared).
+        /// </summary>
+        public event Action<Type, SerializedProperty> OnTypeChanged;
+
         public SubclassSelectorElement(SerializedProperty property) {
             this.property = property;
 
@@ -106,6 +112,9 @@ namespace Broilerplate.Editor.Broilerplate.Data {
             EditorUtility.SetDirty(property.serializedObject.targetObject);
 
             typeSelector.text = GetCurrentTypeDisplayName();
+
+            // Notify listeners that the type has changed
+            OnTypeChanged?.Invoke(selectedType, property);
         }
         
 

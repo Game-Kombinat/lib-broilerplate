@@ -41,18 +41,26 @@ namespace Broilerplate.Editor.Broilerplate.Data {
             container.Add(foldout);
             var selector = new SubclassSelectorElement(prop);
             foldout.Add(selector);
+            
+            var propsContainer = new VisualElement {
+                style = {
+                    marginLeft = 15,
+                    marginTop = 2,
+                    marginBottom = 2
+                }
+            };
+            foldout.Add(propsContainer);
+            selector.OnTypeChanged += (_, property) => {
+                if (property.managedReferenceValue != null) {
+                    BuildNestedProperties(propsContainer, property);
+                }
+                else {
+                    propsContainer.Clear();
+                }
+            };
+            
             if (prop.managedReferenceValue != null) {
-                var propsContainer = new VisualElement {
-                    style = {
-                        marginLeft = 15,
-                        marginTop = 2,
-                        marginBottom = 2
-                    }
-                };
-                foldout.Add(propsContainer);
                 BuildNestedProperties(propsContainer, prop);
-                // todo: this hinges on the actual value of the subclass selector. Which can change.
-                //  we need to listen for an update call and update
             }
         }
 
