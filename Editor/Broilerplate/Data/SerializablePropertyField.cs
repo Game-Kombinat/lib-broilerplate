@@ -1,3 +1,5 @@
+using System;
+using System.Reflection;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
@@ -16,7 +18,7 @@ namespace Broilerplate.Editor.Broilerplate.Data {
 
             var container = new VisualElement();
             Add(container);
-            
+
             // Check if this is a managed reference (SerializeReference) and render a selector on top
             if (IsReferenceType(property)) {
                 BuildManagedReferenceUI(property, container, displayLabel);
@@ -41,7 +43,7 @@ namespace Broilerplate.Editor.Broilerplate.Data {
             container.Add(foldout);
             var selector = new SubclassSelectorElement(prop);
             foldout.Add(selector);
-            
+
             var propsContainer = new VisualElement {
                 style = {
                     marginLeft = 15,
@@ -58,16 +60,32 @@ namespace Broilerplate.Editor.Broilerplate.Data {
                     propsContainer.Clear();
                 }
             };
-            
+
             if (prop.managedReferenceValue != null) {
                 BuildNestedProperties(propsContainer, prop);
             }
         }
 
         private void BuildPrimitiveUI(VisualElement propsContainer, SerializedProperty prop, string label) {
-            var propertyField = new PropertyField(prop, label);
-            propertyField.BindProperty(prop);
+            // Because unity is apparently incapable of auto-detecting flags enums. Rarely seen such mickey mouse code fumblings.
+            var propertyField = BuildPrimitiveField(prop, label);
             propsContainer.Add(propertyField);
+        }
+
+        private static VisualElement BuildPrimitiveField(SerializedProperty prop, string label) {
+            VisualElement propertyField;
+            if (IsBitField(prop, out var type)) {
+                Debug.Log($"Found a bit field for {prop.name}");
+                var flagsField = new KombinatEnumField(prop, (Enum)Enum.ToObject(type, prop.boxedValue));
+                propertyField = flagsField;
+            }
+            else {
+                var actualField = new PropertyField(prop, label);
+                actualField.BindProperty(prop);
+                propertyField = actualField;
+            }
+
+            return propertyField;
         }
 
         private void BuildComplexTypeUI(SerializedProperty prop, VisualElement container) {
@@ -133,17 +151,35 @@ namespace Broilerplate.Editor.Broilerplate.Data {
                 var childField = new SerializablePropertyField(childProperty);
                 propsContainer.Add(childField);
             } while (iterator.NextVisible(false));
-        }  
-
+        }
+        
         public static bool IsComplexOrReferenceType(SerializedProperty prop) {
             return prop.propertyType is SerializedPropertyType.Generic or SerializedPropertyType.ManagedReference;
         }
+
         private static bool IsComplexType(SerializedProperty prop) {
             return prop.propertyType is SerializedPropertyType.Generic;
         }
-        
+
         private static bool IsReferenceType(SerializedProperty prop) {
             return prop.propertyType is SerializedPropertyType.ManagedReference;
+        }
+        
+        private static bool IsBitField(SerializedProperty prop, out Type enumType) {
+            enumType = null;
+            if (prop.propertyType != SerializedPropertyType.Enum) {
+                return false;
+            }
+
+            Debug.Log($"Seeing an enum. prop name is {prop.name}");
+            var fieldInfo = SerializedPropertyHelper.GetFieldInfoFromProperty(prop);
+            if (fieldInfo == null) {
+                Debug.Log("Failed to get a field info");
+                return false;
+            }
+
+            enumType = fieldInfo.FieldType;
+            return enumType.IsDefined(typeof(FlagsAttribute), true);
         }
     }
 }
