@@ -12,42 +12,42 @@ namespace Broilerplate.Editor.Broilerplate.Data {
         Delete
     }
     public class DataTableEditor : EditorWindow {
-        #region static stuff
-
-        // Oh lord ...
-        [OnOpenAsset]
-#if UNITY_2021_3_OR_NEWER
-        public static bool OpenEditor(int instanceID) {
-#else
-        public static bool OpenEditor(int instanceID, int line) {
-#endif
-        
-        
-            var obj = EditorUtility.InstanceIDToObject(instanceID) as IDataTable;
-            if (obj == null) {
-                return false;
-            }
-
-
-            var openEditors = Resources.FindObjectsOfTypeAll<DataTableEditor>();
-            for (int i = 0; i < openEditors.Length; i++) {
-                var ed = openEditors[i];
-                if (ed.iDataTable == obj) {
-                    ed.Prepare(obj as ScriptableObject);
-                    ed.Show();
-                    ed.Focus();
-                    return true;
-                }
-            }
-            var window = CreateWindow<DataTableEditor>("Data Table Editor");
-
-            window.Prepare(obj as ScriptableObject);
-            window.Show();
-            window.Focus();
-            return true;
-        }
-
-        #endregion
+//         #region static stuff
+//
+//         // Oh lord ...
+//         [OnOpenAsset]
+// #if UNITY_2021_3_OR_NEWER
+//         public static bool OpenEditor(int instanceID) {
+// #else
+//         public static bool OpenEditor(int instanceID, int line) {
+// #endif
+//         
+//         
+//             var obj = EditorUtility.InstanceIDToObject(instanceID) as IDataTable;
+//             if (obj == null) {
+//                 return false;
+//             }
+//
+//
+//             var openEditors = Resources.FindObjectsOfTypeAll<DataTableEditor>();
+//             for (int i = 0; i < openEditors.Length; i++) {
+//                 var ed = openEditors[i];
+//                 if (ed.iDataTable == obj) {
+//                     ed.Prepare(obj as ScriptableObject);
+//                     ed.Show();
+//                     ed.Focus();
+//                     return true;
+//                 }
+//             }
+//             var window = CreateWindow<DataTableEditor>("Data Table Editor");
+//
+//             window.Prepare(obj as ScriptableObject);
+//             window.Show();
+//             window.Focus();
+//             return true;
+//         }
+//
+//         #endregion
 
 
         private IDataTable iDataTable;
@@ -112,10 +112,6 @@ namespace Broilerplate.Editor.Broilerplate.Data {
 
             EditorGUILayout.EndVertical();
             EditorGUILayout.EndScrollView();
-            
-            if (GUILayout.Button("Add Row")) {
-                InsertNewRow();
-            }
         }
 
         private void InsertNewRow() {
@@ -129,10 +125,11 @@ namespace Broilerplate.Editor.Broilerplate.Data {
         private static void DrawHeader(List<ColumnDescriptor> columnInfos, float columnWidth) {
             GUI.enabled = true;
             EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField("X", GUILayout.Width(24));
+            EditorGUILayout.LabelField("X", EditorStyles.boldLabel, GUILayout.Width(24));
             for (var i = 0; i < columnInfos.Count; i++) {
                 var columnInfo = columnInfos[i];
-                EditorGUILayout.LabelField(columnInfo.displayName, GUILayout.Width(columnWidth));
+                float targetColWidth = columnInfo.propertyName == "id" ? 50 : columnWidth;
+                EditorGUILayout.LabelField(columnInfo.displayName, EditorStyles.boldLabel, GUILayout.Width(targetColWidth));
             }
 
             EditorGUILayout.EndHorizontal();
@@ -186,10 +183,11 @@ namespace Broilerplate.Editor.Broilerplate.Data {
             for (var j = 0; j < columnInfos.Count; j++) {
                 var columnInfo = columnInfos[j];
                 GUI.enabled = !columnInfo.readOnly;
-                
+                // this is a fixed column and I don't want it to be that long.
+                float targetColWidth = columnInfo.propertyName == "id" ? 50 : columnWidth;
                 var prop = row.FindProperty(columnInfo.propertyName);
                 if (prop != null) {
-                    EditorGUILayout.PropertyField(row.FindProperty(columnInfo.propertyName), hiddenLabel, GUILayout.Width(columnWidth));
+                    EditorGUILayout.PropertyField(row.FindProperty(columnInfo.propertyName), hiddenLabel, GUILayout.Width(targetColWidth));
                 }
                 else {
                     EditorGUILayout.TextField("", columnInfo.field.GetValue(row.targetObject).ToString());
@@ -199,6 +197,7 @@ namespace Broilerplate.Editor.Broilerplate.Data {
 
             row.ApplyModifiedProperties();
             EditorGUILayout.EndHorizontal();
+            EditorGUILayout.Space(5);
 
             return action;
         }
