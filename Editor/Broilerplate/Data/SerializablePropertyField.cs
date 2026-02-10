@@ -120,12 +120,19 @@ namespace Broilerplate.Editor.Broilerplate.Data {
             var iterator = prop.Copy();
             var endProperty = iterator.GetEndProperty();
 
-            iterator.NextVisible(true);
-            while (iterator.NextVisible(false) && !SerializedProperty.EqualContents(iterator, endProperty)) {
+            if (!iterator.NextVisible(true)) {
+                return;
+            }
+
+            do {
+                if (SerializedProperty.EqualContents(iterator, endProperty)) {
+                    break;
+                }
+
                 var childProperty = iterator.Copy();
                 var childField = new SerializablePropertyField(childProperty);
                 propsContainer.Add(childField);
-            }
+            } while (iterator.NextVisible(false));
         }  
 
         public static bool IsComplexOrReferenceType(SerializedProperty prop) {

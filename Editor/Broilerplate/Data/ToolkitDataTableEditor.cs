@@ -59,6 +59,7 @@ namespace Broilerplate.Editor.Broilerplate.Data {
         private Button addRowButton;
 
         private void Prepare(ScriptableObject asset) {
+            titleContent = new GUIContent($"Data Table for {asset.name}");
             iDataTable = (IDataTable)asset;
             iDataTable.Reset();
             unityDataTable = asset;
