@@ -142,15 +142,14 @@ namespace Broilerplate.Editor.Broilerplate.Data {
             // Header
             tableHeader = new VisualElement();
             BuildTableHeader();
-            rootContainer.Add(tableHeader);
+            tableContainer.Add(tableHeader);
 
             // Body
             tableBody = new VisualElement();
             RebuildTableBody();
-            tableContainer.Add(tableBody);
-
-            tableScrollView.Add(tableContainer);
-            rootContainer.Add(tableScrollView);
+            tableScrollView.Add(tableBody);
+            tableContainer.Add(tableScrollView);
+            rootContainer.Add(tableContainer);
         }
 
         private void BuildTableHeader() {
@@ -164,7 +163,6 @@ namespace Broilerplate.Editor.Broilerplate.Data {
                     borderBottomColor = new Color(0.2f, 0.2f, 0.2f),
                     paddingBottom = 5,
                     marginBottom = 5,
-                    marginRight = 5,
                 }
             };
 
@@ -172,7 +170,10 @@ namespace Broilerplate.Editor.Broilerplate.Data {
             var deleteHeader = new Label("X") {
                 style = {
                     width = 30,
-                    unityFontStyleAndWeight = FontStyle.Bold
+                    minWidth = 30,
+                    maxWidth = 30,
+                    unityFontStyleAndWeight = FontStyle.Bold,
+                    marginRight = 0
                 }
             };
             headerRow.Add(deleteHeader);
@@ -182,10 +183,13 @@ namespace Broilerplate.Editor.Broilerplate.Data {
                     style = {
                         unityFontStyleAndWeight = FontStyle.Bold,
                         flexGrow = 1,
-                        minWidth = 0,
+                        flexShrink = 1,
+                        flexBasis = 0,
+                        minWidth = 100,
+                        marginRight = 0
                     }
                 };
-                
+
                 headerRow.Add(headerLabel);
             }
 
@@ -214,7 +218,6 @@ namespace Broilerplate.Editor.Broilerplate.Data {
                 style = {
                     flexDirection = FlexDirection.Row,
                     marginBottom = 5,
-                    marginRight = 5,
                     paddingBottom = 5,
                     borderBottomWidth = 1,
                     borderBottomColor = new Color(0.3f, 0.3f, 0.3f)
@@ -226,6 +229,9 @@ namespace Broilerplate.Editor.Broilerplate.Data {
                 text = "X",
                 style = {
                     width = 30,
+                    minWidth = 30,
+                    maxWidth = 30,
+                    marginRight = 0
                 }
             };
             rowElement.Add(deleteButton);
@@ -236,12 +242,14 @@ namespace Broilerplate.Editor.Broilerplate.Data {
                 VisualElement fieldElement;
 
                 if (prop != null) {
-                    Debug.Log($"{prop.name} is type {prop.propertyType}");
                     if (SerializablePropertyField.IsComplexOrReferenceType(prop)) {
                         var propertyField = new SerializablePropertyField(prop, "") {
                             style = {
                                 flexGrow = 1,
-                                minWidth = 0,
+                                flexShrink = 1,
+                                flexBasis = 0,
+                                minWidth = 100,
+                                marginRight = 0
                             }
                         };
                         propertyField.SetEnabled(!columnInfo.readOnly);
@@ -252,21 +260,27 @@ namespace Broilerplate.Editor.Broilerplate.Data {
                         var propertyField = new PropertyField(prop, "") {
                             style = {
                                 flexGrow = 1,
-                                minWidth = 0,
+                                flexShrink = 1,
+                                flexBasis = 0,
+                                minWidth = 100,
+                                marginRight = 0
                             }
                         };
                         propertyField.SetEnabled(!columnInfo.readOnly);
                         propertyField.Bind(row);
                         fieldElement = propertyField;
                     }
-                    
+
                 }
                 else {
                     var textField = new TextField("") {
                         value = columnInfo.field.GetValue(row.targetObject)?.ToString() ?? "",
                         style = {
                             flexGrow = 1,
-                            minWidth = 0,
+                            flexShrink = 1,
+                            flexBasis = 0,
+                            minWidth = 100,
+                            marginRight = 0
                         }
                     };
                     textField.SetEnabled(false);
