@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Broilerplate.Core;
 using UnityEngine;
 
@@ -45,6 +46,9 @@ namespace Broilerplate.Ticking {
 
         public bool IsPaused { get; private set; }
 
+        public event Action OnPause;
+        public event Action OnResume;
+
         private float timeScaleAtPause;
         
         public TickManager(World world) {
@@ -60,6 +64,7 @@ namespace Broilerplate.Ticking {
                 timeScaleAtPause = Time.timeScale;
                 Time.timeScale = 0;
             }
+            OnPause?.Invoke();
         }
 
         public void Resume() {
@@ -68,6 +73,7 @@ namespace Broilerplate.Ticking {
                 Time.timeScale = timeScaleAtPause;
                 timeScaleAtPause = 0;
             }
+            OnResume?.Invoke();
         }
 
         public virtual void Tick() {
