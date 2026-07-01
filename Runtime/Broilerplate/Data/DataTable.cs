@@ -7,6 +7,7 @@ using UnityEditor;
 namespace Broilerplate.Data {
     // Exists to do some editor stuffs cause in editor we don't know the generic type.
     public interface IDataTable {
+        int Count { get; }
         void AddRow();
 
         void RemoveRow(int index);
@@ -26,6 +27,8 @@ namespace Broilerplate.Data {
         [SerializeField, HideInInspector] private List<TRowType> rows;
 
         [SerializeField, HideInInspector] private int autoIncrementIndex;
+        
+        public int Count => rows.Count;
 
 #if UNITY_EDITOR
         private TableRowDescriptor descriptor;
