@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using ZLinq;
 using Random = System.Random;
 
 namespace Broilerplate.Tools {
@@ -9,7 +10,7 @@ namespace Broilerplate.Tools {
     /// Generic typed weighted random function.
     /// </summary>
     public static class WeightedRandom {
-        private static readonly Random Random = new Random();
+        private static readonly Random Random = new();
         public static T Get<T>(IEnumerable<T> itemsEnumerable, Func<T, int> weightKey) {
             return Get(itemsEnumerable, weightKey, Random);
         }
@@ -81,6 +82,68 @@ namespace Broilerplate.Tools {
             return Get(itemsEnumerable, weightKey);
         }
         
+        /// <summary>
+        /// ZLinq based weighted random pick. 
+        /// </summary>
+        public static T RandomWithWeight<TEnumerator, T>(this ValueEnumerable<TEnumerator, T> source, Func<T, int> weightKey, Random rng)
+            where TEnumerator : struct, IValueEnumerator<T> {
+
+            var enumerator = source.Enumerator;
+            try {
+                // array or list - sources expose a span, we can go with the double-phase approach that we have for vanilla enumerables.
+                // This is faster-ish because it doesn't need to enumerate.
+                if (enumerator.TryGetSpan(out var span)) {
+                    return GetFromSpan(span, weightKey, rng);
+                }
+
+                // Otherwise use the "Algorithm A-Chao" which I stole from this here wikipedia page and butchered some:
+                // https://en.wikipedia.org/wiki/Reservoir_sampling
+                T selected = default;
+                var totalWeight = 0;
+                while (enumerator.TryGetNext(out var item)) {
+                    var weight = weightKey(item);
+                    if (weight <= 0) {
+                        continue;
+                    }
+                    totalWeight += weight;
+                    if (rng.Next(totalWeight) < weight) { // fires with probability weight / totalWeight
+                        selected = item;
+                    }
+                }
+                return selected;
+            }
+            finally {
+                enumerator.Dispose(); // this is all struct stuff so this was a copy and needs to be disposed as it is a disposable
+            }
+        }
+
+        public static T RandomWithWeight<TEnumerator, T>(this ValueEnumerable<TEnumerator, T> source, Func<T, int> weightKey)
+            where TEnumerator : struct, IValueEnumerator<T> {
+            return source.RandomWithWeight(weightKey, Random);
+        }
+
+        private static T GetFromSpan<T>(ReadOnlySpan<T> items, Func<T, int> weightKey, Random rng) {
+            if (items.Length == 0) {
+                return default;
+            }
+            var totalWeight = 0;
+            for (var i = 0; i < items.Length; i++) {
+                totalWeight += weightKey(items[i]);
+            }
+            if (totalWeight <= 0) {
+                return default;
+            }
+            var targetWeight = rng.Next(totalWeight);
+            var accumulatedWeight = 0;
+            for (var i = 0; i < items.Length; i++) {
+                accumulatedWeight += weightKey(items[i]);
+                if (targetWeight < accumulatedWeight) {
+                    return items[i];
+                }
+            }
+            return default;
+        }
+
         public static IEnumerable<T> OrderWeightedRandomSequence<T>(this IEnumerable<T> itemsEnumerable, Func<T, int> weightKey) {
             return OrderWeightedRandomSequence(itemsEnumerable, weightKey, Random);
         }
