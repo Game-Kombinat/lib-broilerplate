@@ -243,35 +243,18 @@ namespace Broilerplate.Editor.Broilerplate.Data {
                 VisualElement fieldElement;
 
                 if (prop != null) {
-                    if (SerializablePropertyField.IsComplexOrReferenceType(prop)) {
-                        var propertyField = new SerializablePropertyField(prop, "") {
-                            style = {
-                                flexGrow = 1,
-                                flexShrink = 1,
-                                flexBasis = 0,
-                                minWidth = 100,
-                                marginRight = 0
-                            }
-                        };
-                        propertyField.SetEnabled(!columnInfo.readOnly);
-                        propertyField.Bind(row);
-                        fieldElement = propertyField;
-                    }
-                    else {
-                        var propertyField = new PropertyField(prop, "") {
-                            style = {
-                                flexGrow = 1,
-                                flexShrink = 1,
-                                flexBasis = 0,
-                                minWidth = 100,
-                                marginRight = 0
-                            }
-                        };
-                        propertyField.SetEnabled(!columnInfo.readOnly);
-                        propertyField.Bind(row);
-                        fieldElement = propertyField;
-                    }
-
+                    var propertyField = new PropertyField(prop, "") {
+                        style = {
+                            flexGrow = 1,
+                            flexShrink = 1,
+                            flexBasis = 0,
+                            minWidth = 100,
+                            marginRight = 0
+                        }
+                    };
+                    propertyField.SetEnabled(!columnInfo.readOnly);
+                    propertyField.Bind(row);
+                    fieldElement = propertyField;
                 }
                 else {
                     var textField = new TextField("") {

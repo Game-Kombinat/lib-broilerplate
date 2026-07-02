@@ -1,128 +1,273 @@
-﻿#if UNITY_2019_3_OR_NEWER
-using System;
-using System.Linq;
+﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
+using UnityEngine;
 
-namespace MackySoft.SerializeReferenceExtensions.Editor {
+namespace MackySoft.SerializeReferenceExtensions.Editor
+{
 
-	[CustomPropertyDrawer(typeof(SubclassSelectorAttribute))]
-	public class SubclassSelectorDrawer : PropertyDrawer {
+    [CustomPropertyDrawer(typeof(SubclassSelectorAttribute))]
+    public class SubclassSelectorDrawer : PropertyDrawer
+    {
 
-		struct TypePopupCache {
-			public AdvancedTypePopup TypePopup { get; }
-			public AdvancedDropdownState State { get; }
-			public TypePopupCache (AdvancedTypePopup typePopup,AdvancedDropdownState state) {
-				TypePopup = typePopup;
-				State = state;
-			}
-		}
+        private struct TypePopupCache
+        {
+            public AdvancedTypePopup TypePopup { get; }
+            public AdvancedDropdownState State { get; }
+            public TypePopupCache (AdvancedTypePopup typePopup, AdvancedDropdownState state)
+            {
+                TypePopup = typePopup;
+                State = state;
+            }
+        }
 
-		const int k_MaxTypePopupLineCount = 13;
-		static readonly Type k_UnityObjectType = typeof(UnityEngine.Object);
-		static readonly GUIContent k_NullDisplayName = new GUIContent(TypeMenuUtility.k_NullDisplayName);
-		static readonly GUIContent k_IsNotManagedReferenceLabel = new GUIContent("The property type is not manage reference.");
+        private const int MaxTypePopupLineCount = 13;
 
-		readonly Dictionary<string,TypePopupCache> m_TypePopups = new Dictionary<string,TypePopupCache>();
-		readonly Dictionary<string,GUIContent> m_TypeNameCaches = new Dictionary<string,GUIContent>();
+        private static readonly GUIContent NullDisplayName = new GUIContent(TypeMenuUtility.NullDisplayName);
+        private static readonly GUIContent IsNotManagedReferenceLabel = new GUIContent("The property type is not manage reference.");
+        private static readonly GUIContent TempChildLabel = new GUIContent();
 
-		SerializedProperty m_TargetProperty;
+        private readonly Dictionary<string, TypePopupCache> typePopups = new Dictionary<string, TypePopupCache>();
+        private readonly Dictionary<string, GUIContent> typeNameCaches = new Dictionary<string, GUIContent>();
 
-		public override void OnGUI (Rect position,SerializedProperty property,GUIContent label) {
-			EditorGUI.BeginProperty(position,label,property);
+        private SerializedProperty targetProperty;
 
-			if (property.propertyType == SerializedPropertyType.ManagedReference) {
-				// Draw the subclass selector popup.
-				Rect popupPosition = new Rect(position);
-				popupPosition.width -= EditorGUIUtility.labelWidth;
-				popupPosition.x += EditorGUIUtility.labelWidth;
-				popupPosition.height = EditorGUIUtility.singleLineHeight;
+        public override void OnGUI (Rect position, SerializedProperty property, GUIContent label)
+        {
+            EditorGUI.BeginProperty(position, label, property);
 
-				if (EditorGUI.DropdownButton(popupPosition,GetTypeName(property),FocusType.Keyboard)) {
-					TypePopupCache popup = GetTypePopup(property);
-					m_TargetProperty = property;
-					popup.TypePopup.Show(popupPosition);
-				}
+            if (property.propertyType == SerializedPropertyType.ManagedReference)
+            {
+                // Render label first to avoid label overlap for lists
+                Rect foldoutLabelRect = new Rect(position);
+                foldoutLabelRect.height = EditorGUIUtility.singleLineHeight;
 
-				// Draw the managed reference property.
-				EditorGUI.PropertyField(position,property,label,true);
-			} else {
-				EditorGUI.LabelField(position,label,k_IsNotManagedReferenceLabel);
-			}
+                // NOTE: IndentedRect should be disabled as it causes extra indentation.
+                //foldoutLabelRect = EditorGUI.IndentedRect(foldoutLabelRect);
+                Rect popupPosition = EditorGUI.PrefixLabel(foldoutLabelRect, label);
 
-			EditorGUI.EndProperty();
-		}
-
-		TypePopupCache GetTypePopup (SerializedProperty property) {
-			// Cache this string. This property internally call Assembly.GetName, which result in a large allocation.
-			string managedReferenceFieldTypename = property.managedReferenceFieldTypename;
-
-			if (!m_TypePopups.TryGetValue(managedReferenceFieldTypename,out TypePopupCache result)) {
-				var state = new AdvancedDropdownState();
-				
-				Type baseType = ManagedReferenceUtility.GetType(managedReferenceFieldTypename);
-				var popup = new AdvancedTypePopup(
-					TypeCache.GetTypesDerivedFrom(baseType).Append(baseType).Where(p =>
-						(p.IsPublic || p.IsNestedPublic) &&
-						!p.IsAbstract &&
-						!p.IsGenericType &&
-						!k_UnityObjectType.IsAssignableFrom(p) &&
-						Attribute.IsDefined(p,typeof(SerializableAttribute))
-					),
-					k_MaxTypePopupLineCount,
-					state
-				);
-				popup.OnItemSelected += item => {
-					Type type = item.Type;
-					object obj = m_TargetProperty.SetManagedReference(type);
-					m_TargetProperty.isExpanded = (obj != null);
-					m_TargetProperty.serializedObject.ApplyModifiedProperties();
-					m_TargetProperty.serializedObject.Update();
-				};
-
-				result = new TypePopupCache(popup, state);
-				m_TypePopups.Add(managedReferenceFieldTypename, result);
-			}
-			return result;
-		}
-
-		GUIContent GetTypeName (SerializedProperty property) {
-			// Cache this string.
-			string managedReferenceFullTypename = property.managedReferenceFullTypename;
-
-			if (string.IsNullOrEmpty(managedReferenceFullTypename)) {
-				return k_NullDisplayName;
-			}
-			if (m_TypeNameCaches.TryGetValue(managedReferenceFullTypename,out GUIContent cachedTypeName)) {
-				return cachedTypeName;
-			}
-
-			Type type = ManagedReferenceUtility.GetType(managedReferenceFullTypename);
-			string typeName = null;
-
-			AddTypeMenuAttribute typeMenu = TypeMenuUtility.GetAttribute(type);
-			if (typeMenu != null) {
-				typeName = typeMenu.GetTypeNameWithoutPath();
-				if (!string.IsNullOrWhiteSpace(typeName)) {
-					typeName = ObjectNames.NicifyVariableName(typeName);
-				}
-			}
-
-			if (string.IsNullOrWhiteSpace(typeName)) {
-				typeName = ObjectNames.NicifyVariableName(type.Name);
-			}
-
-			GUIContent result = new GUIContent(typeName);
-			m_TypeNameCaches.Add(managedReferenceFullTypename,result);
-			return result;
-		}
-
-		public override float GetPropertyHeight (SerializedProperty property,GUIContent label) {
-			return EditorGUI.GetPropertyHeight(property,true);
-		}
-
-	}
-}
+#if UNITY_2021_3_OR_NEWER
+                // Override the label text with the ToString() of the managed reference.
+                var subclassSelectorAttribute = (SubclassSelectorAttribute)attribute;
+                if (subclassSelectorAttribute.UseToStringAsLabel && !property.hasMultipleDifferentValues)
+                {
+                    object managedReferenceValue = property.managedReferenceValue;
+                    if (managedReferenceValue != null)
+                    {
+                        label.text = managedReferenceValue.ToString();
+                    }
+                }
 #endif
+
+                // Draw the subclass selector popup.
+                if (EditorGUI.DropdownButton(popupPosition, GetTypeName(property), FocusType.Keyboard))
+                {
+                    TypePopupCache popup = GetTypePopup(property);
+                    targetProperty = property;
+                    popup.TypePopup.Show(popupPosition);
+                }
+
+                // Draw the foldout.
+                if (!string.IsNullOrEmpty(property.managedReferenceFullTypename))
+                {
+                    Rect foldoutRect = new Rect(position);
+                    foldoutRect.height = EditorGUIUtility.singleLineHeight;
+
+#if UNITY_2022_2_OR_NEWER && !UNITY_6000_0_OR_NEWER && !UNITY_2022_3
+                    // NOTE: Position x must be adjusted.
+                    // FIXME: Is there a more essential solution...?
+                    // The most promising is UI Toolkit, but it is currently unable to reproduce all of SubclassSelector features. (Complete provision of contextual menu, e.g.)
+                    // 2021.3: No adjustment
+                    // 2022.1: No adjustment
+                    // 2022.2: Adjustment required
+                    // 2022.3: Adjustment required
+                    // 2023.1: Adjustment required
+                    // 2023.2: Adjustment required
+                    // 6000.0: No adjustment
+                    foldoutRect.x -= 12;
+#endif
+
+                    property.isExpanded = EditorGUI.Foldout(foldoutRect, property.isExpanded, GUIContent.none, true);
+                }
+
+                // Draw property if expanded.
+                if (property.isExpanded)
+                {
+                    using (new EditorGUI.IndentLevelScope())
+                    {
+                        // Check if a custom property drawer exists for this type.
+                        PropertyDrawer customDrawer = GetCustomPropertyDrawer(property);
+                        if (customDrawer != null)
+                        {
+                            // Draw the property with custom property drawer.
+                            Rect indentedRect = position;
+                            float foldoutDifference = EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
+                            indentedRect.height = customDrawer.GetPropertyHeight(property, label);
+                            indentedRect.y += foldoutDifference;
+                            customDrawer.OnGUI(indentedRect, property, label);
+                        }
+                        else
+                        {
+                            // Draw the properties of the child elements.
+                            // NOTE: In the following code, since the foldout layout isn't working properly, I'll iterate through the properties of the child elements myself.
+                            // EditorGUI.PropertyField(position, property, GUIContent.none, true);
+
+                            Rect childPosition = position;
+                            childPosition.y += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
+                            foreach (SerializedProperty childProperty in property.GetChildProperties())
+                            {
+                                float height = EditorGUI.GetPropertyHeight(childProperty, new GUIContent(childProperty.displayName, childProperty.tooltip), true);
+                                childPosition.height = height;
+                                EditorGUI.PropertyField(childPosition, childProperty, true);
+
+                                childPosition.y += height + EditorGUIUtility.standardVerticalSpacing;
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                EditorGUI.LabelField(position, label, IsNotManagedReferenceLabel);
+            }
+
+            EditorGUI.EndProperty();
+        }
+
+        private PropertyDrawer GetCustomPropertyDrawer (SerializedProperty property)
+        {
+            Type propertyType = ManagedReferenceUtility.GetType(property.managedReferenceFullTypename);
+            if (propertyType != null && PropertyDrawerCache.TryGetPropertyDrawer(propertyType, out PropertyDrawer drawer))
+            {
+                return drawer;
+            }
+            return null;
+        }
+
+        private TypePopupCache GetTypePopup (SerializedProperty property)
+        {
+            // Cache this string. This property internally call Assembly.GetName, which result in a large allocation.
+            string managedReferenceFieldTypename = property.managedReferenceFieldTypename;
+
+            if (!typePopups.TryGetValue(managedReferenceFieldTypename, out TypePopupCache result))
+            {
+                var state = new AdvancedDropdownState();
+
+                Type baseType = ManagedReferenceUtility.GetType(managedReferenceFieldTypename);
+                var types = TypeSearchService.TypeCandiateService.GetDisplayableTypes(baseType);
+                var popup = new AdvancedTypePopup(
+                    types,
+                    MaxTypePopupLineCount,
+                    state
+                );
+                popup.OnItemSelected += item =>
+                {
+                    Type type = item.Type;
+
+                    // Apply changes to individual serialized objects.
+                    foreach (var targetObject in targetProperty.serializedObject.targetObjects)
+                    {
+                        SerializedObject individualObject = new SerializedObject(targetObject);
+                        SerializedProperty individualProperty = individualObject.FindProperty(targetProperty.propertyPath);
+                        object obj = individualProperty.SetManagedReference(type);
+                        individualProperty.isExpanded = (obj != null);
+
+                        individualObject.ApplyModifiedProperties();
+                        individualObject.Update();
+                    }
+                };
+
+                result = new TypePopupCache(popup, state);
+                typePopups.Add(managedReferenceFieldTypename, result);
+            }
+            return result;
+        }
+
+        private GUIContent GetTypeName (SerializedProperty property)
+        {
+            // Cache this string.
+            string managedReferenceFullTypename = property.managedReferenceFullTypename;
+
+            if (string.IsNullOrEmpty(managedReferenceFullTypename))
+            {
+                return NullDisplayName;
+            }
+            if (typeNameCaches.TryGetValue(managedReferenceFullTypename, out GUIContent cachedTypeName))
+            {
+                return cachedTypeName;
+            }
+
+            Type type = ManagedReferenceUtility.GetType(managedReferenceFullTypename);
+            string typeName = null;
+
+            AddTypeMenuAttribute typeMenu = TypeMenuUtility.GetAttribute(type);
+            if (typeMenu != null)
+            {
+                typeName = typeMenu.GetTypeNameWithoutPath();
+                if (!string.IsNullOrWhiteSpace(typeName))
+                {
+                    typeName = ObjectNames.NicifyVariableName(typeName);
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(typeName))
+            {
+                typeName = ObjectNames.NicifyVariableName(type.Name);
+            }
+
+            GUIContent result = new GUIContent(typeName);
+            typeNameCaches.Add(managedReferenceFullTypename, result);
+            return result;
+        }
+
+        public override float GetPropertyHeight (SerializedProperty property, GUIContent label)
+        {
+            if (property.propertyType != SerializedPropertyType.ManagedReference)
+            {
+                return EditorGUIUtility.singleLineHeight;
+            }
+            if (!property.isExpanded || string.IsNullOrEmpty(property.managedReferenceFullTypename))
+            {
+                return EditorGUIUtility.singleLineHeight;
+            }
+
+            float height = EditorGUIUtility.singleLineHeight;
+            height += EditorGUIUtility.standardVerticalSpacing;
+
+            PropertyDrawer customDrawer = GetCustomPropertyDrawer(property);
+            if (customDrawer != null)
+            {
+                height += customDrawer.GetPropertyHeight(property, label);
+                return height;
+            }
+
+            height += GetChildrenHeight(property);
+
+            return height;
+        }
+
+        private static float GetChildrenHeight (SerializedProperty property)
+        {
+            float height = 0f;
+            bool first = true;
+
+            foreach (SerializedProperty child in property.GetChildProperties())
+            {
+                if (!first)
+                {
+                    height += EditorGUIUtility.standardVerticalSpacing;
+                }
+                first = false;
+
+                TempChildLabel.text = child.displayName;
+                TempChildLabel.tooltip = child.tooltip;
+
+                height += EditorGUI.GetPropertyHeight(child, TempChildLabel, true);
+            }
+
+            return height;
+        }
+
+    }
+}
