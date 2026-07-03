@@ -13,6 +13,10 @@ namespace Broilerplate.Tools {
             return Dot(direction, (facingThis - fromHere).normalized) >= precision;
         }
         
+        public static float GetFacing(Vector3 direction, Vector3 fromHere, Vector3 facingThis) {
+            return Dot(direction, (facingThis - fromHere).normalized);
+        }
+        
         public static bool IsFacingDirection(Vector3 direction, Vector3 otherDirection, float precision = .55f) {
             return Dot(direction, otherDirection) >= precision;
         }
