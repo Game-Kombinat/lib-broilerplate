@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using Broilerplate.Tools;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -60,7 +61,7 @@ namespace Broilerplate.Core {
         /// <param name="levelName"></param>
         /// <param name="progress"></param>
         /// <param name="minimumLoadingTime"></param>
-        public static void LoadLevelAsync(string levelName, Action<float> progress = null, float minimumLoadingTime = -1) {
+        public static async UniTaskVoid LoadLevelAsync(string levelName, Action<float> progress = null, float minimumLoadingTime = -1) {
             if (loadingInProgress) {
                 Debug.LogWarning($"Attempting to load level {levelName} while another is currently being loaded. Aborting this.");
                 return;
@@ -68,7 +69,8 @@ namespace Broilerplate.Core {
             if (minimumLoadingTime < 0) {
                 minimumLoadingTime = GameInstance.GetInstance().GameInstanceConfiguration.DefaultMinimumLoadingTime;
             }
-            CoroutineJobs.StartJob(DoLoadLevelAsync(levelName, minimumLoadingTime, progress), true);
+
+            await DoLoadLevelAsync(levelName, minimumLoadingTime, progress);
         }
         
         /// <summary>
@@ -78,36 +80,45 @@ namespace Broilerplate.Core {
         /// <param name="fakeLoadingTime"></param>
         /// <param name="progress"></param>
         /// <returns></returns>
-        private static IEnumerator DoLoadLevelAsync(string targetLevelName, float fakeLoadingTime, Action<float> progress) {
+        private static async UniTask DoLoadLevelAsync(string targetLevelName, float fakeLoadingTime, Action<float> progress) {
             loadingInProgress = true;
-            var currentSceneObject = SceneManager.GetActiveScene();
-            string currentSceneName = currentSceneObject.name;
-            
-            if (!string.IsNullOrEmpty(loadingScene)) {
-                bool currentIsLoadingScene = true;
-                // if we have a loading scene configured, load this in first
-                if (loadingScene != currentSceneName) {
-                    currentIsLoadingScene = false;
-                    yield return LoadLoadingScene();
-                }
+            try {
+                var currentSceneObject = SceneManager.GetActiveScene();
+                string currentSceneName = currentSceneObject.name;
 
-                if (!currentIsLoadingScene) {
-                    // unload currently loaded level if we didn't start from the loading scene
-                    yield return UnloadLevelRoutine(currentSceneObject, targetLevelName);
+                if (!string.IsNullOrEmpty(loadingScene)) {
+                    bool currentIsLoadingScene = true;
+                    // if we have a loading scene configured, load this in first
+                    if (loadingScene != currentSceneName) {
+                        currentIsLoadingScene = false;
+                        await LoadLoadingScene();
+                    }
+
+                    if (!currentIsLoadingScene) {
+                        // unload currently loaded level if we didn't start from the loading scene
+                        await UnloadLevelRoutine(currentSceneObject, targetLevelName);
+                    }
+
+                    // Now load the new scene and get rid of the loading scene if necessary
+                    await LoadLevelRoutine(targetLevelName, fakeLoadingTime, progress, !currentIsLoadingScene);
                 }
-                // Now load the new scene and get rid of the loading scene if necessary
-                yield return LoadLevelRoutine(targetLevelName, fakeLoadingTime, progress, !currentIsLoadingScene);
+                else {
+                    // we have to manually call the unload callback for the current scene here because
+                    // on this code path we don't explicitly unload it. and we can't because unity doesn't
+                    // allow no scene to be loaded. (Which I think is fine)
+                    BeforeLevelUnload?.Invoke(ActiveScene, targetLevelName);
+                    string unloadedLevel = ActiveScene.name;
+                    await LoadLevelRoutine(targetLevelName, fakeLoadingTime, progress, false);
+                    OnLevelUnloaded?.Invoke(unloadedLevel); // This is not necessarily the correct location but it's the best we can get
+                }
             }
-            else {
-                // we have to manually call the unload callback for the current scene here because
-                // on this code path we don't explicitly unload it. and we can't because unity doesn't
-                // allow no scene to be loaded. (Which I think is fine)
-                BeforeLevelUnload?.Invoke(ActiveScene, targetLevelName);
-                string unloadedLevel = ActiveScene.name;
-                yield return LoadLevelRoutine(targetLevelName, fakeLoadingTime, progress, false);
-                OnLevelUnloaded?.Invoke(unloadedLevel); // This is not necessarily the correct location but it's the best we can get
+            catch (Exception e) {
+                Debug.Log($"Some level load procedure went sideways: {e.Message}");
+                Debug.LogException(e);
             }
-            loadingInProgress = false;
+            finally {
+                loadingInProgress = false;
+            }
         }
 
         /// <summary>
@@ -118,15 +129,15 @@ namespace Broilerplate.Core {
         /// <param name="progress"></param>
         /// <param name="unloadLoadingScene"></param>
         /// <returns></returns>
-        private static IEnumerator LoadLevelRoutine(string targetLevelName, float fakeLoadingTime, Action<float> progress, bool unloadLoadingScene) {
+        private static async UniTask LoadLevelRoutine(string targetLevelName, float fakeLoadingTime, Action<float> progress, bool unloadLoadingScene) {
             // if we have a loading scene, we need to load target on top. If we have none, just load as is
             var loadMode = unloadLoadingScene ? LoadSceneMode.Additive : LoadSceneMode.Single;
             BeforeLevelLoad?.Invoke(targetLevelName);
-            yield return LoadingLoop(fakeLoadingTime, progress, SceneManager.LoadSceneAsync(targetLevelName, loadMode));
+            await LoadingLoop(fakeLoadingTime, progress, SceneManager.LoadSceneAsync(targetLevelName, loadMode));
             Resources.UnloadUnusedAssets();
             GC.Collect();
             if (unloadLoadingScene) {
-                yield return SceneManager.UnloadSceneAsync(loadingScene);
+                await SceneManager.UnloadSceneAsync(loadingScene);
             }
 
             var activeScene = SceneManager.GetSceneByName(targetLevelName);
@@ -140,10 +151,10 @@ namespace Broilerplate.Core {
         /// <param name="currentScene"></param>
         /// <param name="nextLevel">Name of next level. This is to pass on this information as meta into the game code.</param>
         /// <returns></returns>
-        private static IEnumerator UnloadLevelRoutine(Scene currentScene, string nextLevel) {
+        private static async UniTask UnloadLevelRoutine(Scene currentScene, string nextLevel) {
             string sceneName = currentScene.name;
             BeforeLevelUnload?.Invoke(currentScene, nextLevel);
-            yield return SceneManager.UnloadSceneAsync(currentScene);
+            await SceneManager.UnloadSceneAsync(currentScene);
             OnLevelUnloaded?.Invoke(sceneName);
         }
         
@@ -151,11 +162,11 @@ namespace Broilerplate.Core {
         /// The standard routine to load the loading scene.
         /// </summary>
         /// <returns></returns>
-        private static IEnumerator LoadLoadingScene() {
-            yield return SceneManager.LoadSceneAsync(loadingScene, LoadSceneMode.Additive);
+        private static async UniTask LoadLoadingScene() {
+            await SceneManager.LoadSceneAsync(loadingScene, LoadSceneMode.Additive);
             var loadingSceneObject = SceneManager.GetSceneByName(loadingScene);
             // because unity can be a little slow here, we wait until this has actually finished loading.
-            yield return new WaitUntil(() => loadingSceneObject.isLoaded);
+            await UniTask.WaitUntil(() => loadingSceneObject.isLoaded);
         }
 
         /// <summary>
@@ -167,9 +178,12 @@ namespace Broilerplate.Core {
         /// <param name="progress"></param>
         /// <param name="loadNewScene"></param>
         /// <returns></returns>
-        private static IEnumerator LoadingLoop(float fakeLoadingTime, Action<float> progress, AsyncOperation loadNewScene) {
+        private static async UniTask LoadingLoop(float fakeLoadingTime, Action<float> progress, AsyncOperation loadNewScene) {
             float loadingProgress = 0;
             float fakeProgress = 0;
+            if (fakeLoadingTime > 0) {
+                
+            }
             do {
                 if (fakeLoadingTime > 0) {
                     fakeProgress += Time.deltaTime;
@@ -180,8 +194,10 @@ namespace Broilerplate.Core {
                 }
                 progress?.Invoke(loadingProgress);
 
-                yield return null;
-            } while (loadingProgress < 1 || !loadNewScene.isDone);
+                await UniTask.Yield();
+            } while (loadingProgress < 1);
+
+            await loadNewScene;
         }
 
 
