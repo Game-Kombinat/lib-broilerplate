@@ -10,9 +10,9 @@ namespace Broilerplate.Tools {
     /// Generic typed weighted random function.
     /// </summary>
     public static class WeightedRandom {
-        private static readonly Random Random = new();
+        private static readonly Random Rng = new();
         public static T Get<T>(IEnumerable<T> itemsEnumerable, Func<T, int> weightKey) {
-            return Get(itemsEnumerable, weightKey, Random);
+            return Get(itemsEnumerable, weightKey, Rng);
         }
         
         /// <summary>
@@ -116,10 +116,23 @@ namespace Broilerplate.Tools {
                 enumerator.Dispose(); // this is all struct stuff so this was a copy and needs to be disposed as it is a disposable
             }
         }
+        
+        public static T Random<TEnumerator, T>(this ValueEnumerable<TEnumerator, T> source)
+            where TEnumerator : struct, IValueEnumerator<T> {
+
+            return source.Random(Rng);
+        }
+        
+        public static T Random<TEnumerator, T>(this ValueEnumerable<TEnumerator, T> source, Random rng)
+            where TEnumerator : struct, IValueEnumerator<T> {
+
+            var (arr, poolSize) = source.ToArrayPool();
+            return arr[rng.Next(0, poolSize)];
+        }
 
         public static T RandomWithWeight<TEnumerator, T>(this ValueEnumerable<TEnumerator, T> source, Func<T, int> weightKey)
             where TEnumerator : struct, IValueEnumerator<T> {
-            return source.RandomWithWeight(weightKey, Random);
+            return source.RandomWithWeight(weightKey, Rng);
         }
 
         private static T GetFromSpan<T>(ReadOnlySpan<T> items, Func<T, int> weightKey, Random rng) {
@@ -145,7 +158,7 @@ namespace Broilerplate.Tools {
         }
 
         public static IEnumerable<T> OrderWeightedRandomSequence<T>(this IEnumerable<T> itemsEnumerable, Func<T, int> weightKey) {
-            return OrderWeightedRandomSequence(itemsEnumerable, weightKey, Random);
+            return OrderWeightedRandomSequence(itemsEnumerable, weightKey, Rng);
         }
         
         public static IEnumerable<T> OrderWeightedRandomSequence<T>(this IEnumerable<T> itemsEnumerable, Func<T, int> weightKey, Random rng) {
