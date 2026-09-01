@@ -127,6 +127,10 @@ namespace Broilerplate.Tools {
             where TEnumerator : struct, IValueEnumerator<T> {
 
             var (arr, poolSize) = source.ToArrayPool();
+            if (poolSize == 0) {
+                return default;
+            }
+            
             return arr[rng.Next(0, poolSize)];
         }
 
